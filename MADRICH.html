@@ -447,8 +447,9 @@ joblib.<span class="fn2">dump</span>(model.<span class="fn2">cpu</span>().<span 
   <div class="sec-h"><span class="sec-n">7</span><h2>המתודולוגיה — וזה נבחן בראיון</h2></div>
   <p>התוכנית עוקבת אחרי המתודולוגיה של "ML in Practice" מהתרגול, לא רק "תאמן רשת". כללי הברזל האלה לא נתונים למשא ומתן, והצנרת אוכפת אותם כדי שאף אחד לא ידרוס אותם בטעות:</p>
 
-  <h3>פיצול תלת־כיווני</h3>
-  <p>Train / Dev (ולידציה) / Test. נבנה <b>פעם אחת</b>, seeded, <b>stratified</b> לפי מחלקה — כל פיצול מייצג נאמנה את כל ההתפלגות (אין דליפת מחלקות). Dev = כל הכיוונון ו־error analysis. ה־Test המקומי נוגעים בו <b>פעם אחת בלבד</b>, ממש בסוף, כדי לאמוד הכללה אמיתית. כל הצצה נוספת אליו = overfit שמשמיד אותו כמדד.</p>
+  <h3>פיצול תלת־כיווני (וכך הוא ממופה ל-5 החלקים)</h3>
+  <p>Train / Dev (ולידציה) / Test. נבנה <b>פעם אחת</b>, seeded, <b>stratified</b> לפי מחלקה — כל פיצול מייצג נאמנה את כל ההתפלגות (אין דליפת מחלקות). Dev = כל הכיוונון ו־error analysis. ה־Test המקומי נוגעים בו <b>פעם אחת בלבד</b>, כדי לאמוד הכללה אמיתית.</p>
+  <p>המימוש משתמש ב-5 חלקים מצטברים (P0..P4) ולא ב-Test בודד שמור, וזה <b>במכוון</b> ולא מחליש את הכלל: בשלב <code class="k">k</code> מאמנים על P0..P(k-1) ובודקים את Pk — הבלוק ה-15% הבא <b>שעדיין unseen</b>. כל בלוק הוא ה-Test החד־פעמי המקומי בדיוק לשלב שבו הוא עוד לא נראה, ואז מתקפל ל-Train ולעולם לא משמש שוב כ-Test נקי. Dev/כיוונון = ה-holdout של ה-early-stop על ה-Train הנוכחי + בלוקים שכבר נראו. ה-grader החבוי הוא ה-Test החד־פעמי הסופי שלא נראה לעולם → אי אפשר לעשות לו overfit. (לוגיקת הפיצול לא משתנה בשקט.)</p>
 
   <h3>כלל הברזל של preprocessing — מכיילים על Train בלבד</h3>
   <p>כל החלטה מבוססת־data (סטטיסטיקות נרמול, משקלי מחלקה, עוצמת אוגמנטציה) מתקבלת על Train לבד. Dev/Test אף פעם לא מזינים את ה־preprocessing → אין זיהום. (אנחנו משתמשים ב־mean/std קבועים של ImageNet = קבועים, לא מכוילים → כבר תקין.)</p>
@@ -477,7 +478,7 @@ joblib.<span class="fn2">dump</span>(model.<span class="fn2">cpu</span>().<span 
     <div class="arrow">▼</div>
     <div class="fstep"><div class="fi">3</div><div class="fc"><h4>data.py + augment.py</h4><p><code class="k">ManifestDataset</code> קורא מה־manifest, מצמיד transform (אימון = אוגמנטציה, eval = דטרמיניסטי) ובונה DataLoaders.</p></div></div>
     <div class="arrow">▼</div>
-    <div class="fstep"><div class="fi">4</div><div class="fc"><h4>engine.py + model.py</h4><p>לולאת האימון (AdamW, cosine LR, early‑stop, best‑weights) מאמנת את ה־<code class="k">ModelArchitecture</code>.</p></div></div>
+    <div class="fstep"><div class="fi">4</div><div class="fc"><h4>engine.py + model.py</h4><p>לולאת האימון (SGD+momentum, StepLR, early‑stop, best‑weights) מאמנת את ה־<code class="k">ModelArchitecture</code> — ResNet קטן עם BatchNorm ו־skip connections.</p></div></div>
     <div class="arrow">▼</div>
     <div class="fstep"><div class="fi">5</div><div class="fc"><h4>train.py → weights.joblib</h4><p>אימון פרוגרסיבי על חלקים מצטברים, ואז על 100% — שומר את המשקלים בחוזה ה־joblib.</p></div></div>
     <div class="arrow">▼</div>
@@ -587,25 +588,32 @@ python run.py errors --partition P1   <span class="c"># לוג טעויות על
   <details class="file" id="f-makeaug">
     <summary><span class="chev">▶</span><span class="fname">make_augmented.py</span><span class="role C">Person C</span><span class="own">תאומים אופליין</span></summary>
     <div class="body">
-      <p>בונה כפיל מאוגמנט <b>אופליין</b> של תמונות האימון. לכל תמונה — תאום אחד או יותר עם תת־קבוצה אקראית של פילטרים: grayscale · shift · rotation · salt&amp;pepper · zoom · inversion · color jitter.</p>
+      <p>בונה כפיל מאוגמנט <b>אופליין</b> של תמונות האימון. לכל תמונה — <b>שני</b> תאומים (<code class="k">copies=2</code>) עם תת־קבוצה אקראית <b>משוקללת</b> של פילטרים: rotation · color jitter · grayscale · salt&amp;pepper · blur · inversion. על 20k המקורות = ~40k תאומים.</p>
       <div class="code">
         <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">make_augmented.py</span><span class="badge">python · PIL</span></div>
-<pre><code>FILTERS = [(<span class="st">"rotate"</span>,f_rotate),(<span class="st">"shift"</span>,f_shift),(<span class="st">"zoom"</span>,f_zoom),   <span class="c"># גאומטרי</span>
-           (<span class="st">"grayscale"</span>,f_grayscale),(<span class="st">"invert"</span>,f_invert),       <span class="c"># צבע</span>
-           (<span class="st">"color_jitter"</span>,f_color_jitter),(<span class="st">"salt_pepper"</span>,f_salt_pepper)]
+<pre><code><span class="c"># (name, fn, weight) — משקל גבוה = נדגם יותר</span>
+FILTERS = [(<span class="st">"rotate"</span>,f_rotate,<span class="nu">4</span>), (<span class="st">"color_jitter"</span>,f_color_jitter,<span class="nu">4</span>),  <span class="c"># צירי OOD מאומתים</span>
+           (<span class="st">"grayscale"</span>,f_grayscale,<span class="nu">2</span>), (<span class="st">"salt_pepper"</span>,f_salt_pepper,<span class="nu">2</span>),
+           (<span class="st">"blur"</span>,f_blur,<span class="nu">2</span>), (<span class="st">"invert"</span>,f_invert,<span class="nu">1</span>)]   <span class="c"># invert נדיר — מסוכן לתווית</span>
 MAX_FILTERS_PER_IMAGE = <span class="nu">3</span>
 
-<span class="kw">def</span> <span class="fn2">build_augmented</span>(copies=<span class="nu">1</span>, seed=<span class="nu">42</span>):
+<span class="kw">def</span> <span class="fn2">apply_random_filters</span>(img, rng):       <span class="c"># דגימה משוקללת ללא החזרה</span>
+    k = rng.<span class="fn2">randint</span>(<span class="nu">1</span>, MAX_FILTERS_PER_IMAGE)
+    <span class="kw">while</span> <span class="fn2">len</span>(chosen) &lt; k <span class="kw">and</span> pool:        <span class="c"># rng.choices על pool מתכווץ</span>
+        j = rng.<span class="fn2">choices</span>(<span class="fn2">range</span>(<span class="fn2">len</span>(pool)), weights=pool_w, k=<span class="nu">1</span>)[<span class="nu">0</span>] ...
+
+<span class="kw">def</span> <span class="fn2">build_augmented</span>(copies=<span class="nu">2</span>, seed=<span class="nu">42</span>):
     <span class="kw">for</span> img_path <span class="kw">in</span> ...:
         rng = random.<span class="fn2">Random</span>(<span class="st">f"{seed}:{img_path.name}:{i}"</span>)  <span class="c"># זרע per-file</span>
         aug = <span class="fn2">apply_random_filters</span>(img, rng)
         aug.<span class="fn2">save</span>(dst / <span class="st">f"{stem}__aug{i}.jpg"</span>)</code></pre>
       </div>
       <ul class="ann">
-        <li><span class="pin">__aug0.jpg</span><span class="tx">הפלט משקף את עץ ה־train: <code class="k">dataset/train_aug/&lt;class&gt;/&lt;stem&gt;__aug0.jpg</code>. שם זהה למקור = <code class="k">data.py</code> מוצא את התאום לפי הנתיב של המקור → יורש partition → אין דליפה.</span></li>
-        <li><span class="pin g">דטרמיניסטי</span><span class="tx">זרע per‑(file,copy) → כל ארבעת חברי הצוות מייצרים אותו data מאוגמנט byte‑for‑byte. git‑ignored, נוצר מקומית.</span></li>
-        <li><span class="pin">PIL בלבד</span><span class="tx">פילטרים native של Pillow (לא torchvision) → אפשר לשמור JPGים רגילים שאפשר לפתוח ולראות. מילוי פינות בסיבוב = הצבע <b>הממוצע</b> של התמונה, לא שחור.</span></li>
-        <li><span class="pin w">מלכודת</span><span class="tx">צריך להריץ <code class="k">run.py materialize</code> <b>לפני</b> האימון, אחרת אין תאומים ו־<code class="k">build_loaders</code> מתאמן רק על מקורות עם transform קל = פחות אוגמנטציה ממה שנדמה.</span></li>
+        <li><span class="pin">__aug0.jpg</span><span class="tx">הפלט משקף את עץ ה־train: <code class="k">dataset/train_aug/&lt;class&gt;/&lt;stem&gt;__aug{0,1}.jpg</code>. שם זהה למקור = <code class="k">data.py</code> מוצא את התאום לפי הנתיב של המקור → יורש partition → אין דליפה.</span></li>
+        <li><span class="pin g">משוקלל</span><span class="tx">rotation ו־color_jitter במשקל <b>4</b>, השאר 2, invert רק <b>1</b>. הדגימה ללא־החזרה מטה כל תת־קבוצה אקראית לשני הצירים ש־<code class="k">dataset/augmentations/</code> <b>מאשר</b> שהם המניפולציות האמיתיות במבחן — בלי לוותר על השאר.</span></li>
+        <li><span class="pin">PIL בלבד</span><span class="tx">פילטרים native של Pillow (לא torchvision) → אפשר לשמור JPGים רגילים שאפשר לפתוח ולראות. סיבוב 45/90/180/270, מילוי פינות = הצבע <b>הממוצע</b> של התמונה, לא שחור. color_jitter בטווח רחב 0.5–1.5 (Color/Brightness/Contrast).</span></li>
+        <li><span class="pin r">בלי background swap</span><span class="tx">החלפת רקע דורשת סגמנטציה (מודל נפרד/אסטים חיצוניים) = מחוץ לגבולות (אימון מאפס, בלי מודלים/data חיצוני) וגם לא נלמד. סיבוב מילוי־ממוצע הוא ה־proxy הקרוב ביותר ל"הסביבה השתנתה".</span></li>
+        <li><span class="pin w">מלכודת</span><span class="tx">צריך להריץ <code class="k">run.py materialize</code> <b>לפני</b> האימון, אחרת אין תאומים ו־<code class="k">build_loaders</code> מתאמן רק על מקורות עם transform קל = פחות אוגמנטציה ממה שנדמה. <code class="k">copies=2</code> = פי 2 דיסק וזמן materialize.</span></li>
       </ul>
     </div>
   </details>
@@ -622,10 +630,10 @@ MAX_FILTERS_PER_IMAGE = <span class="nu">3</span>
     v2.<span class="fn2">RandomResizedCrop</span>(img_size, scale=(<span class="nu">.6</span>,<span class="nu">1.</span>)),   <span class="c"># zoom</span>
     v2.<span class="fn2">RandomHorizontalFlip</span>(p=<span class="nu">.5</span>),
     v2.<span class="fn2">RandomApply</span>([v2.<span class="fn2">RandomAffine</span>(<span class="nu">0</span>, translate=(<span class="nu">.15</span>,<span class="nu">.15</span>))], p=<span class="nu">.5</span>),  <span class="c"># shift</span>
-    v2.<span class="fn2">RandomApply</span>([<span class="fn2">MeanFillRotation</span>((<span class="nu">45</span>,<span class="nu">90</span>,<span class="nu">180</span>,<span class="nu">270</span>))], p=<span class="nu">.3</span>),
-    v2.<span class="fn2">RandomApply</span>([v2.<span class="fn2">ColorJitter</span>(<span class="nu">.4</span>,<span class="nu">.4</span>,<span class="nu">.4</span>,<span class="nu">.1</span>)], p=<span class="nu">.7</span>),     <span class="c"># תאורה/צבע</span>
+    v2.<span class="fn2">RandomApply</span>([<span class="fn2">MeanFillRotation</span>((<span class="nu">45</span>,<span class="nu">90</span>,<span class="nu">180</span>,<span class="nu">270</span>))], p=<span class="nu">.5</span>),  <span class="c"># ↑ ציר OOD מאומת</span>
+    v2.<span class="fn2">RandomApply</span>([v2.<span class="fn2">ColorJitter</span>(<span class="nu">.5</span>,<span class="nu">.5</span>,<span class="nu">.5</span>,<span class="nu">.1</span>)], p=<span class="nu">.8</span>),     <span class="c"># תאורה/צבע — ↑ ציר OOD מאומת</span>
     v2.<span class="fn2">RandomGrayscale</span>(p=<span class="nu">.15</span>),
-    v2.<span class="fn2">RandomApply</span>([v2.<span class="fn2">RandomInvert</span>()], p=<span class="nu">.10</span>),           <span class="c"># 🚩 מסוכן לתווית</span>
+    v2.<span class="fn2">RandomApply</span>([v2.<span class="fn2">RandomInvert</span>()], p=<span class="nu">.08</span>),           <span class="c"># 🚩 מסוכן לתווית — נדיר</span>
     v2.<span class="fn2">RandomApply</span>([<span class="fn2">SaltPepperNoise</span>(<span class="nu">.02</span>)], p=<span class="nu">.2</span>),
     *<span class="fn2">_normalize_tail</span>(),
   ])</code></pre>
@@ -633,10 +641,10 @@ MAX_FILTERS_PER_IMAGE = <span class="nu">3</span>
       <ul class="ann">
         <li><span class="pin">MeanFillRotation</span><span class="tx">סיבוב שממלא פינות ריקות בצבע <b>הממוצע</b> של התמונה — לא שחור. שחור היה רמז־רקע מזויף שהמודל יכול לרמות עליו.</span></li>
         <li><span class="pin">SaltPepperNoise</span><span class="tx">מגריל חלק מהפיקסלים ל־0 (פלפל) או 1 (מלח) — מדמה רעש חיישן/דחיסה.</span></li>
-        <li><span class="pin g">heavy</span><span class="tx"><code class="k">build_train_transform</code>: אוגמנטציה אקראית כבדה. כל תמונה מקבלת תת־קבוצה אקראית כל epoch → data מאוגמנט אינסופי אפקטיבית. זה הלביר העיקרי לכוונן.</span></li>
+        <li><span class="pin g">heavy (fallback)</span><span class="tx"><code class="k">build_train_transform</code>: אוגמנטציה אקראית כבדה online. <b>מת בנתיב ברירת־המחדל</b> — אנחנו רצים offline-only (תאומים על הדיסק). הוא נשאר מתועד ועקבי עם השקלול האופליין (rotation p=.5, colorjitter p=.8 בעוצמה .5, invert p=.08) למקרה שנרצה לחזור ל-online.</span></li>
         <li><span class="pin w">light</span><span class="tx"><code class="k">build_light_train_transform</code>: רק crop+flip+normalize. לשימוש <b>עם</b> התאומים האפויים, כדי לא להכפיל עיוות. זה ה־default כשמתאמנים עם <code class="k">train_aug/</code>.</span></li>
-        <li><span class="pin r">eval</span><span class="tx"><code class="k">build_eval_transform</code>: דטרמיניסטי, משקף <b>בדיוק</b> את <code class="k">evaluate.py</code> (Resize 256 → CenterCrop 224 → Normalize) כדי שהמספרים המקומיים יתאימו לgrader.</span></li>
-        <li><span class="pin">OOD_TRANSFORMS</span><span class="tx">dict של מניפולציה בודדת בכל פעם (grayscale / color_jitter / rotation / invert / salt_pepper) — למדידת אינווריאנטיות ציר אחר ציר ב־<code class="k">robust_eval</code>.</span></li>
+        <li><span class="pin r">eval — לא נגענו</span><span class="tx"><code class="k">build_eval_transform</code>: דטרמיניסטי, משקף <b>בדיוק</b> את <code class="k">evaluate.py</code> (Resize 256 → CenterCrop 224 → Normalize) כדי שהמספרים המקומיים יתאימו לgrader. הושאר ללא שינוי.</span></li>
+        <li><span class="pin">OOD_TRANSFORMS</span><span class="tx">dict של מניפולציה בודדת בכל פעם (grayscale / color_jitter / rotation / invert / salt_pepper) — למדידת אינווריאנטיות ציר אחר ציר ב־<code class="k">robust_eval</code>. זוויות הסיבוב עודכנו ל־<code class="k">(45,90,180,270)</code> כדי לשקף את מה שהתאומים באמת ראו, ועוצמות ה־probe מראות את אותו הטווח של התאומים.</span></li>
       </ul>
       <div class="note warn"><span class="ic">▲</span><div class="bd"><b>חוב לסוף:</b> <code class="k">augment.py</code> מייבא torchvision — תקין לפיתוח, אבל <code class="k">model.py</code> המוגש חייב להיות עצמאי. התאומים האפויים (PIL בלבד) הם הדרך לעקוף: האוגמנטציה יושבת על הדיסק, לא בקוד המוגש.</div></div>
     </div>
@@ -647,16 +655,19 @@ MAX_FILTERS_PER_IMAGE = <span class="nu">3</span>
     <summary><span class="chev">▶</span><span class="fname">engine.py</span><span class="role B">Person B</span><span class="own">לולאות אימון</span></summary>
     <div class="body">
       <p>בחירת device, seeding, ולולאות train/eval. PyTorch רגיל עם הערות מפורטות. עובד כבר; התפקיד של Person B הוא לגרום לאימון <b>להתכנס טוב יותר</b>.</p>
-      <div class="note good"><span class="ic">◆</span><div class="bd"><b>בחירות Person B (מעודכן):</b> אופטימייזר <code class="k">SGD(momentum=0.9)</code> במקום AdamW — מכליל טוב יותר על CNN מאפס, ו-momentum נלמד בקורס. תזמון <code class="k">StepLR</code> במקום cosine — ירידת-מדרגה פשוטה וניתנת להסבר: כל <code class="k">lr_step_size</code> epochs ה-LR מוכפל ב-<code class="k">lr_gamma</code> (0.1). LR התחלתי <code class="k">0.01</code> (SGD צריך גבוה מ-Adam). <b>דקות:</b> השלבים הפרוגרסיביים (5 epochs כל אחד) רצים ב-LR קבוע 0.01, והשלב הסופי (10) מבצע ירידה אחת ל-0.001 באמצע — כלומר רוב האימון הוא חימום ב-LR גבוה, והכיוונון העדין קורה בריצה הארוכה.</div></div>
+      <div class="note good"><span class="ic">◆</span><div class="bd"><b>בחירות Person B (מעודכן):</b> אופטימייזר <code class="k">SGD(momentum=0.9)</code> במקום AdamW — מכליל טוב יותר על CNN מאפס (חשוב לחצי ה-OOD), ו-SGD נלמד בקורס. תזמון <code class="k">StepLR</code> — ירידת-מדרגה: כל <code class="k">lr_step_size</code> epochs ה-LR מוכפל ב-<code class="k">lr_gamma</code> (0.1); <code class="k">step_size=None</code> נגזר אוטומטית ל-<code class="k">epochs//3</code> → ~2 ירידות לכל אורך הריצה. <b>LR התחלתי <code class="k">0.05</code></b> — גבוה בכוונה, ובטוח <b>רק כי הוספנו BatchNorm</b> שמייצב את התפלגות האקטיבציות; רשת בלי נרמול היתה מתפוצצת ב-0.05. <code class="k">weight_decay=5e-4</code> מותאם ל-LR הגבוה, ו-<code class="k">grad_clip=1.0</code> הוא רשת הביטחון.</div></div>
+      <div class="note warn"><span class="ic">▲</span><div class="bd"><b>🚩 קצה-סילבוס — מוכנים להגן:</b> <code class="k">momentum=0.9</code> (הרחבת SGD: ממוצע נע של גרדיאנטים = velocity, לא Adam), <code class="k">label_smoothing=0.1</code> (הרחבה של cross-entropy שנלמד; 0.9 לאמת, 0.1 מפוזר על 19 — מצמצם ביטחון-יתר וקיצורי-דרך, אפשר לאפס ל-0.0), ו-<code class="k">StepLR</code> (תזמון LR נלמד, צורת המדרגה היא ההרחבה). BatchNorm עצמו (ב-model.py) הוא קצה-סילבוס ומוגן באנלוגיה ל-LayerNorm.</div></div>
       <div class="code">
         <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">engine.py — לולאת האימון</span><span class="badge">python</span></div>
 <pre><code><span class="kw">def</span> <span class="fn2">train</span>(model, train_loader, val_loader=<span class="kw">None</span>, *, epochs=<span class="nu">15</span>,
-          lr=<span class="nu">0.01</span>, momentum=<span class="nu">0.9</span>, weight_decay=<span class="nu">1e-4</span>,
-          lr_step_size=<span class="nu">5</span>, lr_gamma=<span class="nu">0.1</span>, patience=<span class="nu">5</span>):
+          lr=<span class="nu">0.05</span>, momentum=<span class="nu">0.9</span>, weight_decay=<span class="nu">5e-4</span>,
+          lr_step_size=<span class="kw">None</span>, lr_gamma=<span class="nu">0.1</span>,  <span class="c"># None ⇒ epochs//3</span>
+          grad_clip=<span class="nu">1.0</span>, label_smoothing=<span class="nu">0.1</span>, patience=<span class="nu">5</span>):
     criterion = nn.<span class="fn2">CrossEntropyLoss</span>(label_smoothing=<span class="nu">0.1</span>)  <span class="c"># לוגיטים + ריכוך יעדים</span>
     optimizer = torch.optim.<span class="fn2">SGD</span>(model.<span class="fn2">parameters</span>(), lr=lr,
                                 momentum=momentum, weight_decay=weight_decay)
-    scheduler = ....<span class="fn2">StepLR</span>(optimizer, step_size=lr_step_size, gamma=lr_gamma)
+    step = lr_step_size <span class="kw">or</span> <span class="fn2">max</span>(<span class="nu">1</span>, epochs // <span class="nu">3</span>)   <span class="c"># ~2 ירידות לאורך הריצה</span>
+    scheduler = ....<span class="fn2">StepLR</span>(optimizer, step_size=step, gamma=lr_gamma)
 
     <span class="kw">for</span> epoch <span class="kw">in</span> <span class="fn2">range</span>(<span class="nu">1</span>, epochs+<span class="nu">1</span>):
         tr_loss = <span class="fn2">train_one_epoch</span>(...)
@@ -674,8 +685,8 @@ MAX_FILTERS_PER_IMAGE = <span class="nu">3</span>
         <li><span class="pin">evaluate</span><span class="tx">תחת <code class="k">@torch.no_grad</code>, מחזיר <code class="k">acc, preds, labels, confs</code> (confidence דרך softmax). ה־confidence משמש רק ל־error analysis, לא משפיע על acc.</span></li>
         <li><span class="pin g">best‑weights</span><span class="tx">שומר את ה־state עם ה־val הכי טוב ומשחזר בסוף — לא את ה־epoch האחרון. עמיד ל־overfit מאוחר.</span></li>
         <li><span class="pin">early stop</span><span class="tx"><code class="k">patience</code> epochs בלי שיפור → עצירה. רלוונטי רק כשיש val set.</span></li>
-        <li><span class="pin g">בוצע(B)</span><span class="tx">הוחלף ל-<code class="k">SGD(momentum=0.9)</code> + <code class="k">StepLR(step_size=5, gamma=0.1)</code> + LR=0.01. נוסף <b>gradient clipping</b> (<code class="k">grad_clip=1.0</code>) לייצוב SGD, ו-<b>label smoothing</b> (<code class="k">0.1</code>) לריכוך היעדים ומניעת ביטחון-יתר (משפר הכללה+חוסן). פרמטרים <code class="k">momentum/lr_step_size/lr_gamma/grad_clip/label_smoothing</code> נחשפו לכיוונון. self-check עובר.</span></li>
-        <li><span class="pin w">TODO(B)</span><span class="tx">לכוונן: <code class="k">lr</code> ב-[0.003, 0.1], <code class="k">weight_decay</code> ל-5e-4, <code class="k">grad_clip</code> עד 5.0 / <code class="k">label_smoothing</code> ב-[0, 0.2] אם צריך. אופציונלי: MixUp/CutMix (משפר חוסן, לתאם עם C). AMP לא רלוונטי — האימון על Mac (MPS), לא CUDA.</span></li>
+        <li><span class="pin g">בוצע(B)</span><span class="tx"><code class="k">SGD(momentum=0.9)</code> + <code class="k">StepLR(step_size=None→epochs//3, gamma=0.1)</code> + <b>LR=0.05</b> (בטוח הודות ל-BatchNorm) + <code class="k">weight_decay=5e-4</code>. <b>gradient clipping</b> (<code class="k">grad_clip=1.0</code>) מייצב את ה-LR הגבוה, ו-<b>label smoothing</b> (<code class="k">0.1</code>) מרכך יעדים ומונע ביטחון-יתר (משפר הכללה+חוסן). seed גם ל-MPS; אי-דטרמיניזם MPS/CUDA → סומכים על קובץ המשקלים. self-check עובר.</span></li>
+        <li><span class="pin w">TODO(B)</span><span class="tx">לכוונן: <code class="k">lr</code> ב-[0.01, 0.1], <code class="k">weight_decay</code> סביב 5e-4, <code class="k">grad_clip</code> עד 5.0 / <code class="k">label_smoothing</code> ב-[0, 0.2] אם צריך. אם BatchNorm מודאג למראיין — fallback ל-GroupNorm ואז LR נמוך יותר. AMP לא רלוונטי — האימון על Mac (MPS), לא CUDA.</span></li>
       </ul>
     </div>
   </details>
@@ -684,37 +695,41 @@ MAX_FILTERS_PER_IMAGE = <span class="nu">3</span>
   <details class="file" id="f-model">
     <summary><span class="chev">▶</span><span class="fname">submissions/my_team/model.py</span><span class="role A">Person A</span><span class="own">הרשת · נשלחת</span></summary>
     <div class="body">
-      <p>VGG‑style CNN מ־random init. זה הקובץ ה<b>יחיד</b> שהgrader משחזר ממנו את הרשת — חייב להיות עצמאי.</p>
+      <p>ResNet קטן (סגנון He 2016) מ־random init — BatchNorm + skip connections, ~11.2M params. זה הקובץ ה<b>יחיד</b> שהgrader משחזר ממנו את הרשת — חייב להיות עצמאי.</p>
       <div class="code">
         <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">model.py — הארכיטקטורה</span><span class="badge">nn.Module</span></div>
-<pre><code><span class="kw">def</span> <span class="fn2">conv_block</span>(in_ch, out_ch, n_convs=<span class="nu">2</span>):
-    <span class="c"># n פעמים (Conv 3x3 -> ReLU), ואז MaxPool(2) שחוצה H,W</span>
-    layers = []
-    <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn2">range</span>(n_convs):
-        layers += [nn.<span class="fn2">Conv2d</span>(c,out_ch,<span class="nu">3</span>,padding=<span class="nu">1</span>), nn.<span class="fn2">ReLU</span>()]
-    layers += [nn.<span class="fn2">MaxPool2d</span>(<span class="nu">2</span>)]
-    <span class="kw">return</span> nn.<span class="fn2">Sequential</span>(*layers)
+<pre><code><span class="kw">class</span> <span class="fn2">ResidualBlock</span>(nn.Module):
+    <span class="c"># out = ReLU( F(x) + identity ),  F = (3x3→BN→ReLU)·2</span>
+    <span class="kw">def</span> <span class="fn2">forward</span>(self, x):
+        identity = x <span class="kw">if</span> self.downsample <span class="kw">is</span> <span class="kw">None</span> <span class="kw">else</span> self.<span class="fn2">downsample</span>(x)
+        out = self.<span class="fn2">relu</span>(self.<span class="fn2">bn1</span>(self.<span class="fn2">conv1</span>(x)))
+        out = self.<span class="fn2">bn2</span>(self.<span class="fn2">conv2</span>(out))
+        <span class="kw">return</span> self.<span class="fn2">relu</span>(out + identity)        <span class="c"># skip — מקצר גרדיאנט</span>
 
 <span class="kw">class</span> <span class="fn2">ModelArchitecture</span>(nn.Module):
-    <span class="kw">def</span> <span class="fn2">__init__</span>(self, num_classes=<span class="nu">20</span>, dropout=<span class="nu">.35</span>):
-        self.features = nn.<span class="fn2">Sequential</span>(
-            <span class="fn2">conv_block</span>(<span class="nu">3</span>,<span class="nu">32</span>),    <span class="c"># 224 -> 112</span>
-            <span class="fn2">conv_block</span>(<span class="nu">32</span>,<span class="nu">64</span>),   <span class="c"># 112 -> 56</span>
-            <span class="fn2">conv_block</span>(<span class="nu">64</span>,<span class="nu">128</span>),  <span class="c"># 56 -> 28</span>
-            <span class="fn2">conv_block</span>(<span class="nu">128</span>,<span class="nu">256</span>,n_convs=<span class="nu">1</span>))  <span class="c"># 28 -> 14</span>
-        self.pool = nn.<span class="fn2">AdaptiveAvgPool2d</span>(<span class="nu">1</span>)     <span class="c"># מקבל כל גודל קלט</span>
+    <span class="kw">def</span> <span class="fn2">__init__</span>(self, num_classes=<span class="nu">20</span>, base=<span class="nu">64</span>,
+                 blocks_per_stage=(<span class="nu">2</span>,<span class="nu">2</span>,<span class="nu">2</span>,<span class="nu">2</span>), dropout=<span class="nu">.4</span>):
+        self.stem   = ...   <span class="c"># 7x7 s2 conv→BN→ReLU→3x3 s2 maxpool : 224→56 [64]</span>
+        self.stage1 = ...   <span class="c"># 2 blocks, stride 1            : 56→56  [64]</span>
+        self.stage2 = ...   <span class="c"># 2 blocks, first stride 2      : 56→28  [128]</span>
+        self.stage3 = ...   <span class="c"># 2 blocks, first stride 2      : 28→14  [256]</span>
+        self.stage4 = ...   <span class="c"># 2 blocks, first stride 2      : 14→7   [512]</span>
+        self.pool = nn.<span class="fn2">AdaptiveAvgPool2d</span>(<span class="nu">1</span>)            <span class="c"># 7→1, מקבל כל גודל קלט</span>
         self.classifier = nn.<span class="fn2">Sequential</span>(
-            nn.<span class="fn2">Flatten</span>(), nn.<span class="fn2">Dropout</span>(dropout), nn.<span class="fn2">Linear</span>(<span class="nu">256</span>,num_classes))
+            nn.<span class="fn2">Flatten</span>(), nn.<span class="fn2">Dropout</span>(dropout), nn.<span class="fn2">Linear</span>(<span class="nu">512</span>,num_classes))
 
-    <span class="kw">def</span> <span class="fn2">forward</span>(self, x):
-        <span class="kw">return</span> self.<span class="fn2">classifier</span>(self.<span class="fn2">pool</span>(self.<span class="fn2">features</span>(x)))  <span class="c"># [B,20]</span></code></pre>
+    <span class="kw">def</span> <span class="fn2">forward</span>(self, x):                          <span class="c"># [B,20]</span>
+        x = self.<span class="fn2">stem</span>(x); x = self.<span class="fn2">stage1</span>(x); x = self.<span class="fn2">stage2</span>(x)
+        x = self.<span class="fn2">stage3</span>(x); x = self.<span class="fn2">stage4</span>(x)
+        <span class="kw">return</span> self.<span class="fn2">classifier</span>(self.<span class="fn2">pool</span>(x))</code></pre>
       </div>
       <ul class="ann">
-        <li><span class="pin">המשפך</span><span class="tx">ערוצים גדלים (32→64→128→256) כשהמרחב מתכווץ (224→14). שתי 3×3 קטנות במקום אחת גדולה = שדה־קליטה גדל זול ומוסבר.</span></li>
-        <li><span class="pin g">AdaptiveAvgPool2d(1)</span><span class="tx">מכווץ כל מפת מאפיינים ל־1×1 → המודל מקבל <b>כל</b> גודל קלט. אפשר לאמן ב־128 וה־grader מזין 224, שניהם עובדים.</span></li>
-        <li><span class="pin r">בלי BatchNorm</span><span class="tx">בכוונה — הצוות עוד לא למד, שמירה על "מוסבר בראיון". מוסיפים מאוחר רק אם אפשר להגן עליו.</span></li>
-        <li><span class="pin">Kaiming init</span><span class="tx"><code class="k">_init_weights</code>: kaiming_normal ל־convs (default טוב ל־ReLU), normal קטן ל־linear.</span></li>
-        <li><span class="pin w">~1.5M params</span><span class="tx">ה־head דק (Linear ישיר 256→20). TODO(A): bump dropout אם overfit, בלוק 5 (256→512), הרחבת ערוצים, או שכבה חבויה ב־head.</span></li>
+        <li><span class="pin">המשפך</span><span class="tx">ערוצים מכפילים (64→128→256→512) כשהמרחב מתכווץ (224→7). רוחב גדול = bias נמוך — הרשת הישנה (VGG ~1.2M) היתה תת־פרמטרית ל-20 מחלקות ImageNet.</span></li>
+        <li><span class="pin g">skip connections</span><span class="tx"><code class="k">y=f(x)+x</code> (He 2016, נלמד ביחידת Transformers, מקל על vanishing gradients) נותן לגרדיאנט מסלול ישר אחורה → אפשר באמת לנצל את העומק. כשהבלוק משנה ערוצים/stride — ענף ה-identity מוקרן ב-1×1 conv (+BN) כדי שהצורות יתאימו לפני החיבור.</span></li>
+        <li><span class="pin w">🚩 BatchNorm</span><span class="tx">נרמול אחרי כל conv. <b>קצה-סילבוס</b> — נלמד רק LayerNorm (Transformers). הגנה: "שכבת נרמול כמו LayerNorm, מותאמת לערוצי conv; ב-<code class="k">eval()</code> משתמשת ב-running stats מה-state_dict → לא תלוית גודל-batch". זו הסיבה העיקרית שהרשת הזו מתאמנת מאפס ומנצחת את ה-VGG הישן, וגם מה שמאפשר LR=0.05. fallback בטוח יותר: GroupNorm.</span></li>
+        <li><span class="pin g">AdaptiveAvgPool2d(1)</span><span class="tx">Global Average Pool: מכווץ כל מפת מאפיינים ל־1×1 → אין FC params לפני ה-Linear הסופי (512→20), ומקבל <b>כל</b> גודל קלט.</span></li>
+        <li><span class="pin">Kaiming init</span><span class="tx"><code class="k">_init_weights</code>: kaiming_normal ל־convs (🚩 קצה-סילבוס — "init אקראי מותאם ל-ReLU fan-out"), BN weight=1/bias=0, normal קטן ל-linear.</span></li>
+        <li><span class="pin r">~11.2M params · dropout=0.4</span><span class="tx">11.2M על ~16k תמונות = נטיית overfit. ה-dropout בראש עלה ל-<b>0.4</b> (בתוך טווח ה-~50% שנלמד), ביחד עם weight-decay (engine) + GAP + אוגמנטציה כבדה. <b>חוזה grader:</b> <code class="k">predict.py</code> בונה <code class="k">ModelArchitecture()</code> בלי args → defaults (base=64, blocks=(2,2,2,2)) מגדירים את הצורה שהמשקלים נטענים אליה, ו-train.py חייב להתאים. <code class="k">dropout</code> הוא הלביר היחיד שבטוח לכוונן בלי לשבור טעינת משקלים (Dropout בלי פרמטרים → אותם state_dict keys).</span></li>
       </ul>
     </div>
   </details>
@@ -780,6 +795,14 @@ joblib.<span class="fn2">dump</span>(model.<span class="fn2">cpu</span>().<span 
       <p>אחרי כל eval כותב <code class="k">outputs/errors_&lt;tag&gt;.csv</code> (כל misclassification: path,true,pred,conf) + <code class="k">confusion_&lt;tag&gt;.csv</code> (מטריצה 20×20). מדפיס את הזוג הכי מבולבל. <b>לעולם לא</b> על ה־Test הסופי.</p>
       <h4>robust_eval.py — מה שבאמת מנקדים</h4>
       <p>מודד דיוק נקי מול דיוק על ה־OOD שסופקו (<code class="k">dataset/augmentations/color_jitter</code>, <code class="k">random_rotation</code>). drop גדול = המודל נשען על קיצורי צבע/אוריינטציה. עבודת האוגמנטציה של Person C אמורה לכווץ את הפער בלי לאבד דיוק נקי.</p>
+      <p>אחרי הפירוט ציר־אחר־ציר, הכלי מדפיס <b>ציון משולב יחיד</b> שמשקף בדיוק את ה-grader:</p>
+      <div class="code">
+        <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">robust_eval.py — SCORE</span><span class="badge">python</span></div>
+<pre><code>ood_mean = <span class="fn2">sum</span>(ood_accs) / <span class="fn2">len</span>(ood_accs)
+SCORE    = <span class="nu">0.5</span> * clean_acc + <span class="nu">0.5</span> * ood_mean
+<span class="fn2">print</span>(<span class="st">f"&gt;&gt; SCORE {SCORE:.4f}  &lt;-- optimize this"</span>)</code></pre>
+      </div>
+      <p><b>למה זה קריטי:</b> הציון הוא 50% נקי + 50% OOD. בלי מספר אחד שמשקף את היעד האמיתי, קל ליפול למלכודת של אופטימיזציה לדיוק נקי בלבד. עוקבים אחרי <b>SCORE</b> שעולה, לא אחרי clean acc. הכלי מטפל גם במקרים חלקיים (רק נקי / רק OOD) ומסמן אותם כ-proxy בביטחון נמוך.</p>
       <div class="note info"><span class="ic">◆</span><div class="bd">ארבעת הכלים האלה הם ה<b>מדידה</b> סביב הצנרת — הם לא מאמנים, הם נותנים את המספרים שכל ההחלטות נשענות עליהם.</div></div>
     </div>
   </details>
@@ -887,11 +910,14 @@ python model.py            <span class="c"># smoke test: צורת [B,20]</span><
   <div class="sec-h"><span class="sec-n">14</span><h2>הראיון — מה צריך להגן עליו</h2></div>
   <p>בסוף יש ראיון קצר. אין מצגת — בודקים הבנה ויכולת להסביר. תהיו מוכנים להסביר את הבחירות, את ההיגיון מאחוריהן, ולהוביל את המראיין דרך המימוש והתוצאות.</p>
   <ul>
-    <li><b>למה הארכיטקטורה הזו</b> — VGG funnel, 3×3 stacked, AdaptiveAvgPool שמקבל כל גודל, למה בלי BatchNorm.</li>
-    <li><b>המתודולוגיה</b> — פיצול stratified seeded, Test נוגעים פעם אחת, preprocessing מכויל על Train בלבד, baseline נאיבי כרצפה.</li>
-    <li><b>אסטרטגיית העמידות</b> — אילו מניפולציות, איפה הכנסתם אותן (אימון מול ולידציה), ולמה מילוי־ממוצע ולא שחור, למה אוגמנטציה רחבה ולא פילטר ספציפי.</li>
+    <li><b>למה הארכיטקטורה הזו</b> — ResNet קטן: skip connections (<code class="k">y=f(x)+x</code>, He 2016, נלמד ב-Transformers) שמקלים על vanishing gradients, רוחב 64→512 ל-bias נמוך, GAP במקום FC, AdaptiveAvgPool שמקבל כל גודל.</li>
+    <li><b>🚩 BatchNorm (קצה-סילבוס)</b> — נלמד רק LayerNorm. הגנה: "שכבת נרמול כמו LayerNorm, מותאמת לערוצי conv; running stats ב-state_dict, ב-<code class="k">eval()</code> בלתי־תלוית batch". זו הסיבה שהרשת מתאמנת מאפס ומנצחת VGG, ומאפשרת LR=0.05. fallback: GroupNorm.</li>
+    <li><b>🚩 אופטימייזר (קצה-סילבוס)</b> — SGD נלמד בקורס; <code class="k">momentum=0.9</code> = הרחבת SGD (velocity = ממוצע נע של גרדיאנטים), <b>לא</b> Adam (מחוץ לסילבוס, מכוון). <code class="k">label_smoothing=0.1</code> = הרחבה של cross-entropy, <code class="k">StepLR</code> = תזמון LR נלמד בצורת מדרגה. כולם מודים שהם קצה ויודעים לאפס לברירת־מחדל "ספרית".</li>
+    <li><b>המתודולוגיה</b> — פיצול stratified seeded, מיפוי 5-החלקים ל-"Test נוגעים פעם אחת" (בלוק־בלוק), preprocessing מכויל על Train בלבד, baseline נאיבי (רגרסיה לוגיסטית) כרצפה.</li>
+    <li><b>אסטרטגיית העמידות</b> — תאומים אופליין משוקללים (rotation/color_jitter במשקל 4 — צירי OOD מאומתים), מילוי־ממוצע ולא שחור, למה אוגמנטציה רחבה ולא פילטר ספציפי, ולמה <b>אין</b> background swap (דורש סגמנטציה = מחוץ לגבולות).</li>
+    <li><b>איך מודדים חוסן</b> — <code class="k">robust_eval</code> מדפיס <b>SCORE = 0.5·נקי + 0.5·ממוצע OOD</b> שמשקף את ה-50/50 של ה-grader; עוקבים אחרי SCORE, לא אחרי דיוק נקי.</li>
     <li><b>Error analysis</b> — איזה דפוס מצאתם בעיניים, ואיך הוא שינה את האוגמנטציה/הארכיטקטורה.</li>
-    <li><b>שחזוּר</b> — למה שומרים את קובץ המשקלים ולא "מריצים שוב" (אי־דטרמיניזם של MPS/CUDA).</li>
+    <li><b>שחזוּר</b> — למה שומרים את קובץ המשקלים ולא "מריצים שוב" (אי־דטרמיניזם של MPS/CUDA, גם אחרי seed ל-MPS).</li>
   </ul>
   <div class="note good"><span class="ic">◆</span><div class="bd"><b>השורה התחתונה:</b> כל בחירה בקוד נבחרה כדי שתהיה <b>ניתנת להסבר</b>. אם משהו בקוד לא ברור לך — זה בדיוק מה שהראיון יחפש. עברת על המדריך הזה? אתה מוכן.</div></div>
 </section>

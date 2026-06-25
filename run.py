@@ -42,8 +42,8 @@ def cmd_train(args):
     spec = importlib.util.spec_from_file_location("team_train", TEAM_DIR / "train.py")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
-    mod.main(img_size=args.img_size, batch_size=args.batch,
-             num_workers=args.workers, epochs_per_stage=args.epochs)
+    mod.main(stage=args.stage, img_size=args.img_size, batch_size=args.batch,
+             num_workers=args.workers, epochs=args.epochs)
 
 
 def cmd_eval(args):
@@ -87,10 +87,11 @@ def build_parser():
     sub.add_parser("baseline").set_defaults(func=cmd_baseline)
 
     t = sub.add_parser("train")
+    t.add_argument("--stage", type=int, default=1, help="1=P0(40%%) 2=+P1(55%%) 3=+P2(70%%) 4=+P3(85%%); test = next block")
     t.add_argument("--img-size", type=int, default=224)
     t.add_argument("--batch", type=int, default=64)
     t.add_argument("--workers", type=int, default=2)
-    t.add_argument("--epochs", type=int, default=5, help="epochs per progressive stage")
+    t.add_argument("--epochs", type=int, default=40, help="per-stage max epochs (early-stop usually triggers first)")
     t.set_defaults(func=cmd_train)
 
     sub.add_parser("eval").set_defaults(func=cmd_eval)

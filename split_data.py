@@ -14,6 +14,36 @@ Progressive (incremental-data) training then goes:
 
 Each 15% block is tested exactly once WHILE UNSEEN, then folded into train → no leakage.
 
+----------------------------------------------------------------------------------
+HOW THIS MAPS TO THE METHODOLOGY'S Train / Dev / Test ("Test touched once")
+----------------------------------------------------------------------------------
+The plan's iron rule is a 3-way split where the local Test is touched EXACTLY ONCE, at
+the end, and never tuned against. We do NOT carve out one fixed reserved Test partition;
+instead the SAME one-shot-test discipline is realised PROGRESSIVELY. At every stage the
+roles are:
+
+    stage k:  Train = P0..P(k-1)  (all blocks already seen / folded in)
+              Test  = Pk          (the next 15% block, still UNSEEN)
+
+Pk plays the role of the methodology's local Test *for that one stage*: we score on it
+exactly ONCE while it is unseen (an honest, un-overfit generalization estimate), THEN it
+is folded into Train for the next stage and is never used as a clean test again. Because
+each block is scored only on its first (and only) unseen appearance, no block is ever
+tuned against as a test set — the "touch the test once" guarantee holds per block.
+
+  - Dev / tuning happens on the CURRENT Train via engine.py's early-stopping (the
+    validation slice the trainer holds out from Train) and on already-seen blocks; all
+    architecture iteration + error_analysis runs there.
+  - The block being scored at a stage (Pk) is the one-shot Test for that stage — look at
+    its accuracy, do NOT error-analyze or tune against it before it's folded in.
+  - The HIDDEN GRADER test (50% clean + 50% OOD) is the ULTIMATE one-shot test: we never
+    see it, so it can never be overfit. Our progressive Pk scores + robust_eval's SCORE
+    are our internal proxies for it.
+
+This is a deliberate design choice (more data exercised as test over the run, fresh init
+each stage) — it does NOT weaken the "test touched once" rule; it applies it block-by-block.
+Do NOT silently change the split logic to chase a different mapping without updating this.
+
 Output: `dataset/splits.json` — the single source of truth all teammates load from
 (deterministic given the seed, so it's git-ignored and regenerated locally).
 `materialize_validation()` copies one partition into `dataset/validation/` so the

@@ -7,6 +7,10 @@ data.
 
 ## 1. One-time setup (every teammate)
 
+This `.venv` + `pip install` is **dev-only** — it's how we train, evaluate, and run
+error analysis on our own machines. The **grader installs nothing**: it just loads
+`weights.joblib` through `predict.py`, so nothing here affects the submission.
+
 ```bash
 # clone
 git clone https://github.com/yonatan-cs/IML-HACKATHON.git
@@ -47,6 +51,43 @@ python run.py robust       # clean vs provided-OOD accuracy
 python run.py eval         # provided leaderboard (evaluate.py)
 python run.py errors --partition P1   # detailed misclassification log -> outputs/
 ```
+
+## 5. Run on Google Colab (GPU — for the heavy final training)
+
+MPS/CPU on our laptops is fine for fast 128px iteration, but the **final model** (full 224px,
+more epochs/stages) trains far faster on a free Colab **T4**. The code is device-agnostic —
+`engine.get_device()` auto-selects `cuda` on Colab, no edits needed.
+
+In a Colab notebook (Runtime → Change runtime type → **T4 GPU**), run these cells:
+
+```python
+# 1. clone the code
+!git clone https://github.com/yonatan-cs/IML-HACKATHON.git
+%cd IML-HACKATHON
+
+# 2. deps — Colab ALREADY has torch/torchvision/numpy/pillow/tqdm (CUDA build).
+#    Do NOT `pip install -r requirements.txt` (it would reinstall a CPU torch and break CUDA).
+!pip install -q joblib
+
+# 3. get the data (NOT in git). Put a zip of train_set + augmentations on your Drive, then:
+from google.colab import drive; drive.mount('/content/drive')
+!mkdir -p dataset
+!cp /content/drive/MyDrive/iml_dataset.zip . && unzip -q iml_dataset.zip -d dataset
+#   after this you must have: dataset/train/<class>/*.jpg  and  dataset/augmentations/{color_jitter,random_rotation}/
+
+# 4. reproduce artifacts + train (seeded → identical split/twins as everyone)
+!python run.py split
+!python run.py materialize
+!python run.py train --stage 1 --img-size 224 --epochs 30 --workers 2   # T4 handles full 224px
+!python run.py robust    # clean vs OOD SCORE
+!python run.py eval
+
+# 5. download the trained weights back to commit the best one
+from google.colab import files; files.download('submissions/my_team/weights.joblib')
+```
+
+Notes: GPU lets you raise `--img-size 224` and `--epochs`; advance data with `--stage 2/3/4`.
+`weights.joblib` is git-ignored — download it and force-add only the single best one at the end.
 
 ## Who owns what (edit mostly your own file → clean merges)
 

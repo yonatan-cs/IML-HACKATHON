@@ -206,3 +206,328 @@
 | 15:46 | Deterministic train transform + drop zoom filter | data.py, make_augmented.py | self-checks pass; needs twin regen | ~6k |
 | 15:53 | Bridged dataset/train symlink; ran split+materialize; 20k twins regen (no zoom); verified train=orig+twins deterministic | dataset/, .wolf/cerebrum.md | all checks pass | ~3k |
 | 15:52 | model.py dropout 0.3 -> 0.35 (Person A file, user request) + synced MADRICH.html | model.py MADRICH.html | smoke test OK (4,20) | ~150 |
+
+## Session: 2026-06-25 15:32
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-06-25 15:32
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:59 | Edited make_augmented.py | 2→2 lines | ~43 |
+| 15:59 | Edited make_augmented.py | 2→2 lines | ~43 |
+| 15:59 | Edited make_augmented.py | removed 7 lines | ~7 |
+| 15:59 | Edited make_augmented.py | removed 7 lines | ~7 |
+| 15:59 | Edited make_augmented.py | removed 8 lines | ~7 |
+| 15:59 | Edited make_augmented.py | removed 8 lines | ~7 |
+| 15:59 | Edited make_augmented.py | modified removed() | ~136 |
+| 15:59 | Edited make_augmented.py | modified removed() | ~136 |
+| 15:59 | Edited augment.py | 8→10 lines | ~151 |
+| 15:59 | Edited augment.py | 8→10 lines | ~151 |
+| 16:00 | Edited augment.py | 5→7 lines | ~63 |
+| 16:00 | Edited augment.py | 5→7 lines | ~63 |
+| 16:00 | Session end: 8 writes across 2 files (make_augmented.py, augment.py) | 4 reads | ~6387 tok |
+| 16:00 | Session end: 8 writes across 2 files (make_augmented.py, augment.py) | 4 reads | ~6387 tok |
+| 16:01 | Edited LEARN.html | inline fix | ~40 |
+| 16:01 | Edited LEARN.html | inline fix | ~40 |
+| 16:01 | Edited LEARN.html | 0.3 → 0.35 | ~46 |
+| 16:01 | Edited LEARN.html | 0.3 → 0.35 | ~46 |
+| 16:01 | Edited LEARN.html | 7→9 lines | ~322 |
+| 16:01 | Edited LEARN.html | 7→9 lines | ~322 |
+| 16:02 | Edited LEARN.html | expanded (+8 lines) | ~363 |
+| 16:02 | Edited LEARN.html | expanded (+8 lines) | ~363 |
+| 16:02 | Edited LEARN.html | 4→5 lines | ~178 |
+| 16:02 | Edited LEARN.html | 4→5 lines | ~178 |
+| 16:02 | Edited LEARN.html | inline fix | ~12 |
+| 16:02 | Edited LEARN.html | inline fix | ~12 |
+| 16:02 | Edited LEARN.html | inline fix | ~24 |
+| 16:02 | Edited LEARN.html | inline fix | ~24 |
+| 16:03 | Edited LEARN.html | expanded (+6 lines) | ~354 |
+| 16:03 | Edited LEARN.html | expanded (+6 lines) | ~354 |
+| 16:03 | Edited LEARN.html | 20 → 22 | ~19 |
+| 16:03 | Edited LEARN.html | 20 → 22 | ~19 |
+| 16:03 | LEARN.html updated post-pull: SGD+momentum, StepLR, grad clip, label smoothing, dropout 0.35; +2 interview Qs | LEARN.html | synced to current code | ~2k |
+| 16:04 | Session end: 17 writes across 3 files (make_augmented.py, augment.py, LEARN.html) | 4 reads | ~7840 tok |
+| 16:04 | Session end: 17 writes across 3 files (make_augmented.py, augment.py, LEARN.html) | 4 reads | ~7840 tok |
+| 16:09 | Edited make_augmented.py | inline fix | ~20 |
+| 16:09 | Edited make_augmented.py | inline fix | ~20 |
+| 16:09 | Edited make_augmented.py | modified f_color_jitter() | ~82 |
+| 16:09 | Edited make_augmented.py | modified f_color_jitter() | ~82 |
+| 16:09 | Edited make_augmented.py | 2→3 lines | ~48 |
+| 16:09 | Edited make_augmented.py | 2→3 lines | ~48 |
+| 16:09 | Edited make_augmented.py | 2→2 lines | ~48 |
+| 16:09 | Edited make_augmented.py | 2→2 lines | ~48 |
+
+| 15:xx | aug filters: removed shift+zoom (label-corrupting), added gaussian blur. Active path=make_augmented.py offline twins | make_augmented.py augment.py | imports OK | ~400 |
+| 15:xx | wiped+regenerated train_aug twins: 20000 imgs, 20cls x1000, balanced | dataset/train_aug | done exit0 | ~200 |
+| 15:xx | DIAGNOSED: committed weights.joblib = random (0.0477 < floor 0.3453) = stale init, no real train run done yet. Need run.py train | submissions/my_team/weights.joblib | flagged to team | ~150 |
+| 16:11 | Session end: 22 writes across 3 files (make_augmented.py, augment.py, LEARN.html) | 4 reads | ~8120 tok |
+| 16:11 | Session end: 22 writes across 3 files (make_augmented.py, augment.py, LEARN.html) | 4 reads | ~8120 tok |
+| 16:12 | Session end: 22 writes across 3 files (make_augmented.py, augment.py, LEARN.html) | 4 reads | ~8120 tok |
+| 16:12 | Session end: 22 writes across 3 files (make_augmented.py, augment.py, LEARN.html) | 4 reads | ~8120 tok |
+| 16:23 | Session end: 22 writes across 3 files (make_augmented.py, augment.py, LEARN.html) | 4 reads | ~8120 tok |
+| 16:23 | Session end: 22 writes across 3 files (make_augmented.py, augment.py, LEARN.html) | 4 reads | ~8120 tok |
+
+## Session: 2026-06-25 16:48
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-06-25 16:48
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 16:49 | Edited submissions/my_team/train.py | modified advance() | ~497 |
+| 16:49 | Edited submissions/my_team/train.py | modified advance() | ~497 |
+| 16:50 | Edited submissions/my_team/train.py | modified _per_class_acc() | ~1156 |
+| 16:50 | Edited submissions/my_team/train.py | modified _per_class_acc() | ~1156 |
+| 16:50 | Edited run.py | 2→2 lines | ~39 |
+| 16:50 | Edited run.py | 2→2 lines | ~39 |
+| 16:50 | Edited run.py | 6→7 lines | ~135 |
+| 16:50 | Edited run.py | 6→7 lines | ~135 |
+
+| 15:xx | Rewired train.py: AUTO-progressive+100%-final REPLACED by GATED single-stage. `run.py train --stage N` trains ONE block from FRESH init, tests next 15%, prints per-class acc + verdict, STOPS. No auto-advance. Deleted stale weights.joblib | train.py run.py | imports OK | ~700 |
+| 16:50 | Session end: 4 writes across 2 files (train.py, run.py) | 5 reads | ~11738 tok |
+| 16:50 | Session end: 4 writes across 2 files (train.py, run.py) | 5 reads | ~11738 tok |
+| 16:58 | Created submissions/my_team/model.py | — | ~2392 |
+| 16:58 | Created submissions/my_team/model.py | — | ~2392 |
+| now  | Person A: rewrote model.py plain-VGG → small ResNet (stem+4 residual stages 64→512, BatchNorm, GAP, dropout, ~11.2M params). Course-grounded via NotebookLM (residual+norm in syllabus; BN by LayerNorm analogy). syntax+shape verified; no torch locally | submissions/my_team/model.py | compile OK | ~2.4k |
+| 17:01 | Session end: 5 writes across 3 files (train.py, run.py, model.py) | 6 reads | ~14736 tok |
+| 17:01 | Session end: 5 writes across 3 files (train.py, run.py, model.py) | 6 reads | ~14736 tok |
+| 17:12 | Edited submissions/my_team/model.py | modified __init__() | ~38 |
+| 17:12 | Edited submissions/my_team/model.py | modified __init__() | ~38 |
+| 17:12 | Edited submissions/my_team/model.py | 2→4 lines | ~109 |
+| 17:12 | Edited submissions/my_team/model.py | 2→4 lines | ~109 |
+| 17:12 | Edited robust_eval.py | expanded (+12 lines) | ~373 |
+| 17:12 | Edited make_augmented.py | modified f_color_jitter() | ~742 |
+| 17:12 | Edited make_augmented.py | modified f_color_jitter() | ~742 |
+| 17:12 | Edited robust_eval.py | expanded (+12 lines) | ~373 |
+| 17:12 | Edited submissions/my_team/model.py | expanded (+6 lines) | ~207 |
+| 17:12 | Edited submissions/my_team/model.py | expanded (+6 lines) | ~207 |
+| 17:12 | Session end: 14 writes across 5 files (train.py, run.py, model.py, robust_eval.py, make_augmented.py) | 14 reads | ~26767 tok |
+| 17:12 | Session end: 14 writes across 5 files (train.py, run.py, model.py, robust_eval.py, make_augmented.py) | 14 reads | ~26767 tok |
+| 17:12 | Edited make_augmented.py | modified main() | ~134 |
+| 17:12 | Edited make_augmented.py | modified main() | ~134 |
+| 17:12 | Edited submissions/my_team/model.py | inline fix | ~27 |
+| 17:12 | Edited submissions/my_team/model.py | inline fix | ~27 |
+| 17:13 | Edited robust_eval.py | modified exists() | ~438 |
+| 17:13 | Edited robust_eval.py | modified exists() | ~438 |
+| 17:13 | Edited make_augmented.py | modified COVER() | ~270 |
+| 17:13 | Edited make_augmented.py | modified COVER() | ~270 |
+| 17:13 | Edited submissions/my_team/model.py | modified TODO() | ~156 |
+| 17:13 | Edited submissions/my_team/model.py | modified TODO() | ~156 |
+| 17:13 | Edited augment.py | modified twins() | ~271 |
+| 17:13 | Edited augment.py | modified twins() | ~271 |
+| 17:13 | Edited split_data.py | expanded (+30 lines) | ~686 |
+| 17:13 | Edited split_data.py | expanded (+30 lines) | ~686 |
+| 17:13 | Person A audit of model.py ResNet; raised head dropout 0.3→0.4, hardened grader-contract + interview docstrings | submissions/my_team/model.py | compile OK, no shape/state_dict change | ~3k |
+| 17:13 | Edited augment.py | 12→14 lines | ~218 |
+| 17:13 | Edited augment.py | 12→14 lines | ~218 |
+| 17:13 | Edited engine.py | modified set_seed() | ~312 |
+| 17:13 | Edited engine.py | modified set_seed() | ~312 |
+| 17:13 | Person D: added combined SCORE (0.5 clean+0.5 OOD-mean) to robust_eval; documented Train/Dev/Test progressive mapping in split_data docstring | robust_eval.py split_data.py | compile OK | ~3k |
+| 17:13 | Edited engine.py | modified train() | ~144 |
+| 17:13 | Edited engine.py | modified train() | ~144 |
+| 17:13 | Person C: weighted aug filters (rotate/color_jitter x2), wider jitter 0.5-1.5, copies=2, invert kept rare, documented no-background-swap | augment.py make_augmented.py | compile OK | ~3k |
+| 17:14 | Edited engine.py | modified 9() | ~1240 |
+| 17:14 | Edited engine.py | modified 9() | ~1240 |
+| 17:14 | Edited engine.py | 8→9 lines | ~222 |
+| 17:14 | Edited engine.py | 8→9 lines | ~222 |
+| 17:14 | Tuned engine.py training defaults (BN-aware lr 0.05, wd 5e-4, lr_step_size auto=epochs//3), added course-defense comments (SGD+momentum not Adam, StepLR, early-stop, label_smoothing flag), strengthened seed/MPS comment | engine.py | py_compile OK | ~1800 |
+| 17:17 | Edited MADRICH.html | inline fix | ~72 |
+| 17:17 | Edited MADRICH.html | inline fix | ~72 |
+| 17:17 | Edited plan.md | inline fix | ~404 |
+| 17:17 | Edited plan.md | inline fix | ~404 |
+| 17:17 | Edited plan.md | inline fix | ~339 |
+| 17:17 | Edited plan.md | inline fix | ~339 |
+| 17:17 | Edited plan.md | inline fix | ~205 |
+| 17:17 | Edited plan.md | inline fix | ~205 |
+| 17:17 | Edited plan.md | inline fix | ~77 |
+| 17:17 | Edited plan.md | inline fix | ~77 |
+| 17:17 | Edited plan.md | inline fix | ~72 |
+| 17:17 | Edited plan.md | inline fix | ~72 |
+| 17:18 | Edited plan.md | inline fix | ~104 |
+| 17:18 | Edited plan.md | inline fix | ~104 |
+| 17:18 | Edited MADRICH.html | expanded (+7 lines) | ~1024 |
+| 17:18 | Edited MADRICH.html | expanded (+7 lines) | ~1024 |
+| 17:18 | Edited LEARN.html | 38→42 lines | ~1673 |
+| 17:18 | Edited LEARN.html | 38→42 lines | ~1673 |
+| 17:18 | Edited plan.md | inline fix | ~47 |
+| 17:18 | Edited plan.md | inline fix | ~47 |
+| 17:18 | Edited LEARN.html | 6→7 lines | ~193 |
+| 17:18 | Edited LEARN.html | 6→7 lines | ~193 |
+| 17:18 | Edited SETUP.md | 12→16 lines | ~150 |
+| 17:18 | Edited SETUP.md | 12→16 lines | ~150 |
+| 17:18 | Edited MADRICH.html | 5→5 lines | ~284 |
+| 17:18 | Edited MADRICH.html | 5→5 lines | ~284 |
+| 17:18 | Edited LEARN.html | 5→5 lines | ~182 |
+| 17:18 | Edited LEARN.html | 5→5 lines | ~182 |
+| 17:18 | Edited LEARN.html | inline fix | ~64 |
+| 17:18 | Edited LEARN.html | inline fix | ~64 |
+| 17:18 | Edited MADRICH.html | 4→4 lines | ~349 |
+| 17:18 | Edited MADRICH.html | 4→4 lines | ~349 |
+| 17:18 | Created submissions/my_team/README | — | ~1548 |
+| 17:18 | Created submissions/my_team/README | — | ~1548 |
+| 17:19 | docs sync: plan.md ResNet+BN/residual+offline-twin+SCORE+progressive-split, SETUP.md dev-only env note, created my_team/README (names/IDs placeholders + ResNet/aug write-up) | plan.md, SETUP.md, submissions/my_team/README | done | ~3500 |
+| 17:19 | Edited LEARN.html | 5→5 lines | ~361 |
+| 17:19 | Edited LEARN.html | 5→5 lines | ~361 |
+| 17:19 | Edited MADRICH.html | modified B() | ~344 |
+| 17:19 | Edited MADRICH.html | modified B() | ~344 |
+| 17:19 | Edited MADRICH.html | 3→4 lines | ~149 |
+| 17:19 | Edited MADRICH.html | 3→4 lines | ~149 |
+| 17:19 | Edited LEARN.html | 5→5 lines | ~180 |
+| 17:19 | Edited LEARN.html | 5→5 lines | ~180 |
+| 17:19 | Edited MADRICH.html | 1→2 lines | ~77 |
+| 17:19 | Edited MADRICH.html | 1→2 lines | ~77 |
+| 17:19 | Edited MADRICH.html | 2→2 lines | ~247 |
+| 17:19 | Edited MADRICH.html | 2→2 lines | ~247 |
+| 17:19 | Edited LEARN.html | BatchNorm() → LayerNorm() | ~249 |
+| 17:19 | Edited LEARN.html | BatchNorm() → LayerNorm() | ~249 |
+| 17:20 | Edited LEARN.html | inline fix | ~12 |
+| 17:20 | Edited LEARN.html | inline fix | ~12 |
+| 17:20 | Edited LEARN.html | 6→7 lines | ~139 |
+| 17:20 | Edited LEARN.html | 6→7 lines | ~139 |
+| 17:20 | Edited LEARN.html | 1→2 lines | ~168 |
+| 17:20 | Edited LEARN.html | 1→2 lines | ~168 |
+| 17:20 | Edited MADRICH.html | 32→36 lines | ~1330 |
+| 17:20 | Edited MADRICH.html | 32→36 lines | ~1330 |
+| 17:21 | Edited LEARN.html | 2→2 lines | ~225 |
+| 17:21 | Edited LEARN.html | 2→2 lines | ~225 |
+| 17:21 | Edited MADRICH.html | expanded (+8 lines) | ~320 |
+| 17:21 | Edited MADRICH.html | expanded (+8 lines) | ~320 |
+| 17:21 | Edited LEARN.html | 2→2 lines | ~211 |
+| 17:21 | Edited LEARN.html | 2→2 lines | ~211 |
+| 17:21 | Edited MADRICH.html | 2→3 lines | ~223 |
+| 17:21 | Edited MADRICH.html | 2→3 lines | ~223 |
+| 17:21 | Edited LEARN.html | connections() → ReLU() | ~172 |
+| 17:21 | Edited LEARN.html | connections() → ReLU() | ~172 |
+| 17:22 | Edited MADRICH.html | 7→10 lines | ~461 |
+| 17:22 | Edited MADRICH.html | 7→10 lines | ~461 |
+| 17:22 | Edited LEARN.html | expanded (+12 lines) | ~904 |
+| 17:22 | Edited LEARN.html | expanded (+12 lines) | ~904 |
+| 17:22 | Updated MADRICH.html field guide to ResNet+BatchNorm/skips, offline-twin weighted aug, SGD/StepLR lr=0.05 wd=5e-4, robust_eval combined SCORE, Test-touched-once 5-partition mapping, interview defenses | MADRICH.html | done | ~6k |
+| 17:22 | Edited LEARN.html | inline fix | ~12 |
+| 17:22 | Edited LEARN.html | inline fix | ~12 |
+| 17:22 | Edited LEARN.html | inline fix | ~24 |
+| 17:22 | Edited LEARN.html | inline fix | ~24 |
+| 17:22 | Edited LEARN.html | 14→14 lines | ~299 |
+| 17:22 | Edited LEARN.html | 14→14 lines | ~299 |
+| 17:23 | Edited LEARN.html | inline fix | ~37 |
+| 17:23 | Edited LEARN.html | inline fix | ~37 |
+| 17:24 | Edited LEARN.html | 9→10 lines | ~574 |
+| 17:24 | Edited LEARN.html | 9→10 lines | ~574 |
+| 17:24 | Edited LEARN.html | "באתגר אימנתי CNN מאפס לסי" → "באתגר אימנתי CNN מאפס (Re" | ~147 |
+| 17:24 | Edited LEARN.html | "באתגר אימנתי CNN מאפס לסי" → "באתגר אימנתי CNN מאפס (Re" | ~147 |
+| 17:24 | Updated LEARN.html to teach new ResNet (BatchNorm/residual/GAP512/dropout0.4), SGD+momentum lr0.05/wd5e-4, StepLR epochs//3, early-stop; refreshed Q&A to 26 (added Q23-26); honest background-swap omission + SCORE metric | LEARN.html | done | ~6k |
+| 17:33 | Session end: 75 writes across 13 files (train.py, run.py, model.py, robust_eval.py, make_augmented.py) | 17 reads | ~85036 tok |
+| 17:33 | Session end: 75 writes across 13 files (train.py, run.py, model.py, robust_eval.py, make_augmented.py) | 17 reads | ~85036 tok |
+| 17:39 | Edited submissions/my_team/model_explained.html | 5→5 lines | ~56 |
+| 17:39 | Edited submissions/my_team/model_explained.html | 5→5 lines | ~56 |
+| 17:39 | Edited submissions/my_team/model_explained.html | 10→11 lines | ~168 |
+| 17:39 | Edited submissions/my_team/model_explained.html | 10→11 lines | ~168 |
+| 17:39 | Edited submissions/my_team/model_explained.html | inline fix | ~101 |
+| 17:39 | Edited submissions/my_team/model_explained.html | inline fix | ~101 |
+| 17:40 | Edited submissions/my_team/model_explained.html | expanded (+12 lines) | ~426 |
+| 17:40 | Edited submissions/my_team/model_explained.html | expanded (+12 lines) | ~426 |
+| 17:40 | Edited submissions/my_team/model_explained.html | 2→2 lines | ~69 |
+| 17:40 | Edited submissions/my_team/model_explained.html | 2→2 lines | ~69 |
+| 17:40 | Edited submissions/my_team/model_explained.html | 5→5 lines | ~30 |
+| 17:40 | Edited submissions/my_team/model_explained.html | 5→5 lines | ~30 |
+| 17:41 | Edited submissions/my_team/model_explained.html | expanded (+10 lines) | ~655 |
+| 17:41 | Edited submissions/my_team/model_explained.html | expanded (+10 lines) | ~655 |
+| 17:41 | Edited submissions/my_team/model_explained.html | 14→15 lines | ~339 |
+| 17:41 | Edited submissions/my_team/model_explained.html | 14→15 lines | ~339 |
+| 17:42 | Edited submissions/my_team/model_explained.html | 10→10 lines | ~233 |
+| 17:42 | Edited submissions/my_team/model_explained.html | 10→10 lines | ~233 |
+| 17:42 | Edited submissions/my_team/model_explained.html | 11→11 lines | ~216 |
+| 17:42 | Edited submissions/my_team/model_explained.html | 11→11 lines | ~216 |
+| 17:42 | Edited submissions/my_team/model_explained.html | 10 → 11 | ~20 |
+| 17:42 | Edited submissions/my_team/model_explained.html | 10 → 11 | ~20 |
+| 17:42 | Edited submissions/my_team/model_explained.html | 11 → 12 | ~18 |
+| 17:42 | Edited submissions/my_team/model_explained.html | 11 → 12 | ~18 |
+| 17:42 | Edited submissions/my_team/model_explained.html | 12 → 13 | ~21 |
+| 17:42 | Edited submissions/my_team/model_explained.html | 12 → 13 | ~21 |
+| 17:42 | Edited submissions/my_team/model_explained.html | 13 → 14 | ~22 |
+| 17:42 | Edited submissions/my_team/model_explained.html | 13 → 14 | ~22 |
+| 17:43 | Edited submissions/my_team/model_explained.html | modified ResNet() | ~205 |
+| 17:43 | Edited submissions/my_team/model_explained.html | modified ResNet() | ~205 |
+| 17:43 | Edited submissions/my_team/model_explained.html | inline fix | ~189 |
+| 17:43 | Edited submissions/my_team/model_explained.html | inline fix | ~189 |
+| 17:44 | sync model_explained.html to ResNet arch (was stale plain-VGG): params 1.2M→11.2M, conv_block→ResidualBlock+skip explainer, new BatchNorm section, funnel 64→512 / 56→7, GAP/head/tables 256→512, dropout→0.4, TOC renumber 13→14 sections | submissions/my_team/model_explained.html | done, HTML tags balanced | ~9k |
+| 17:45 | Edited submissions/my_team/train.py | inline fix | ~26 |
+| 17:45 | Edited submissions/my_team/train.py | inline fix | ~26 |
+| 17:45 | Edited submissions/my_team/train.py | inline fix | ~32 |
+| 17:45 | Edited submissions/my_team/train.py | inline fix | ~32 |
+| 17:45 | Edited submissions/my_team/train.py | inline fix | ~35 |
+| 17:45 | Edited submissions/my_team/train.py | inline fix | ~35 |
+| 17:51 | Created engine.py | — | ~3607 |
+| 17:51 | Created engine.py | — | ~3607 |
+| 17:53 | Edited engine.py | added 2 import(s) | ~64 |
+| 17:53 | Edited engine.py | added 2 import(s) | ~64 |
+| 17:53 | Session end: 100 writes across 14 files (train.py, run.py, model.py, robust_eval.py, make_augmented.py) | 23 reads | ~101270 tok |
+| 17:53 | Session end: 100 writes across 14 files (train.py, run.py, model.py, robust_eval.py, make_augmented.py) | 23 reads | ~101270 tok |
+| 17:53 | Edited submissions/my_team/model.py | modified ADDITION() | ~772 |
+| 17:53 | Edited submissions/my_team/model.py | modified ADDITION() | ~772 |
+| 17:54 | Edited make_augmented.py | modified UPDATE() | ~380 |
+| 17:54 | Edited make_augmented.py | modified UPDATE() | ~380 |
+| 17:54 | Edited robust_eval.py | modified exists() | ~832 |
+| 17:54 | Edited robust_eval.py | modified exists() | ~832 |
+
+## Session: 2026-06-25 17:54
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-06-25 17:54
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-06-25 17:54
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-06-25 17:54
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-06-25 17:54
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-06-25 17:54
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-06-25 17:54
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-06-25 17:54
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 17:56 | Edited submissions/my_team/model.py | modified conv3x3() | ~422 |
+| 17:56 | Edited submissions/my_team/model.py | modified conv3x3() | ~422 |
+| 17:56 | Edited submissions/my_team/model.py | 5→6 lines | ~86 |
+| 17:56 | Edited submissions/my_team/model.py | 5→6 lines | ~86 |
+| 17:56 | Edited submissions/my_team/model.py | 4→5 lines | ~79 |
+| 17:56 | Edited submissions/my_team/model.py | 4→5 lines | ~79 |
+| 17:56 | Edited engine.py | 10→8 lines | ~42 |
+| 17:56 | Edited engine.py | 10→8 lines | ~42 |
+| now | Round-2 (constraints lifted) recovered after session interrupt: finished A's SE attention (wired SEBlock into ResidualBlock, params 11.19M->11.28M), cleaned B engine unused imports (AdamW+cosine kept). C weighted aug (rotate/jitter=4), D robust_eval SCORE=0.5clean+0.5OOD. SGD baseline=0.6733. All compile, forward [B,20], predict.py untouched | model.py engine.py | verified, training AdamW+SE running | ~2k |
+| 17:58 | Session end: 6 writes across 2 files (model.py, engine.py) | 5 reads | ~11730 tok |
+| 17:58 | Session end: 6 writes across 2 files (model.py, engine.py) | 5 reads | ~11730 tok |
+| 18:00 | Session end: 6 writes across 2 files (model.py, engine.py) | 5 reads | ~11730 tok |
+| 18:00 | Session end: 6 writes across 2 files (model.py, engine.py) | 5 reads | ~11730 tok |
+| 18:02 | Edited SETUP.md | expanded (+37 lines) | ~475 |
+| 18:02 | Edited SETUP.md | expanded (+37 lines) | ~475 |
+| 18:03 | Session end: 7 writes across 3 files (model.py, engine.py, SETUP.md) | 6 reads | ~13018 tok |
+| 18:03 | Session end: 7 writes across 3 files (model.py, engine.py, SETUP.md) | 6 reads | ~13018 tok |

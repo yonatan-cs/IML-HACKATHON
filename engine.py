@@ -5,6 +5,11 @@ Device selection, seeding, and the train/eval loops. Everything here is plain Py
 with fuller-than-usual comments (team is new to the API). It already works; Person B's
 job is to make training CONVERGE BETTER (see the TODOs in `train`).
 
+NOTE (team rule update, 2026-06-25): we are NO LONGER restricted to course-only methods.
+We use best-practice techniques (AdamW, BatchNorm, cosine LR schedule, label smoothing) and
+DOCUMENT each one — here in the code and in the team guide — so everyone knows exactly what
+we run and why. Nothing is a black box.
+
 Used by: run.py, submissions/my_team/train.py, baseline_naive.py, robust_eval.py.
 """
 from __future__ import annotations
@@ -34,13 +39,20 @@ def set_seed(seed: int = 42) -> None:
     """
     Seed Python / NumPy / Torch for reproducibility.
 
-    ⚠️ Caveat from the tutorial: GPU/MPS kernels are NOT fully deterministic even with a
-    fixed seed — two runs can differ. So we always SAVE the best weights file rather than
-    relying on "rerun and get the same number". Don't panic over tiny run-to-run deltas.
+    We seed every RNG that feeds the run: Python's `random` (used by some samplers),
+    NumPy (our metrics / any array shuffling), and Torch (weight init, dropout masks,
+    DataLoader shuffling). `torch.manual_seed` also seeds the MPS (Apple Silicon)
+    generator, so the same seed gives the same *starting point* on every laptop.
+
+    ⚠️ Caveat: GPU/MPS kernels are NOT fully deterministic even with a fixed seed —
+    floating-point reductions can run in a different order each time, so two runs can still
+    differ by a fraction of a percent. That is why we always SAVE the best weights file
+    (checkpointing) rather than relying on "rerun and get the exact same number". Don't panic
+    over tiny run-to-run deltas.
     """
     random.seed(seed)
     np.random.seed(seed)
-    torch.manual_seed(seed)
+    torch.manual_seed(seed)                       # also seeds the MPS generator on M-series Macs
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
 
@@ -52,8 +64,8 @@ def train_one_epoch(model, loader, optimizer, criterion, device, grad_clip=None)
     Run one pass over `loader`, update weights, return the mean training loss.
 
     `grad_clip` (max gradient norm): if set, clips the gradient norm AFTER backward() and
-    BEFORE step(). This caps how big any single update can be, which keeps SGD stable when
-    the LR is high (0.01) — early in training gradients can spike and blow the weights up.
+    BEFORE step(). This caps how big any single update can be — a safety net that keeps the
+    first few high-learning-rate steps from spiking and blowing the weights up.
     """
     model.train()                       # enable dropout
     running = 0.0
@@ -107,11 +119,13 @@ def train(
     val_loader: DataLoader | None = None,
     *,
     epochs: int = 15,
-    lr: float = 0.01,
-    momentum: float = 0.9,
-    weight_decay: float = 1e-4,
-    lr_step_size: int = 5,
-    lr_gamma: float = 0.1,
+    optimizer: str = "adamw",          # "adamw" (default, best convergence) or "sgd"
+    lr: float | None = None,           # None ⇒ optimizer-aware default (adamw 1e-3, sgd 0.05)
+    weight_decay: float | None = None, # None ⇒ optimizer-aware default (adamw 1e-2, sgd 5e-4)
+    momentum: float = 0.9,             # SGD only
+    lr_schedule: str = "cosine",       # "cosine" (default) or "step"
+    lr_step_size: int | None = None,   # step schedule: None ⇒ auto = epochs // 3
+    lr_gamma: float = 0.1,             # step schedule drop factor
     grad_clip: float | None = 1.0,
     label_smoothing: float = 0.1,
     device: torch.device | None = None,
@@ -119,38 +133,81 @@ def train(
     log_csv: str | Path | None = None,
 ):
     """
-    Train `model` and return (model, history). Keeps the best-val-accuracy weights.
+    Train `model` and return (model, history). Keeps the best-val-accuracy weights
+    (checkpointing) and restores them at the end, so the returned model is the best one we
+    saw on the validation set — not necessarily the last epoch.
 
-    Optimizer = SGD with momentum (generalizes better than Adam on a from-scratch CNN and
-    is course-explainable). LR schedule = StepLR: every `lr_step_size` epochs the LR is
-    multiplied by `lr_gamma` (step decay) — learn fast at a high LR early, then fine-tune at
-    a low LR. With the defaults (lr 0.01, step 5, gamma 0.1) the LR is 0.01 for epochs 1-5,
-    0.001 for 6-10, 0.0001 for 11-15.
+    OPTIMIZER (choose via `optimizer=`):
+      • "adamw" (DEFAULT): AdamW = Adam with *decoupled* weight decay. Adam adapts the step
+        size per-parameter from running estimates of each gradient's mean and variance, so it
+        converges fast and is forgiving about the learning rate — the strongest default for
+        training this ResNet from scratch. The "W" means the weight-decay (L2) term is applied
+        directly to the weights instead of folded into the gradient, which regularizes more
+        correctly than classic Adam. Defaults: lr=1e-3, weight_decay=1e-2.
+      • "sgd": plain stochastic gradient descent + momentum 0.9 (momentum keeps a decaying
+        average of past gradients — "velocity" — and steps along it, damping mini-batch noise).
+        SGD often generalizes a hair better (flatter minima), which can help the 50%
+        out-of-distribution half, but needs a bigger LR and more epochs. Defaults: lr=0.05,
+        weight_decay=5e-4. Set momentum=0 for textbook vanilla SGD.
 
-    Defaults below are a sane starting point. Person B: tune them.
+    LEARNING RATE: lr=None auto-picks the optimizer's default (adamw 1e-3, sgd 0.05). BatchNorm
+      in the model conditions the loss surface so both optimizers stay stable; `grad_clip`
+      (max grad norm 1.0) is the safety net for the first few steps.
 
-    TODO(Person B):
-      - SGD lr lives in ~[0.003, 0.1]; momentum 0.9 is standard. weight_decay ~[1e-4, 5e-4].
-      - StepLR knobs: `lr_step_size` (how often to drop) and `lr_gamma` (drop factor, e.g. 0.1).
-        Rule of thumb: step_size ≈ epochs / 3 so you get ~2 drops over the run.
-      - `grad_clip` (max grad norm, default 1.0): caps update size so high-LR SGD stays stable.
-        Raise toward 5.0 if it's clipping so hard that learning stalls; set None to disable.
-      - `label_smoothing` (default 0.1): softens targets to curb over-confidence. Try 0.0–0.2;
-        set 0.0 to train on hard labels.
-      - early stopping `patience`, label smoothing in the loss, gradient clipping
-      - (advanced) mixed precision via torch.cuda.amp on CUDA machines
+    LR SCHEDULE (`lr_schedule=`):
+      • "cosine" (DEFAULT): CosineAnnealingLR smoothly decays the LR from its start value down
+        to ~0 along a cosine curve over the run — fast learning early, gentle fine-tuning late,
+        no manual step points to pick. Pairs naturally with AdamW.
+      • "step": StepLR multiplies the LR by `lr_gamma` every `lr_step_size` epochs
+        (None ⇒ epochs//3, ~2 drops over the run). The classic step-decay schedule.
+
+    REGULARIZATION (all fighting overfitting — 11.2M params on only ~16k images):
+      • weight_decay = L2 penalty pulling weights toward 0 (optimizer-aware default).
+      • label_smoothing=0.1: replaces the hard 1-of-20 target with 0.9 for the true class and
+        0.1 spread over the other 19. Curbs over-confidence → better calibration and a little
+        more robustness (the net commits less hard to background/color shortcuts). 0.0 = hard.
+      • Dropout (in the model head) + early stopping (below) round out the defenses.
+
+    EARLY STOPPING (`patience`): stop if validation accuracy doesn't improve for `patience`
+      consecutive epochs; the best-seen checkpoint is restored before returning.
+
+    Defaults are a strong from-scratch recipe (AdamW + cosine + BatchNorm + label smoothing).
+    TODO(Person B): tune per stage — adamw lr ~[5e-4, 3e-3] / wd ~[1e-2, 5e-2];
+      sgd lr ~[0.01, 0.1] / wd ~[1e-4, 5e-4]; grad_clip up to 5.0; label_smoothing 0.0–0.2;
+      try `optimizer="sgd"` near the end to see if it squeezes a bit more OOD generalization.
     """
     device = device or get_device()
     model = model.to(device)
 
-    # label_smoothing softens the targets (e.g. 0.9 for the true class, 0.1 spread over the
-    # rest) instead of a hard 1/0. This curbs over-confidence → better generalization and a
-    # bit more robustness (the model commits less hard to background/color shortcuts).
-    criterion = nn.CrossEntropyLoss(label_smoothing=label_smoothing)  # wants logits
-    optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=momentum,
-                                weight_decay=weight_decay)
-    # step decay: LR *= lr_gamma every lr_step_size epochs
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=lr_step_size, gamma=lr_gamma)
+    # Build the optimizer from the `optimizer=` string, filling optimizer-aware defaults for
+    # lr / weight_decay when the caller left them None, then REBIND `optimizer` to the built
+    # object so the training loop below uses it directly.
+    opt_name = optimizer.lower()
+    if opt_name == "adamw":
+        lr = 1e-3 if lr is None else lr
+        weight_decay = 1e-2 if weight_decay is None else weight_decay
+        optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
+    elif opt_name == "sgd":
+        lr = 0.05 if lr is None else lr
+        weight_decay = 5e-4 if weight_decay is None else weight_decay
+        optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=momentum,
+                                    weight_decay=weight_decay)
+    else:
+        raise ValueError(f"optimizer must be 'adamw' or 'sgd', got {opt_name!r}")
+
+    # CrossEntropyLoss takes raw logits (it applies log-softmax internally — do NOT softmax
+    # first). label_smoothing softens the targets (0.9 true / 0.1 spread) — see docstring.
+    criterion = nn.CrossEntropyLoss(label_smoothing=label_smoothing)
+
+    # LR schedule, stepped once per epoch below. cosine = smooth decay to ~0; step = drop every k.
+    if lr_schedule.lower() == "cosine":
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+            optimizer, T_max=max(1, epochs), eta_min=lr * 0.01)
+    elif lr_schedule.lower() == "step":
+        step = lr_step_size if lr_step_size is not None else max(1, epochs // 3)
+        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=step, gamma=lr_gamma)
+    else:
+        raise ValueError(f"lr_schedule must be 'cosine' or 'step', got {lr_schedule!r}")
 
     history = []
     best_acc, best_state, since_improved = -1.0, None, 0
@@ -192,15 +249,16 @@ def train(
 
 
 if __name__ == "__main__":
-    # Self-check: tiny fake data trains for 1 epoch on the chosen device.
+    # Self-check: tiny fake data trains for 1 epoch on the chosen device (both optimizers).
     from torch.utils.data import TensorDataset
     set_seed(0)
     dev = get_device()
     print("device:", dev)
     X = torch.randn(32, 3, 32, 32)
     Y = torch.randint(0, 20, (32,))
-    net = nn.Sequential(nn.Flatten(), nn.Linear(3 * 32 * 32, 20))
     loader = DataLoader(TensorDataset(X, Y), batch_size=8)
-    _, hist = train(net, loader, loader, epochs=1, device=dev)
-    assert len(hist) == 1
-    print("engine OK")
+    for opt in ("adamw", "sgd"):
+        net = nn.Sequential(nn.Flatten(), nn.Linear(3 * 32 * 32, 20))
+        _, hist = train(net, loader, loader, epochs=1, optimizer=opt, device=dev)
+        assert len(hist) == 1
+    print("engine OK (adamw + sgd)")

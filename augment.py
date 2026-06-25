@@ -90,17 +90,21 @@ def build_train_transform(img_size: int = 224) -> v2.Compose:
     Person C TODO: this is the main lever. Tune the probabilities (`p=`), add/remove
     transforms, and use error analysis to drop any that hurt a specific class
     (e.g. color inversion turns a yellow lemon blue → may mislabel). Candidates the team
-    listed: grayscale, shift, rotation(45/90/180 mean-fill), salt&pepper, zoom, inversion,
+    listed: grayscale, rotation(45/90/180 mean-fill), salt&pepper, inversion,
     color jitter. Provided OOD examples confirm color_jitter + rotation are real test ops.
+    (shift + zoom removed per Person D — they translate/crop the object out of frame.)
     """
+    resize = int(round(img_size * 256 / 224))
     return v2.Compose([
-        v2.RandomResizedCrop(img_size, scale=(0.6, 1.0), antialias=True),  # zoom in/out
+        v2.Resize(resize, antialias=True),
+        v2.CenterCrop(img_size),
         v2.RandomHorizontalFlip(p=0.5),
-        v2.RandomApply([v2.RandomAffine(degrees=0, translate=(0.15, 0.15))], p=0.5),  # shift
-        v2.RandomApply([MeanFillRotation(angles=(45, 90, 180, 270))], p=0.3),
-        v2.RandomApply([v2.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.7),       # lighting/color
+        # rotation + colour jitter get the highest probabilities: they are the two
+        # CONFIRMED real test axes (dataset/augmentations/{random_rotation,color_jitter}).
+        v2.RandomApply([MeanFillRotation(angles=(45, 90, 180, 270))], p=0.5),
+        v2.RandomApply([v2.ColorJitter(0.5, 0.5, 0.5, 0.1)], p=0.8),       # lighting/color
         v2.RandomGrayscale(p=0.15),
-        v2.RandomApply([v2.RandomInvert()], p=0.10),                       # 🚩 label-risky
+        v2.RandomApply([v2.RandomInvert()], p=0.08),                       # 🚩 label-risky, rare
         v2.RandomApply([SaltPepperNoise(amount=0.02)], p=0.2),
         *_normalize_tail(),
     ])
@@ -113,8 +117,10 @@ def build_light_train_transform(img_size: int = 224) -> v2.Compose:
     disk, so we must NOT heavily re-augment or we compound the distortion). Just a little
     geometric jitter + normalize. This is the default when training includes train_aug/.
     """
+    resize = int(round(img_size * 256 / 224))
     return v2.Compose([
-        v2.RandomResizedCrop(img_size, scale=(0.7, 1.0), antialias=True),
+        v2.Resize(resize, antialias=True),
+        v2.CenterCrop(img_size),
         v2.RandomHorizontalFlip(p=0.5),
         *_normalize_tail(),
     ])
@@ -134,14 +140,17 @@ def build_eval_transform(img_size: int = 224) -> v2.Compose:
 
 
 # Single-manipulation probes for robust_eval.py — measure invariance one axis at a time.
-# Person C TODO: keep these aligned with whatever the train pipeline simulates.
+# These are kept aligned with the ACTIVE offline twins (make_augmented.py FILTERS): the
+# probe strengths roughly mirror the baked-in twin ranges so local robustness numbers
+# track what training actually saw. color_jitter + rotation are the confirmed real test
+# axes, so we probe them at full strength.
 OOD_TRANSFORMS = {
     "grayscale":      v2.Compose([v2.Resize(256, antialias=True), v2.CenterCrop(224),
                                   v2.RandomGrayscale(p=1.0), *_normalize_tail()]),
     "color_jitter":   v2.Compose([v2.Resize(256, antialias=True), v2.CenterCrop(224),
                                   v2.ColorJitter(0.5, 0.5, 0.5, 0.2), *_normalize_tail()]),
     "rotation":       v2.Compose([v2.Resize(256, antialias=True), v2.CenterCrop(224),
-                                  MeanFillRotation(angles=(90, 180, 270)), *_normalize_tail()]),
+                                  MeanFillRotation(angles=(45, 90, 180, 270)), *_normalize_tail()]),
     "invert":         v2.Compose([v2.Resize(256, antialias=True), v2.CenterCrop(224),
                                   v2.RandomInvert(p=1.0), *_normalize_tail()]),
     "salt_pepper":    v2.Compose([v2.Resize(256, antialias=True), v2.CenterCrop(224),
