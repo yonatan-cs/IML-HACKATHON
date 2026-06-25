@@ -200,3 +200,5 @@
 | 15:25 | LEARN.html: private CNN+interview study guide for D, MADRICH-styled, gitignored | LEARN.html .gitignore | created, git-ignored OK | ~9k |
 | 15:26 | Session end: 2 writes across 2 files (LEARN.html, .gitignore) | 3 reads | ~35699 tok |
 | 15:26 | Session end: 2 writes across 2 files (LEARN.html, .gitignore) | 3 reads | ~35699 tok |
+| 14:59 | Identified user = Person B (engine.py owner); recorded in cerebrum | .wolf/cerebrum.md | done | ~200 |
+| 15:28 | engine.py: AdamW/cosine -> SGD(mom)/StepLR + LR 0.01 + grad_clip; updated MADRICH.html engine section | engine.py MADRICH.html | self-check OK | ~900 |

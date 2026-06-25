@@ -647,13 +647,16 @@ MAX_FILTERS_PER_IMAGE = <span class="nu">3</span>
     <summary><span class="chev">▶</span><span class="fname">engine.py</span><span class="role B">Person B</span><span class="own">לולאות אימון</span></summary>
     <div class="body">
       <p>בחירת device, seeding, ולולאות train/eval. PyTorch רגיל עם הערות מפורטות. עובד כבר; התפקיד של Person B הוא לגרום לאימון <b>להתכנס טוב יותר</b>.</p>
+      <div class="note good"><span class="ic">◆</span><div class="bd"><b>בחירות Person B (מעודכן):</b> אופטימייזר <code class="k">SGD(momentum=0.9)</code> במקום AdamW — מכליל טוב יותר על CNN מאפס, ו-momentum נלמד בקורס. תזמון <code class="k">StepLR</code> במקום cosine — ירידת-מדרגה פשוטה וניתנת להסבר: כל <code class="k">lr_step_size</code> epochs ה-LR מוכפל ב-<code class="k">lr_gamma</code> (0.1). LR התחלתי <code class="k">0.01</code> (SGD צריך גבוה מ-Adam). <b>דקות:</b> השלבים הפרוגרסיביים (5 epochs כל אחד) רצים ב-LR קבוע 0.01, והשלב הסופי (10) מבצע ירידה אחת ל-0.001 באמצע — כלומר רוב האימון הוא חימום ב-LR גבוה, והכיוונון העדין קורה בריצה הארוכה.</div></div>
       <div class="code">
         <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">engine.py — לולאת האימון</span><span class="badge">python</span></div>
 <pre><code><span class="kw">def</span> <span class="fn2">train</span>(model, train_loader, val_loader=<span class="kw">None</span>, *, epochs=<span class="nu">15</span>,
-          lr=<span class="nu">1e-3</span>, weight_decay=<span class="nu">1e-4</span>, patience=<span class="nu">5</span>):
+          lr=<span class="nu">0.01</span>, momentum=<span class="nu">0.9</span>, weight_decay=<span class="nu">1e-4</span>,
+          lr_step_size=<span class="nu">5</span>, lr_gamma=<span class="nu">0.1</span>, patience=<span class="nu">5</span>):
     criterion = nn.<span class="fn2">CrossEntropyLoss</span>()                 <span class="c"># רוצה לוגיטים</span>
-    optimizer = torch.optim.<span class="fn2">AdamW</span>(model.<span class="fn2">parameters</span>(), lr=lr, ...)
-    scheduler = ....<span class="fn2">CosineAnnealingLR</span>(optimizer, T_max=epochs)
+    optimizer = torch.optim.<span class="fn2">SGD</span>(model.<span class="fn2">parameters</span>(), lr=lr,
+                                momentum=momentum, weight_decay=weight_decay)
+    scheduler = ....<span class="fn2">StepLR</span>(optimizer, step_size=lr_step_size, gamma=lr_gamma)
 
     <span class="kw">for</span> epoch <span class="kw">in</span> <span class="fn2">range</span>(<span class="nu">1</span>, epochs+<span class="nu">1</span>):
         tr_loss = <span class="fn2">train_one_epoch</span>(...)
@@ -671,7 +674,8 @@ MAX_FILTERS_PER_IMAGE = <span class="nu">3</span>
         <li><span class="pin">evaluate</span><span class="tx">תחת <code class="k">@torch.no_grad</code>, מחזיר <code class="k">acc, preds, labels, confs</code> (confidence דרך softmax). ה־confidence משמש רק ל־error analysis, לא משפיע על acc.</span></li>
         <li><span class="pin g">best‑weights</span><span class="tx">שומר את ה־state עם ה־val הכי טוב ומשחזר בסוף — לא את ה־epoch האחרון. עמיד ל־overfit מאוחר.</span></li>
         <li><span class="pin">early stop</span><span class="tx"><code class="k">patience</code> epochs בלי שיפור → עצירה. רלוונטי רק כשיש val set.</span></li>
-        <li><span class="pin w">TODO(B)</span><span class="tx">לכוונן: AdamW מול SGD+momentum, cosine מול OneCycle, label smoothing, grad clipping, AMP על CUDA.</span></li>
+        <li><span class="pin g">בוצע(B)</span><span class="tx">הוחלף ל-<code class="k">SGD(momentum=0.9)</code> + <code class="k">StepLR(step_size=5, gamma=0.1)</code> + LR=0.01. נוסף <b>gradient clipping</b> (<code class="k">grad_clip=1.0</code>, חיתוך נורמת הגרדיאנט בין backward ל-step) כדי לייצב את SGD ב-LR הגבוה. פרמטרים <code class="k">momentum/lr_step_size/lr_gamma/grad_clip</code> נחשפו לכיוונון. self-check עובר.</span></li>
+        <li><span class="pin w">TODO(B)</span><span class="tx">לכוונן: <code class="k">lr</code> ב-[0.003, 0.1], <code class="k">weight_decay</code> ל-5e-4, <code class="k">grad_clip</code> עד 5.0 אם הלמידה נתקעת; להוסיף label smoothing ו-AMP על CUDA. שקול MixUp/CutMix (משפר דיוק+חוסן).</span></li>
       </ul>
     </div>
   </details>

@@ -47,8 +47,14 @@ def set_seed(seed: int = 42) -> None:
 
 # ── one epoch ─────────────────────────────────────────────────────────────────
 
-def train_one_epoch(model, loader, optimizer, criterion, device) -> float:
-    """Run one pass over `loader`, update weights, return the mean training loss."""
+def train_one_epoch(model, loader, optimizer, criterion, device, grad_clip=None) -> float:
+    """
+    Run one pass over `loader`, update weights, return the mean training loss.
+
+    `grad_clip` (max gradient norm): if set, clips the gradient norm AFTER backward() and
+    BEFORE step(). This caps how big any single update can be, which keeps SGD stable when
+    the LR is high (0.01) — early in training gradients can spike and blow the weights up.
+    """
     model.train()                       # enable dropout
     running = 0.0
     n = 0
@@ -58,6 +64,8 @@ def train_one_epoch(model, loader, optimizer, criterion, device) -> float:
         logits = model(x)               # [B, 20]
         loss = criterion(logits, y)
         loss.backward()                 # backprop
+        if grad_clip is not None:
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=grad_clip)
         optimizer.step()                # update weights
         running += loss.item() * x.size(0)
         n += x.size(0)
@@ -99,8 +107,12 @@ def train(
     val_loader: DataLoader | None = None,
     *,
     epochs: int = 15,
-    lr: float = 1e-3,
+    lr: float = 0.01,
+    momentum: float = 0.9,
     weight_decay: float = 1e-4,
+    lr_step_size: int = 5,
+    lr_gamma: float = 0.1,
+    grad_clip: float | None = 1.0,
     device: torch.device | None = None,
     patience: int = 5,
     log_csv: str | Path | None = None,
@@ -108,11 +120,20 @@ def train(
     """
     Train `model` and return (model, history). Keeps the best-val-accuracy weights.
 
+    Optimizer = SGD with momentum (generalizes better than Adam on a from-scratch CNN and
+    is course-explainable). LR schedule = StepLR: every `lr_step_size` epochs the LR is
+    multiplied by `lr_gamma` (step decay) — learn fast at a high LR early, then fine-tune at
+    a low LR. With the defaults (lr 0.01, step 5, gamma 0.1) the LR is 0.01 for epochs 1-5,
+    0.001 for 6-10, 0.0001 for 11-15.
+
     Defaults below are a sane starting point. Person B: tune them.
 
     TODO(Person B):
-      - optimizer: AdamW (here) vs SGD(momentum=0.9, nesterov) — SGD often generalizes better
-      - lr schedule: cosine (here) vs OneCycleLR vs StepLR; try lr in [3e-4, 3e-3]
+      - SGD lr lives in ~[0.003, 0.1]; momentum 0.9 is standard. weight_decay ~[1e-4, 5e-4].
+      - StepLR knobs: `lr_step_size` (how often to drop) and `lr_gamma` (drop factor, e.g. 0.1).
+        Rule of thumb: step_size ≈ epochs / 3 so you get ~2 drops over the run.
+      - `grad_clip` (max grad norm, default 1.0): caps update size so high-LR SGD stays stable.
+        Raise toward 5.0 if it's clipping so hard that learning stalls; set None to disable.
       - early stopping `patience`, label smoothing in the loss, gradient clipping
       - (advanced) mixed precision via torch.cuda.amp on CUDA machines
     """
@@ -120,8 +141,10 @@ def train(
     model = model.to(device)
 
     criterion = nn.CrossEntropyLoss()             # standard multi-class loss (wants logits)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
+    optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=momentum,
+                                weight_decay=weight_decay)
+    # step decay: LR *= lr_gamma every lr_step_size epochs
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=lr_step_size, gamma=lr_gamma)
 
     history = []
     best_acc, best_state, since_improved = -1.0, None, 0
@@ -133,7 +156,7 @@ def train(
         writer.writerow(["epoch", "train_loss", "val_acc", "lr"])
 
     for epoch in range(1, epochs + 1):
-        tr_loss = train_one_epoch(model, train_loader, optimizer, criterion, device)
+        tr_loss = train_one_epoch(model, train_loader, optimizer, criterion, device, grad_clip)
         val_acc = -1.0
         if val_loader is not None:
             val_acc, *_ = evaluate(model, val_loader, device)

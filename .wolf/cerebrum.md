@@ -13,6 +13,12 @@
 ## Key Learnings
 
 - **Project:** IML-HACKATHON
+- **This human user = Person B** (Training / optimization). Owns `engine.py` ONLY: optimizer,
+  LR schedule, early-stop, device select, seeding/reproducibility, checkpointing, metrics.
+  NOT augment.py/make_augmented.py (Person C), NOT model.py (A), NOT data/eval (D). When the
+  user says "חלק B" they mean Person B's lane, not task section 2.2. The user does NOT have the
+  dataset locally — a different machine runs training; user's job is to make engine.py excellent
+  + correct + interview-defensible.
 
 ## Do-Not-Repeat
 
