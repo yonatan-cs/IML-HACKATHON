@@ -544,3 +544,66 @@
 |------|--------|---------|---------|--------|
 | 18:06 | Edited engine.py | removed 20 lines | ~8 |
 | 18:06 | Edited engine.py | removed 20 lines | ~8 |
+| 18:06 | Session end: 2 writes across 1 files (engine.py) | 3 reads | ~3623 tok |
+| 18:06 | Session end: 2 writes across 1 files (engine.py) | 3 reads | ~3623 tok |
+| 18:07 | Created submissions/my_team/README | — | ~1377 |
+| 18:07 | Created submissions/my_team/README | — | ~1377 |
+| 18:09 | Session end: 3 writes across 2 files (engine.py, README) | 3 reads | ~5099 tok |
+| 18:09 | Session end: 3 writes across 2 files (engine.py, README) | 3 reads | ~5099 tok |
+| 18:12 | Edited MADRICH.html | 15→18 lines | ~576 |
+| 18:12 | Edited MADRICH.html | 15→18 lines | ~576 |
+| 18:13 | Edited MADRICH.html | 7→7 lines | ~389 |
+| 18:13 | Edited MADRICH.html | 7→7 lines | ~389 |
+| 18:13 | Edited MADRICH.html | 22→23 lines | ~806 |
+| 18:13 | Edited MADRICH.html | 22→23 lines | ~806 |
+| 18:13 | Edited MADRICH.html | inline fix | ~127 |
+| 18:13 | Edited MADRICH.html | inline fix | ~127 |
+| 18:14 | Edited MADRICH.html | "note warn" → "note info" | ~107 |
+| 18:14 | Edited MADRICH.html | "note warn" → "note info" | ~107 |
+| 18:15 | Edited MADRICH.html | modified B() | ~1723 |
+| 18:15 | Edited MADRICH.html | modified B() | ~1723 |
+| 18:17 | Edited MADRICH.html | expanded (+9 lines) | ~1863 |
+| 18:17 | Edited MADRICH.html | expanded (+9 lines) | ~1863 |
+| 18:17 | Edited MADRICH.html | 21→22 lines | ~847 |
+| 18:17 | Edited MADRICH.html | 21→22 lines | ~847 |
+| 18:18 | Edited MADRICH.html | 2→2 lines | ~122 |
+| 18:18 | Edited MADRICH.html | 2→2 lines | ~122 |
+| 18:18 | Edited MADRICH.html | 17→18 lines | ~545 |
+| 18:18 | Edited MADRICH.html | 17→18 lines | ~545 |
+| 18:19 | Edited MADRICH.html | 2→2 lines | ~103 |
+| 18:19 | Edited MADRICH.html | 2→2 lines | ~103 |
+| 18:20 | Edited MADRICH.html | 12→13 lines | ~746 |
+| 18:20 | Edited MADRICH.html | 12→13 lines | ~746 |
+| 18:20 | Edited MADRICH.html | expanded (+24 lines) | ~994 |
+| 18:20 | Edited MADRICH.html | expanded (+24 lines) | ~994 |
+| 18:20 | Edited MADRICH.html | 3→3 lines | ~33 |
+| 18:20 | Edited MADRICH.html | 3→3 lines | ~33 |
+| 18:21 | Edited MADRICH.html | inline fix | ~164 |
+| 18:21 | Edited MADRICH.html | inline fix | ~164 |
+| 18:21 | Edited MADRICH.html | inline fix | ~94 |
+| 18:21 | Edited MADRICH.html | inline fix | ~94 |
+| 18:22 | Edited MADRICH.html | inline fix | ~50 |
+| 18:22 | Edited MADRICH.html | inline fix | ~50 |
+| 18:25 | Created LEARN.html | — | ~24220 |
+| 18:25 | Created LEARN.html | — | ~24220 |
+| now | AdamW+SE stage-1 (128px) RESULTS: clean-Dev P1=0.7223 (vs SGD 0.6733, +5pts from SE+AdamW). robust_eval: clean=0.7050, color_jitter=0.7125 (drop -0.008), random_rotation=0.7650 (drop -0.060), SCORE=0.7219. OOD>=clean → ~zero robustness gap on known axes. check_submission my_team = ALL OK. Docs synced (LEARN 28 sec, MADRICH 15 sec, README names, model_explained, SETUP Colab) | all | submission-valid, weak classes laptop/mobile_phone | ~2k |
+| 18:28 | Session end: 28 writes across 4 files (engine.py, README, MADRICH.html, LEARN.html) | 19 reads | ~104208 tok |
+| 18:28 | Session end: 28 writes across 4 files (engine.py, README, MADRICH.html, LEARN.html) | 19 reads | ~104208 tok |
+| 18:32 | Session end: 28 writes across 4 files (engine.py, README, MADRICH.html, LEARN.html) | 19 reads | ~104208 tok |
+| 18:32 | Session end: 28 writes across 4 files (engine.py, README, MADRICH.html, LEARN.html) | 19 reads | ~104208 tok |
+| 18:37 | Session end: 28 writes across 4 files (engine.py, README, MADRICH.html, LEARN.html) | 20 reads | ~104208 tok |
+| 18:37 | Session end: 28 writes across 4 files (engine.py, README, MADRICH.html, LEARN.html) | 20 reads | ~104208 tok |
+| 18:39 | Edited SETUP.md | mount() → gdown() | ~131 |
+| 18:39 | Edited SETUP.md | mount() → gdown() | ~131 |
+| 18:39 | Session end: 29 writes across 5 files (engine.py, README, MADRICH.html, LEARN.html, SETUP.md) | 20 reads | ~104348 tok |
+| 18:39 | Session end: 29 writes across 5 files (engine.py, README, MADRICH.html, LEARN.html, SETUP.md) | 20 reads | ~104348 tok |
+| 18:40 | Edited submissions/my_team/README | inline fix | ~11 |
+| 18:40 | Edited submissions/my_team/README | inline fix | ~11 |
+| 18:40 | Session end: 30 writes across 5 files (engine.py, README, MADRICH.html, LEARN.html, SETUP.md) | 20 reads | ~104360 tok |
+| 18:40 | Session end: 30 writes across 5 files (engine.py, README, MADRICH.html, LEARN.html, SETUP.md) | 20 reads | ~104360 tok |
+| 18:41 | Session end: 30 writes across 5 files (engine.py, README, MADRICH.html, LEARN.html, SETUP.md) | 20 reads | ~104360 tok |
+| 18:41 | Session end: 30 writes across 5 files (engine.py, README, MADRICH.html, LEARN.html, SETUP.md) | 20 reads | ~104360 tok |
+| 18:43 | Session end: 30 writes across 5 files (engine.py, README, MADRICH.html, LEARN.html, SETUP.md) | 20 reads | ~104360 tok |
+| 18:43 | Session end: 30 writes across 5 files (engine.py, README, MADRICH.html, LEARN.html, SETUP.md) | 20 reads | ~104360 tok |
+| 18:49 | Session end: 30 writes across 5 files (engine.py, README, MADRICH.html, LEARN.html, SETUP.md) | 20 reads | ~104360 tok |
+| 18:49 | Session end: 30 writes across 5 files (engine.py, README, MADRICH.html, LEARN.html, SETUP.md) | 20 reads | ~104360 tok |

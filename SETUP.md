@@ -69,10 +69,12 @@ In a Colab notebook (Runtime → Change runtime type → **T4 GPU**), run these 
 #    Do NOT `pip install -r requirements.txt` (it would reinstall a CPU torch and break CUDA).
 !pip install -q joblib
 
-# 3. get the data (NOT in git). Put a zip of train_set + augmentations on your Drive, then:
-from google.colab import drive; drive.mount('/content/drive')
-!mkdir -p dataset
-!cp /content/drive/MyDrive/iml_dataset.zip . && unzip -q iml_dataset.zip -d dataset
+# 3. get the data (NOT in git). Upload a zip of train_set + augmentations to Drive, then
+#    Share -> "Anyone with the link", copy FILE_ID from drive.google.com/file/d/FILE_ID/view.
+#    Use gdown (NOT drive.mount — mount often fails with "credential propagation unsuccessful").
+!pip install -q gdown
+!gdown FILE_ID -O iml_dataset.zip
+!unzip -q iml_dataset.zip -d dataset
 #   after this you must have: dataset/train/<class>/*.jpg  and  dataset/augmentations/{color_jitter,random_rotation}/
 
 # 4. reproduce artifacts + train (seeded → identical split/twins as everyone)

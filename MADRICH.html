@@ -315,7 +315,7 @@ details.file .body{padding:6px 22px 22px}
   <a href="#status">10 · סטטוס + מפת דרכים</a>
   <a href="#owners">11 · חלוקה ל־4 אנשים</a>
   <a href="#submit">12 · צ'קליסט הגשה</a>
-  <a href="#cmds">13 · פקודות</a>
+  <a href="#cmds">13 · פקודות + Colab</a>
   <a href="#interview">14 · הראיון</a>
 </nav>
 
@@ -328,18 +328,21 @@ details.file .body{padding:6px 22px 22px}
   <div class="card">
     <p style="margin-bottom:10px"><b>המשימה בשורה אחת:</b> לאמן CNN מאפס שמסווג תמונה ל־20 מחלקות, וגם עומד במניפולציות ויזואליות (רקע, תאורה, צבע) שלא נראה מראש.</p>
     <p style="margin-bottom:10px"><b>הקלט:</b> טנזור <code class="k">[B, 3, 224, 224]</code> מנורמל ב־ImageNet. <b>הפלט:</b> מדד מחלקה <code class="k">[B]</code> בערכים 0..19.</p>
+    <p style="margin-bottom:10px"><b>המודל:</b> ResNet קטן (בצורת ResNet-18) + תשומת־לב ערוצים <b>Squeeze-and-Excitation</b>, ‎<code class="k">~11.28M</code> פרמטרים. אופטימייזר <b>AdamW</b> + cosine schedule + label smoothing.</p>
     <p style="margin:0"><b>הציון:</b> חצי על דיוק רגיל (in‑domain) + חצי על עמידות (out‑of‑domain). שני החצאים שווי משקל.</p>
   </div>
+  <div class="note good"><span class="ic">◆</span><div class="bd"><b>שינוי מסגרת (2026-06-25):</b> כבר <b>לא</b> מוגבלים לשיטות מהקורס בלבד. אנחנו משתמשים בטכניקות best-practice מודרניות — <b>AdamW</b>, <b>Squeeze-and-Excitation</b>, <b>BatchNorm</b>, cosine LR, label smoothing — <b>ומתעדים כל אחת</b> (כאן ובקוד) כדי שכולם ידעו בדיוק מה אנחנו מריצים ולמה. שום קופסה שחורה. אין יותר "קצה־סילבוס, להגן באנלוגיה".</div></div>
   <h3>איפה הפרויקט עומד עכשיו</h3>
   <div class="chips">
     <span class="chip done"><i></i>שלד מלא רץ end‑to‑end</span>
-    <span class="chip done"><i></i>baseline CNN כתוב ומתאמן</span>
-    <span class="chip done"><i></i>pipeline אוגמנטציה + split + הערכה</span>
-    <span class="chip next"><i></i>הורדת הdata + הרצה אמיתית</span>
-    <span class="chip next"><i></i>כיול עמידות + error analysis</span>
-    <span class="chip miss"><i></i>weights.joblib סופי + README + אריזה</span>
+    <span class="chip done"><i></i>ResNet+SE כתוב ומתאמן (11.28M)</span>
+    <span class="chip done"><i></i>אימון AdamW+cosine, best‑weights/early‑stop</span>
+    <span class="chip done"><i></i>תאומים אופליין משוקללים + split + robust SCORE</span>
+    <span class="chip done"><i></i>רצפה נאיבית נמדדה (0.2230)</span>
+    <span class="chip next"><i></i>הרצת full-res סופית (Colab T4) + error analysis</span>
+    <span class="chip miss"><i></i>weights.joblib סופי + README ת"ז + אריזה</span>
   </div>
-  <div class="note info"><span class="ic">◆</span><div class="bd"><b>הקיצור:</b> כל הצנרת בנויה. מה שחסר זה להריץ אותה על הdata האמיתי, לכוון את האוגמנטציה לפי טעויות אמיתיות, ולארוז. הפירוט המלא ב<a class="inl" href="#status">סעיף 10</a>.</div></div>
+  <div class="note info"><span class="ic">◆</span><div class="bd"><b>הקיצור:</b> כל הצנרת בנויה והמודל מתאמן. stage-1 ב-128px נותן ‎<code class="k">~0.67</code> דיוק נקי על Dev; המספר הסופי ב-full-res מגיע מהרצת GPU ב-Colab (סעיף 5 ב-SETUP.md). מה שנשאר: לכוון אוגמנטציה לפי טעויות אמיתיות, להריץ סופי ולארוז. הפירוט המלא ב<a class="inl" href="#status">סעיף 10</a>.</div></div>
 </section>
 
 <!-- 1 STORY -->
@@ -476,11 +479,11 @@ joblib.<span class="fn2">dump</span>(model.<span class="fn2">cpu</span>().<span 
     <div class="arrow">▼</div>
     <div class="fstep"><div class="fi">2</div><div class="fc"><h4>make_augmented.py</h4><p>בונה תאומים מאוגמנטים אופליין ב־<code class="k">dataset/train_aug/</code> (פילטרי PIL, שמות זהים → יורשים partition).</p></div></div>
     <div class="arrow">▼</div>
-    <div class="fstep"><div class="fi">3</div><div class="fc"><h4>data.py + augment.py</h4><p><code class="k">ManifestDataset</code> קורא מה־manifest, מצמיד transform (אימון = אוגמנטציה, eval = דטרמיניסטי) ובונה DataLoaders.</p></div></div>
+    <div class="fstep"><div class="fi">3</div><div class="fc"><h4>data.py + augment.py</h4><p><code class="k">ManifestDataset</code> קורא מה־manifest. ב־<code class="k">build_loaders</code> (ברירת מחדל <code class="k">include_augmented=True</code>) גם המקורות וגם התאומים עוברים את ה־transform ה<b>דטרמיניסטי</b> (זהה ל-eval) — <b>אין עריכה online</b>, כל הגיוון מגיע מהתאומים שעל הדיסק. ה-eval תמיד מקורות נקיים.</p></div></div>
     <div class="arrow">▼</div>
-    <div class="fstep"><div class="fi">4</div><div class="fc"><h4>engine.py + model.py</h4><p>לולאת האימון (SGD+momentum, StepLR, early‑stop, best‑weights) מאמנת את ה־<code class="k">ModelArchitecture</code> — ResNet קטן עם BatchNorm ו־skip connections.</p></div></div>
+    <div class="fstep"><div class="fi">4</div><div class="fc"><h4>engine.py + model.py</h4><p>לולאת האימון (<b>AdamW</b> + <b>CosineAnnealingLR</b>, label smoothing, grad‑clip, early‑stop, best‑weights) מאמנת את ה־<code class="k">ModelArchitecture</code> — ResNet קטן עם BatchNorm, skip connections, ו־<b>Squeeze-and-Excitation</b>.</p></div></div>
     <div class="arrow">▼</div>
-    <div class="fstep"><div class="fi">5</div><div class="fc"><h4>train.py → weights.joblib</h4><p>אימון פרוגרסיבי על חלקים מצטברים, ואז על 100% — שומר את המשקלים בחוזה ה־joblib.</p></div></div>
+    <div class="fstep"><div class="fi">5</div><div class="fc"><h4>train.py → weights.joblib</h4><p>מאמן <b>שלב אחד</b> בכל הרצה (gated), מ-init אקראי טרי, בודק את הבלוק הבא בעודו unseen, ושומר. <b>לא</b> מתקדם אוטומטית ו<b>לא</b> מתאמן על 100% — קידום שלב הוא החלטה אנושית (<code class="k">--stage N+1</code>).</p></div></div>
     <div class="arrow">▼</div>
     <div class="fstep"><div class="fi">6</div><div class="fc"><h4>predict.py → grader</h4><p>טוען את המשקלים, מריץ <code class="k">forward</code>, מחזיר <code class="k">argmax</code>. סביב הכל: baseline / error_analysis / robust_eval מודדים.</p></div></div>
   </div>
@@ -571,14 +574,15 @@ python run.py errors --partition P1   <span class="c"># לוג טעויות על
                         self.samples.<span class="fn2">append</span>((twin, label))
 
 <span class="kw">def</span> <span class="fn2">build_loaders</span>(train_parts, eval_part, *, include_augmented=<span class="kw">True</span>):
-    train_tf = <span class="fn2">build_light_train_transform</span>() <span class="kw">if</span> include_augmented \
-               <span class="kw">else</span> <span class="fn2">build_train_transform</span>()
+    <span class="c"># ברירת מחדל: מקורות + תאומים → אותו transform דטרמיניסטי כמו eval. אין online.</span>
+    train_tf = <span class="fn2">build_eval_transform</span>(img_size) <span class="kw">if</span> include_augmented \
+               <span class="kw">else</span> <span class="fn2">build_train_transform</span>(img_size)
     eval_ds  = <span class="fn2">ManifestDataset</span>([eval_part], <span class="fn2">build_eval_transform</span>())  <span class="c"># נקי בלבד</span></code></pre>
       </div>
       <ul class="ann">
         <li><span class="pin">transform אחד</span><span class="tx">אותו <code class="k">ManifestDataset</code> משרת אימון או eval — ההבדל היחיד הוא ה־transform שמזריקים.</span></li>
         <li><span class="pin g">leakage‑safe</span><span class="tx"><code class="k">include_augmented=True</code> מוסיף את התאומים מ־<code class="k">train_aug/</code> — אבל התאום יורש את ה־partition של המקור. תאום של תמונת‑P1 ישמש רק כש־P1 ב־<b>train</b>, אף פעם ב־eval. לכן מעבירים True רק ל־train.</span></li>
-        <li><span class="pin w">light vs heavy</span><span class="tx">עם תאומים → transform <b>קל</b> (הפילטרים הכבדים כבר אפויים בקבצים, אסור להכפיל עיוות). בלי תאומים → transform כבד online.</span></li>
+        <li><span class="pin g">offline-only · אין online</span><span class="tx"><b>שינוי חשוב:</b> ב-<code class="k">include_augmented=True</code> (ברירת המחדל) גם המקורות וגם התאומים עוברים את <code class="k">build_eval_transform</code> — ה-transform ה<b>דטרמיניסטי</b>, בדיוק כמו eval. <b>אין שום עריכה אקראית online.</b> כל הגיוון מגיע מהתאומים האפויים על הדיסק (שכבר עברו פילטרים), כדי לא להכפיל עיוות. רק כש-<code class="k">include_augmented=False</code> חוזרים ל-<code class="k">build_train_transform</code> הכבד (נתיב fallback מת).</span></li>
         <li><span class="pin r">shuffle=False</span><span class="tx">ה־eval loader <b>לא</b> מערבב — כדי ש־<code class="k">error_analysis</code> יוכל למפות כל תחזית בחזרה לקובץ דרך <code class="k">dataset.samples</code>.</span></li>
       </ul>
     </div>
@@ -588,7 +592,7 @@ python run.py errors --partition P1   <span class="c"># לוג טעויות על
   <details class="file" id="f-makeaug">
     <summary><span class="chev">▶</span><span class="fname">make_augmented.py</span><span class="role C">Person C</span><span class="own">תאומים אופליין</span></summary>
     <div class="body">
-      <p>בונה כפיל מאוגמנט <b>אופליין</b> של תמונות האימון. לכל תמונה — <b>שני</b> תאומים (<code class="k">copies=2</code>) עם תת־קבוצה אקראית <b>משוקללת</b> של פילטרים: rotation · color jitter · grayscale · salt&amp;pepper · blur · inversion. על 20k המקורות = ~40k תאומים.</p>
+      <p>בונה כפיל מאוגמנט <b>אופליין</b> של תמונות האימון. כל תאום מקבל תת־קבוצה אקראית <b>משוקללת</b> של פילטרים: rotation · color jitter · grayscale · salt&amp;pepper · blur · inversion. <code class="k">make_augmented.main()</code> רץ עם <code class="k">copies=2</code> → ‎~40k תאומים על 20k המקורות; ‎<code class="k">run.py materialize</code> ברירת מחדל <code class="k">--copies 1</code> (~20k) — אפשר <code class="k">--copies 2</code>. הזריעה היא <b>per-file</b> (<code class="k">f"{seed}:{name}:{i}"</code>) → כל חבר צוות מקבל קבצים זהים byte-for-byte. נתיב <b>פעיל</b> (האוגמנטציה האמיתית של הפרויקט).</p>
       <div class="code">
         <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">make_augmented.py</span><span class="badge">python · PIL</span></div>
 <pre><code><span class="c"># (name, fn, weight) — משקל גבוה = נדגם יותר</span>
@@ -602,7 +606,7 @@ MAX_FILTERS_PER_IMAGE = <span class="nu">3</span>
     <span class="kw">while</span> <span class="fn2">len</span>(chosen) &lt; k <span class="kw">and</span> pool:        <span class="c"># rng.choices על pool מתכווץ</span>
         j = rng.<span class="fn2">choices</span>(<span class="fn2">range</span>(<span class="fn2">len</span>(pool)), weights=pool_w, k=<span class="nu">1</span>)[<span class="nu">0</span>] ...
 
-<span class="kw">def</span> <span class="fn2">build_augmented</span>(copies=<span class="nu">2</span>, seed=<span class="nu">42</span>):
+<span class="kw">def</span> <span class="fn2">build_augmented</span>(copies=<span class="nu">1</span>, seed=<span class="nu">42</span>):     <span class="c"># main() קורא copies=2</span>
     <span class="kw">for</span> img_path <span class="kw">in</span> ...:
         rng = random.<span class="fn2">Random</span>(<span class="st">f"{seed}:{img_path.name}:{i}"</span>)  <span class="c"># זרע per-file</span>
         aug = <span class="fn2">apply_random_filters</span>(img, rng)
@@ -613,7 +617,7 @@ MAX_FILTERS_PER_IMAGE = <span class="nu">3</span>
         <li><span class="pin g">משוקלל</span><span class="tx">rotation ו־color_jitter במשקל <b>4</b>, השאר 2, invert רק <b>1</b>. הדגימה ללא־החזרה מטה כל תת־קבוצה אקראית לשני הצירים ש־<code class="k">dataset/augmentations/</code> <b>מאשר</b> שהם המניפולציות האמיתיות במבחן — בלי לוותר על השאר.</span></li>
         <li><span class="pin">PIL בלבד</span><span class="tx">פילטרים native של Pillow (לא torchvision) → אפשר לשמור JPGים רגילים שאפשר לפתוח ולראות. סיבוב 45/90/180/270, מילוי פינות = הצבע <b>הממוצע</b> של התמונה, לא שחור. color_jitter בטווח רחב 0.5–1.5 (Color/Brightness/Contrast).</span></li>
         <li><span class="pin r">בלי background swap</span><span class="tx">החלפת רקע דורשת סגמנטציה (מודל נפרד/אסטים חיצוניים) = מחוץ לגבולות (אימון מאפס, בלי מודלים/data חיצוני) וגם לא נלמד. סיבוב מילוי־ממוצע הוא ה־proxy הקרוב ביותר ל"הסביבה השתנתה".</span></li>
-        <li><span class="pin w">מלכודת</span><span class="tx">צריך להריץ <code class="k">run.py materialize</code> <b>לפני</b> האימון, אחרת אין תאומים ו־<code class="k">build_loaders</code> מתאמן רק על מקורות עם transform קל = פחות אוגמנטציה ממה שנדמה. <code class="k">copies=2</code> = פי 2 דיסק וזמן materialize.</span></li>
+        <li><span class="pin w">מלכודת</span><span class="tx">צריך להריץ <code class="k">run.py materialize</code> <b>לפני</b> האימון. אחרת אין תאומים, ו-<code class="k">build_loaders</code> (offline-only, transform דטרמיניסטי) מתאמן רק על מקורות נקיים = <b>אפס אוגמנטציה</b>. <code class="k">--copies 2</code> = פי 2 דיסק וזמן materialize.</span></li>
       </ul>
     </div>
   </details>
@@ -641,12 +645,12 @@ MAX_FILTERS_PER_IMAGE = <span class="nu">3</span>
       <ul class="ann">
         <li><span class="pin">MeanFillRotation</span><span class="tx">סיבוב שממלא פינות ריקות בצבע <b>הממוצע</b> של התמונה — לא שחור. שחור היה רמז־רקע מזויף שהמודל יכול לרמות עליו.</span></li>
         <li><span class="pin">SaltPepperNoise</span><span class="tx">מגריל חלק מהפיקסלים ל־0 (פלפל) או 1 (מלח) — מדמה רעש חיישן/דחיסה.</span></li>
-        <li><span class="pin g">heavy (fallback)</span><span class="tx"><code class="k">build_train_transform</code>: אוגמנטציה אקראית כבדה online. <b>מת בנתיב ברירת־המחדל</b> — אנחנו רצים offline-only (תאומים על הדיסק). הוא נשאר מתועד ועקבי עם השקלול האופליין (rotation p=.5, colorjitter p=.8 בעוצמה .5, invert p=.08) למקרה שנרצה לחזור ל-online.</span></li>
+        <li><span class="pin g">heavy (fallback מת)</span><span class="tx"><code class="k">build_train_transform</code>: אוגמנטציה אקראית כבדה online. <b>מת בנתיב ברירת־המחדל</b> — לפי החלטת הצוות אנחנו רצים <b>offline-only</b> (כל הגיוון מהתאומים על הדיסק). הוא נשאר מתועד ועקבי עם השקלול האופליין (rotation p=.5, colorjitter p=.8 בעוצמה .5, invert p=.08) למקרה שנרצה לחזור ל-online. <code class="k">build_loaders</code> כלל לא קורא לו ב-include_augmented=True.</span></li>
         <li><span class="pin w">light</span><span class="tx"><code class="k">build_light_train_transform</code>: רק crop+flip+normalize. לשימוש <b>עם</b> התאומים האפויים, כדי לא להכפיל עיוות. זה ה־default כשמתאמנים עם <code class="k">train_aug/</code>.</span></li>
         <li><span class="pin r">eval — לא נגענו</span><span class="tx"><code class="k">build_eval_transform</code>: דטרמיניסטי, משקף <b>בדיוק</b> את <code class="k">evaluate.py</code> (Resize 256 → CenterCrop 224 → Normalize) כדי שהמספרים המקומיים יתאימו לgrader. הושאר ללא שינוי.</span></li>
         <li><span class="pin">OOD_TRANSFORMS</span><span class="tx">dict של מניפולציה בודדת בכל פעם (grayscale / color_jitter / rotation / invert / salt_pepper) — למדידת אינווריאנטיות ציר אחר ציר ב־<code class="k">robust_eval</code>. זוויות הסיבוב עודכנו ל־<code class="k">(45,90,180,270)</code> כדי לשקף את מה שהתאומים באמת ראו, ועוצמות ה־probe מראות את אותו הטווח של התאומים.</span></li>
       </ul>
-      <div class="note warn"><span class="ic">▲</span><div class="bd"><b>חוב לסוף:</b> <code class="k">augment.py</code> מייבא torchvision — תקין לפיתוח, אבל <code class="k">model.py</code> המוגש חייב להיות עצמאי. התאומים האפויים (PIL בלבד) הם הדרך לעקוף: האוגמנטציה יושבת על הדיסק, לא בקוד המוגש.</div></div>
+      <div class="note info"><span class="ic">◆</span><div class="bd"><b>למה זה תקין מול הgrader:</b> <code class="k">augment.py</code> מייבא torchvision — תקין לחלוטין לפיתוח, אבל <code class="k">model.py</code> המוגש חייב להיות עצמאי (torch בלבד). התאומים האפויים (PIL בלבד) הם בדיוק הדרך לעקוף: האוגמנטציה יושבת על הדיסק כקבצי JPG, לא בקוד המוגש. בזמן ההגשה לא צריך את augment.py בכלל.</div></div>
     </div>
   </details>
 
@@ -655,22 +659,24 @@ MAX_FILTERS_PER_IMAGE = <span class="nu">3</span>
     <summary><span class="chev">▶</span><span class="fname">engine.py</span><span class="role B">Person B</span><span class="own">לולאות אימון</span></summary>
     <div class="body">
       <p>בחירת device, seeding, ולולאות train/eval. PyTorch רגיל עם הערות מפורטות. עובד כבר; התפקיד של Person B הוא לגרום לאימון <b>להתכנס טוב יותר</b>.</p>
-      <div class="note good"><span class="ic">◆</span><div class="bd"><b>בחירות Person B (מעודכן):</b> אופטימייזר <code class="k">SGD(momentum=0.9)</code> במקום AdamW — מכליל טוב יותר על CNN מאפס (חשוב לחצי ה-OOD), ו-SGD נלמד בקורס. תזמון <code class="k">StepLR</code> — ירידת-מדרגה: כל <code class="k">lr_step_size</code> epochs ה-LR מוכפל ב-<code class="k">lr_gamma</code> (0.1); <code class="k">step_size=None</code> נגזר אוטומטית ל-<code class="k">epochs//3</code> → ~2 ירידות לכל אורך הריצה. <b>LR התחלתי <code class="k">0.05</code></b> — גבוה בכוונה, ובטוח <b>רק כי הוספנו BatchNorm</b> שמייצב את התפלגות האקטיבציות; רשת בלי נרמול היתה מתפוצצת ב-0.05. <code class="k">weight_decay=5e-4</code> מותאם ל-LR הגבוה, ו-<code class="k">grad_clip=1.0</code> הוא רשת הביטחון.</div></div>
-      <div class="note warn"><span class="ic">▲</span><div class="bd"><b>🚩 קצה-סילבוס — מוכנים להגן:</b> <code class="k">momentum=0.9</code> (הרחבת SGD: ממוצע נע של גרדיאנטים = velocity, לא Adam), <code class="k">label_smoothing=0.1</code> (הרחבה של cross-entropy שנלמד; 0.9 לאמת, 0.1 מפוזר על 19 — מצמצם ביטחון-יתר וקיצורי-דרך, אפשר לאפס ל-0.0), ו-<code class="k">StepLR</code> (תזמון LR נלמד, צורת המדרגה היא ההרחבה). BatchNorm עצמו (ב-model.py) הוא קצה-סילבוס ומוגן באנלוגיה ל-LayerNorm.</div></div>
+      <div class="note good"><span class="ic">◆</span><div class="bd"><b>בחירות Person B (מודרני, מתועד):</b> אופטימייזר ברירת מחדל <code class="k">AdamW</code> (lr=<code class="k">1e-3</code>, weight_decay=<code class="k">1e-2</code>) — Adam עם weight-decay <b>מנותק</b> (decoupled). Adam מתאים את גודל הצעד פר-פרמטר מתוך אומדנים רצים של ממוצע ושונות הגרדיאנט, ולכן מתכנס מהר וסלחני לבחירת ה-LR — ה-default החזק ביותר לאימון ה-ResNet הזה מאפס. ה-"W" אומר שה-decay מוחל ישירות על המשקלים (רגולריזציה נכונה יותר מ-Adam הקלאסי). תזמון ברירת מחדל <code class="k">CosineAnnealingLR</code> — דועך את ה-LR בעקומת קוסינוס מהערך ההתחלתי עד ~0 לאורך הריצה: למידה מהירה בהתחלה, כיוונון עדין בסוף, בלי לבחור נקודות-מדרגה ידנית. <code class="k">SGD(momentum=0.9)+StepLR</code> זמינים גם הם דרך <code class="k">optimizer="sgd"</code>/<code class="k">lr_schedule="step"</code> (SGD לפעמים מכליל קצת יותר טוב — minima שטוחים — שימושי לחצי ה-OOD, אבל דורש LR גדול יותר ועוד epochs).</div></div>
+      <div class="note info"><span class="ic">◆</span><div class="bd"><b>הגנות נגד overfit (11.28M פרמטרים על ~16k תמונות):</b> <code class="k">weight_decay</code> (L2, default מודע-אופטימייזר), <code class="k">label_smoothing=0.1</code> (יעד 0.9 לאמת + 0.1 מפוזר על 19 → פחות ביטחון-יתר, פחות היתפסות על קיצורי רקע/צבע → קצת יותר חוסן), Dropout בראש (model.py), ו-early-stopping. <code class="k">grad_clip=1.0</code> (max grad-norm) הוא רשת הביטחון לצעדים הראשונים. <code class="k">CrossEntropyLoss</code> מקבל לוגיטים גולמיים (מחיל log-softmax בפנים — <b>לא</b> לעשות softmax לפני).</div></div>
       <div class="code">
         <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">engine.py — לולאת האימון</span><span class="badge">python</span></div>
 <pre><code><span class="kw">def</span> <span class="fn2">train</span>(model, train_loader, val_loader=<span class="kw">None</span>, *, epochs=<span class="nu">15</span>,
-          lr=<span class="nu">0.05</span>, momentum=<span class="nu">0.9</span>, weight_decay=<span class="nu">5e-4</span>,
-          lr_step_size=<span class="kw">None</span>, lr_gamma=<span class="nu">0.1</span>,  <span class="c"># None ⇒ epochs//3</span>
+          optimizer=<span class="st">"adamw"</span>,        <span class="c"># "adamw" (default) או "sgd"</span>
+          lr=<span class="kw">None</span>, weight_decay=<span class="kw">None</span>,   <span class="c"># None ⇒ default מודע-אופטימייזר</span>
+          lr_schedule=<span class="st">"cosine"</span>,      <span class="c"># "cosine" (default) או "step"</span>
           grad_clip=<span class="nu">1.0</span>, label_smoothing=<span class="nu">0.1</span>, patience=<span class="nu">5</span>):
-    criterion = nn.<span class="fn2">CrossEntropyLoss</span>(label_smoothing=<span class="nu">0.1</span>)  <span class="c"># לוגיטים + ריכוך יעדים</span>
-    optimizer = torch.optim.<span class="fn2">SGD</span>(model.<span class="fn2">parameters</span>(), lr=lr,
-                                momentum=momentum, weight_decay=weight_decay)
-    step = lr_step_size <span class="kw">or</span> <span class="fn2">max</span>(<span class="nu">1</span>, epochs // <span class="nu">3</span>)   <span class="c"># ~2 ירידות לאורך הריצה</span>
-    scheduler = ....<span class="fn2">StepLR</span>(optimizer, step_size=step, gamma=lr_gamma)
+    <span class="kw">if</span> optimizer == <span class="st">"adamw"</span>:                          <span class="c"># lr=1e-3, wd=1e-2</span>
+        optimizer = torch.optim.<span class="fn2">AdamW</span>(model.<span class="fn2">parameters</span>(), lr=lr, weight_decay=weight_decay)
+    <span class="kw">elif</span> optimizer == <span class="st">"sgd"</span>:                         <span class="c"># lr=0.05, wd=5e-4, momentum=0.9</span>
+        optimizer = torch.optim.<span class="fn2">SGD</span>(model.<span class="fn2">parameters</span>(), lr=lr, momentum=<span class="nu">0.9</span>, weight_decay=weight_decay)
+    criterion = nn.<span class="fn2">CrossEntropyLoss</span>(label_smoothing=label_smoothing)  <span class="c"># לוגיטים + ריכוך</span>
+    scheduler = ....<span class="fn2">CosineAnnealingLR</span>(optimizer, T_max=epochs, eta_min=lr*<span class="nu">0.01</span>)
 
     <span class="kw">for</span> epoch <span class="kw">in</span> <span class="fn2">range</span>(<span class="nu">1</span>, epochs+<span class="nu">1</span>):
-        tr_loss = <span class="fn2">train_one_epoch</span>(...)
+        tr_loss = <span class="fn2">train_one_epoch</span>(...)           <span class="c"># grad_clip אחרי backward, לפני step</span>
         val_acc, *_ = <span class="fn2">evaluate</span>(model, val_loader, device)
         scheduler.<span class="fn2">step</span>()
         <span class="kw">if</span> val_acc &gt; best_acc:                       <span class="c"># שומר best, לא last</span>
@@ -681,12 +687,13 @@ MAX_FILTERS_PER_IMAGE = <span class="nu">3</span>
     model.<span class="fn2">load_state_dict</span>(best_state)               <span class="c"># משחזר את הטוב</span></code></pre>
       </div>
       <ul class="ann">
-        <li><span class="pin">get_device</span><span class="tx">בוחר את הbackend המהיר: CUDA → MPS (Apple M3) → CPU. אותו קוד רץ אצל כולם.</span></li>
+        <li><span class="pin">get_device</span><span class="tx">בוחר את הbackend המהיר: CUDA → MPS (Apple M3) → CPU. אותו קוד רץ אצל כולם. ב-Colab זה בוחר <code class="k">cuda</code> אוטומטית, בלי שינוי קוד.</span></li>
         <li><span class="pin">evaluate</span><span class="tx">תחת <code class="k">@torch.no_grad</code>, מחזיר <code class="k">acc, preds, labels, confs</code> (confidence דרך softmax). ה־confidence משמש רק ל־error analysis, לא משפיע על acc.</span></li>
+        <li><span class="pin g">AdamW + cosine (default)</span><span class="tx"><code class="k">AdamW</code> (lr=1e-3, wd=1e-2) + <code class="k">CosineAnnealingLR</code> (<code class="k">eta_min=lr*0.01</code>). הצעד האדפטיבי פר-פרמטר נותן התכנסות מהירה וחוסן ל-LR מאפס; ה-cosine דועך ל-~0 חלק. <b>למה זו הבחירה:</b> ה-default החזק ביותר לאימון from-scratch, פחות כיוונון ידני מ-SGD.</span></li>
+        <li><span class="pin">SGD זמין</span><span class="tx"><code class="k">optimizer="sgd"</code> → SGD+momentum 0.9 (lr=0.05, wd=5e-4) + אפשר <code class="k">lr_schedule="step"</code> (StepLR, ירידת-מדרגה כל <code class="k">epochs//3</code>). שווה לנסות בסבב הסופי כדי לראות אם סוחט עוד טיפת הכללת-OOD. BatchNorm במודל מייצב את משטח ה-loss כך ששני האופטימייזרים יציבים.</span></li>
         <li><span class="pin g">best‑weights</span><span class="tx">שומר את ה־state עם ה־val הכי טוב ומשחזר בסוף — לא את ה־epoch האחרון. עמיד ל־overfit מאוחר.</span></li>
-        <li><span class="pin">early stop</span><span class="tx"><code class="k">patience</code> epochs בלי שיפור → עצירה. רלוונטי רק כשיש val set.</span></li>
-        <li><span class="pin g">בוצע(B)</span><span class="tx"><code class="k">SGD(momentum=0.9)</code> + <code class="k">StepLR(step_size=None→epochs//3, gamma=0.1)</code> + <b>LR=0.05</b> (בטוח הודות ל-BatchNorm) + <code class="k">weight_decay=5e-4</code>. <b>gradient clipping</b> (<code class="k">grad_clip=1.0</code>) מייצב את ה-LR הגבוה, ו-<b>label smoothing</b> (<code class="k">0.1</code>) מרכך יעדים ומונע ביטחון-יתר (משפר הכללה+חוסן). seed גם ל-MPS; אי-דטרמיניזם MPS/CUDA → סומכים על קובץ המשקלים. self-check עובר.</span></li>
-        <li><span class="pin w">TODO(B)</span><span class="tx">לכוונן: <code class="k">lr</code> ב-[0.01, 0.1], <code class="k">weight_decay</code> סביב 5e-4, <code class="k">grad_clip</code> עד 5.0 / <code class="k">label_smoothing</code> ב-[0, 0.2] אם צריך. אם BatchNorm מודאג למראיין — fallback ל-GroupNorm ואז LR נמוך יותר. AMP לא רלוונטי — האימון על Mac (MPS), לא CUDA.</span></li>
+        <li><span class="pin">early stop</span><span class="tx"><code class="k">patience</code> (5) epochs בלי שיפור → עצירה. רלוונטי רק כשיש val set.</span></li>
+        <li><span class="pin w">TODO(B)</span><span class="tx">לכוונן פר-שלב: adamw lr ב-[5e-4, 3e-3] / wd ב-[1e-2, 5e-2]; sgd lr ב-[0.01, 0.1] / wd ~5e-4; <code class="k">grad_clip</code> עד 5.0; <code class="k">label_smoothing</code> ב-[0, 0.2]. seed גם ל-MPS, אבל אי-דטרמיניזם MPS/CUDA → סומכים על קובץ המשקלים, לא על "נריץ שוב".</span></li>
       </ul>
     </div>
   </details>
@@ -695,18 +702,26 @@ MAX_FILTERS_PER_IMAGE = <span class="nu">3</span>
   <details class="file" id="f-model">
     <summary><span class="chev">▶</span><span class="fname">submissions/my_team/model.py</span><span class="role A">Person A</span><span class="own">הרשת · נשלחת</span></summary>
     <div class="body">
-      <p>ResNet קטן (סגנון He 2016) מ־random init — BatchNorm + skip connections, ~11.2M params. זה הקובץ ה<b>יחיד</b> שהgrader משחזר ממנו את הרשת — חייב להיות עצמאי.</p>
+      <p>ResNet קטן (בצורת ResNet-18, סגנון He 2016) מ־random init — BatchNorm + skip connections + תשומת־לב ערוצים <b>Squeeze-and-Excitation</b>, ‎<code class="k">~11.28M</code> פרמטרים (‎<code class="k">11,275,852</code>). זה הקובץ ה<b>יחיד</b> שהgrader משחזר ממנו את הרשת — חייב להיות עצמאי (torch בלבד).</p>
       <div class="code">
-        <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">model.py — הארכיטקטורה</span><span class="badge">nn.Module</span></div>
-<pre><code><span class="kw">class</span> <span class="fn2">ResidualBlock</span>(nn.Module):
-    <span class="c"># out = ReLU( F(x) + identity ),  F = (3x3→BN→ReLU)·2</span>
+        <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">model.py — SEBlock + ResidualBlock</span><span class="badge">nn.Module</span></div>
+<pre><code><span class="kw">class</span> <span class="fn2">SEBlock</span>(nn.Module):                <span class="c"># Squeeze-and-Excitation (Hu et al. 2018)</span>
+    <span class="kw">def</span> <span class="fn2">forward</span>(self, x):                  <span class="c"># gate פר-ערוץ מתוך הקשר גלובלי</span>
+        s = sigmoid(W2·ReLU(W1·<span class="fn2">GAP</span>(x)))   <span class="c"># [B,C,1,1] חשיבות 0..1 לכל ערוץ</span>
+        <span class="kw">return</span> x * s                       <span class="c"># מגביר ערוצים מועילים, מדכא מסיחים</span>
+
+<span class="kw">class</span> <span class="fn2">ResidualBlock</span>(nn.Module):
+    <span class="c"># out = ReLU( SE(F(x)) + identity ),  F = (3x3→BN→ReLU)·2</span>
     <span class="kw">def</span> <span class="fn2">forward</span>(self, x):
         identity = x <span class="kw">if</span> self.downsample <span class="kw">is</span> <span class="kw">None</span> <span class="kw">else</span> self.<span class="fn2">downsample</span>(x)
         out = self.<span class="fn2">relu</span>(self.<span class="fn2">bn1</span>(self.<span class="fn2">conv1</span>(x)))
         out = self.<span class="fn2">bn2</span>(self.<span class="fn2">conv2</span>(out))
-        <span class="kw">return</span> self.<span class="fn2">relu</span>(out + identity)        <span class="c"># skip — מקצר גרדיאנט</span>
-
-<span class="kw">class</span> <span class="fn2">ModelArchitecture</span>(nn.Module):
+        out = self.<span class="fn2">se</span>(out)                      <span class="c"># SE — מכייל ערוצים לפני החיבור</span>
+        <span class="kw">return</span> self.<span class="fn2">relu</span>(out + identity)        <span class="c"># skip — מקצר גרדיאנט</span></code></pre>
+      </div>
+      <div class="code">
+        <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">model.py — ModelArchitecture</span><span class="badge">nn.Module</span></div>
+<pre><code><span class="kw">class</span> <span class="fn2">ModelArchitecture</span>(nn.Module):
     <span class="kw">def</span> <span class="fn2">__init__</span>(self, num_classes=<span class="nu">20</span>, base=<span class="nu">64</span>,
                  blocks_per_stage=(<span class="nu">2</span>,<span class="nu">2</span>,<span class="nu">2</span>,<span class="nu">2</span>), dropout=<span class="nu">.4</span>):
         self.stem   = ...   <span class="c"># 7x7 s2 conv→BN→ReLU→3x3 s2 maxpool : 224→56 [64]</span>
@@ -724,12 +739,13 @@ MAX_FILTERS_PER_IMAGE = <span class="nu">3</span>
         <span class="kw">return</span> self.<span class="fn2">classifier</span>(self.<span class="fn2">pool</span>(x))</code></pre>
       </div>
       <ul class="ann">
+        <li><span class="pin g">Squeeze-and-Excitation</span><span class="tx"><b>תשומת־לב ערוצים</b> (Hu et al. 2018), בתוך כל בלוק, אחרי שני ה-convs ולפני חיבור ה-residual. <b>squeeze</b>: global avg pool מכווץ כל מפת ערוץ למספר אחד (הקשר גלובלי). <b>excite</b>: MLP זעיר עם bottleneck (Conv1x1 reduce/16 → ReLU → Conv1x1 → Sigmoid) מוציא gate ב-0..1 לכל ערוץ. <b>recalibrate</b>: <code class="k">out = x * s</code> — מגביר ערוצים אינפורמטיביים, מדכא ערוצים-מסיחים. <b>למה בחרנו בזה:</b> הזזות רקע/צבע/תאורה מעוותות בעיקר <b>תת-קבוצה</b> של ערוצים (הרגישים-לצבע); SE מאפשר לרשת ללמוד לדכא אותם ולהישען על ערוצי צורה/מבנה — בדיוק יעד ה-OOD של האתגר. זול: ‎<code class="k">~0.09M</code> פרמטרים בלבד (reduction=16). אנלוגיה: כמו attention על טוקנים, רק שכאן משקלל <b>ערוצי</b> מפות-מאפיינים.</span></li>
         <li><span class="pin">המשפך</span><span class="tx">ערוצים מכפילים (64→128→256→512) כשהמרחב מתכווץ (224→7). רוחב גדול = bias נמוך — הרשת הישנה (VGG ~1.2M) היתה תת־פרמטרית ל-20 מחלקות ImageNet.</span></li>
-        <li><span class="pin g">skip connections</span><span class="tx"><code class="k">y=f(x)+x</code> (He 2016, נלמד ביחידת Transformers, מקל על vanishing gradients) נותן לגרדיאנט מסלול ישר אחורה → אפשר באמת לנצל את העומק. כשהבלוק משנה ערוצים/stride — ענף ה-identity מוקרן ב-1×1 conv (+BN) כדי שהצורות יתאימו לפני החיבור.</span></li>
-        <li><span class="pin w">🚩 BatchNorm</span><span class="tx">נרמול אחרי כל conv. <b>קצה-סילבוס</b> — נלמד רק LayerNorm (Transformers). הגנה: "שכבת נרמול כמו LayerNorm, מותאמת לערוצי conv; ב-<code class="k">eval()</code> משתמשת ב-running stats מה-state_dict → לא תלוית גודל-batch". זו הסיבה העיקרית שהרשת הזו מתאמנת מאפס ומנצחת את ה-VGG הישן, וגם מה שמאפשר LR=0.05. fallback בטוח יותר: GroupNorm.</span></li>
-        <li><span class="pin g">AdaptiveAvgPool2d(1)</span><span class="tx">Global Average Pool: מכווץ כל מפת מאפיינים ל־1×1 → אין FC params לפני ה-Linear הסופי (512→20), ומקבל <b>כל</b> גודל קלט.</span></li>
-        <li><span class="pin">Kaiming init</span><span class="tx"><code class="k">_init_weights</code>: kaiming_normal ל־convs (🚩 קצה-סילבוס — "init אקראי מותאם ל-ReLU fan-out"), BN weight=1/bias=0, normal קטן ל-linear.</span></li>
-        <li><span class="pin r">~11.2M params · dropout=0.4</span><span class="tx">11.2M על ~16k תמונות = נטיית overfit. ה-dropout בראש עלה ל-<b>0.4</b> (בתוך טווח ה-~50% שנלמד), ביחד עם weight-decay (engine) + GAP + אוגמנטציה כבדה. <b>חוזה grader:</b> <code class="k">predict.py</code> בונה <code class="k">ModelArchitecture()</code> בלי args → defaults (base=64, blocks=(2,2,2,2)) מגדירים את הצורה שהמשקלים נטענים אליה, ו-train.py חייב להתאים. <code class="k">dropout</code> הוא הלביר היחיד שבטוח לכוונן בלי לשבור טעינת משקלים (Dropout בלי פרמטרים → אותם state_dict keys).</span></li>
+        <li><span class="pin g">skip connections</span><span class="tx"><code class="k">y=f(x)+x</code> (He 2016) נותן לגרדיאנט מסלול ישר אחורה → מקל על vanishing gradients ומאפשר באמת לנצל את העומק. כשהבלוק משנה ערוצים/stride — ענף ה-identity מוקרן ב-1×1 conv (+BN) כדי שהצורות יתאימו לפני החיבור.</span></li>
+        <li><span class="pin g">BatchNorm</span><span class="tx">נרמול אחרי כל conv: מנרמל כל ערוץ על פני ה-batch + המיקומים המרחביים, מתנה את משטח ה-loss כך שרשת עמוקה מאפס מתאמנת נקי ומהר. <b>למה בחרנו:</b> זו הסיבה העיקרית שה-ResNet הזה מתאמן מאפס ומנצח VGG פשוט. ה-scale/shift + running mean/var רוכבים ב-state_dict כ-buffers; <code class="k">predict.py</code> קורא <code class="k">.eval()</code> → ב-inference משתמשים ב-running stats קפואים, בלתי-תלוי בגודל ה-batch.</span></li>
+        <li><span class="pin g">AdaptiveAvgPool2d(1)</span><span class="tx">Global Average Pool: מכווץ כל מפת מאפיינים ל־1×1 → אין FC params לפני ה-Linear הסופי (512→20), ומקבל <b>כל</b> גודל קלט (מאמנים ב-128 למהירות, ה-grader מזין 224 — שניהם עובדים).</span></li>
+        <li><span class="pin">Kaiming init</span><span class="tx"><code class="k">_init_weights</code>: <code class="k">kaiming_normal</code> ל-convs (fan-out, מותאם ל-ReLU — אתחול תקני וטוב), BN weight=1/bias=0, normal קטן ל-linear.</span></li>
+        <li><span class="pin r">~11.28M params · dropout=0.4</span><span class="tx">‎11,275,852 פרמטרים על ~16k תמונות = נטיית overfit. ה-dropout בראש על <b>0.4</b>, ביחד עם weight-decay (engine) + GAP + אוגמנטציה אופליין. <b>חוזה grader:</b> <code class="k">predict.py</code> בונה <code class="k">ModelArchitecture()</code> בלי args → defaults (base=64, blocks=(2,2,2,2), num_classes=20) מגדירים את הצורה שהמשקלים נטענים אליה, ו-train.py חייב להתאים. <code class="k">dropout</code> הוא הלביר היחיד שבטוח לכוונן בלי לשבור טעינת משקלים (Dropout בלי פרמטרים → אותם state_dict keys ואותן צורות).</span></li>
       </ul>
     </div>
   </details>
@@ -738,24 +754,25 @@ MAX_FILTERS_PER_IMAGE = <span class="nu">3</span>
   <details class="file" id="f-train">
     <summary><span class="chev">▶</span><span class="fname">submissions/my_team/train.py</span><span class="role S">Shared</span><span class="own">צנרת האימון</span></summary>
     <div class="body">
-      <p>אימון פרוגרסיבי → מייצר <code class="k">weights.joblib</code>. מודל אחד, שסט האימון שלו גדל partition אחד בכל פעם (warm‑start), בודק כל בלוק הבא בעודו unseen, ואז מתאמן על 100% ושומר.</p>
+      <p>מאמן <b>שלב אחד בכל הרצה</b> (gated) → מעדכן <code class="k">weights.joblib</code>. כל הרצה מתחילה מ-init אקראי <b>טרי</b> ("שוכחים מודלים קודמים"), בודקת את הבלוק ה-15% הבא בעודו unseen, מדפיסה דיוק פר-מחלקה + לוג טעויות, שומרת ו<b>עוצרת</b>. <b>לא</b> מתקדמת אוטומטית ו<b>לא</b> מתאמנת על 100% — קידום שלב הוא החלטה אנושית (<code class="k">--stage N+1</code>).</p>
       <div class="code">
         <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">train.py</span><span class="badge">python</span></div>
-<pre><code>model = <span class="fn2">ModelArchitecture</span>()
-<span class="kw">for</span> stage, (train_parts, test_part) <span class="kw">in</span> <span class="fn2">enumerate</span>(<span class="fn2">progressive_stages</span>()):
+<pre><code><span class="kw">def</span> <span class="fn2">main</span>(stage=<span class="nu">1</span>, ...):
+    <span class="fn2">set_seed</span>(<span class="nu">42</span>)
+    train_parts, test_part = <span class="fn2">progressive_stages</span>()[stage-<span class="nu">1</span>]   <span class="c"># stage 1 ⇒ (['P0'],'P1')</span>
+    model = <span class="fn2">ModelArchitecture</span>()                            <span class="c"># FRESH init בכל הרצה</span>
     train_loader, eval_loader = <span class="fn2">build_loaders</span>(train_parts, test_part, ...)
-    model, _ = <span class="fn2">train</span>(model, train_loader, eval_loader, epochs=EPOCHS_PER_STAGE)
+    model, _ = <span class="fn2">train</span>(model, train_loader, eval_loader, epochs=epochs)  <span class="c"># AdamW+cosine</span>
     acc, preds, labels, confs = <span class="fn2">evaluate</span>(model, eval_loader, device)
-    <span class="fn2">log_errors</span>(..., tag=<span class="st">f"stage{stage}_{test_part}"</span>)
-
-<span class="c"># מודל סופי: כל ה-data, ואז שמירה</span>
-final_loader, _ = <span class="fn2">build_loaders</span>([<span class="st">"P0"</span>,<span class="st">"P1"</span>,<span class="st">"P2"</span>,<span class="st">"P3"</span>,<span class="st">"P4"</span>], <span class="kw">None</span>, ...)
-model, _ = <span class="fn2">train</span>(model, final_loader, <span class="kw">None</span>, epochs=FINAL_EPOCHS)
-joblib.<span class="fn2">dump</span>(model.<span class="fn2">cpu</span>().<span class="fn2">state_dict</span>(), OUTPUT)   <span class="c"># חוזה ה-grader</span></code></pre>
+    <span class="c"># דיוק פר-מחלקה (גרוע ראשון) + dump טעויות</span>
+    <span class="fn2">log_errors</span>(eval_loader.dataset.samples, ..., tag=<span class="st">f"stage{stage}_{test_part}"</span>)
+    joblib.<span class="fn2">dump</span>(model.<span class="fn2">cpu</span>().<span class="fn2">state_dict</span>(), OUTPUT)         <span class="c"># חוזה ה-grader</span>
+    <span class="c"># verdict: GOOD אם acc≥0.55 · weak אם ≥floor(0.2230) · BROKEN אם מתחת לרצפה</span></code></pre>
       </div>
       <ul class="ann">
-        <li><span class="pin">warm‑start</span><span class="tx">אותו מודל ממשיך משלב לשלב — לא מאתחל מחדש. כל שלב מאמן עוד 5 epochs על data מצטבר.</span></li>
-        <li><span class="pin g">save contract</span><span class="tx"><code class="k">joblib.dump(model.cpu().state_dict(), "weights.joblib")</code> — בדיוק החוזה. CPU + joblib.</span></li>
+        <li><span class="pin">gated · fresh init</span><span class="tx">כל הרצה: init אקראי טרי, אימון שלב <b>אחד</b>, עצירה. נכון כשהארכיטקטורה משתנה בין איטרציות (אין הפתעות משקלים-ישנים). הסילבוס: stage 1 = P0(40%)→test P1, stage 2 = +P1(55%)→test P2, וכן הלאה עד stage 4. אין שלב "100% + save" אוטומטי בקוד.</span></li>
+        <li><span class="pin g">save contract</span><span class="tx"><code class="k">joblib.dump(model.cpu().state_dict(), "weights.joblib")</code> — בדיוק החוזה. CPU + joblib. כל הרצה דורסת את הקובץ.</span></li>
+        <li><span class="pin">verdict + floor</span><span class="tx">מדפיס verdict מול הרצפה הנאיבית הנמדדת <code class="k">0.2230</code>: ‎<code class="k">≥0.55</code> = GOOD (אפשר לקדם), בין הרצפה ל-0.55 = weak (לכוונן ולהריץ שוב), מתחת לרצפה = BROKEN (משהו שבור). מדפיס גם את 8 המחלקות הגרועות ביותר.</span></li>
         <li><span class="pin w">sys.path</span><span class="tx">מכניס גם שורש‑הריפו (engine/data...) וגם תיקיית הצוות (model). לפני הגשה סופית מקפלים את ה־helpers פנימה → קובץ עצמאי (Stage 6).</span></li>
         <li><span class="pin r">הgrader לא מריץ</span><span class="tx">את <code class="k">train.py</code> אף פעם. הוא רק טוען <code class="k">weights.joblib</code> דרך <code class="k">predict.py</code>. לכן הייבוא מהשורש תקין בפיתוח.</span></li>
       </ul>
@@ -789,8 +806,8 @@ joblib.<span class="fn2">dump</span>(model.<span class="fn2">cpu</span>().<span 
   <details class="file" id="f-tools">
     <summary><span class="chev">▶</span><span class="fname">baseline_naive.py · error_analysis.py · robust_eval.py</span><span class="role D">Person D</span><span class="own">כלי מדידה</span></summary>
     <div class="body">
-      <h4>baseline_naive.py — הרצפה</h4>
-      <p>שלב 4. מודל טיפש = <code class="k">nn.Linear(3·32·32, 20)</code> = רגרסיה לוגיסטית על פיקסלים מוקטנים. רץ בשניות, מתאמן על P0 ובודק P1. אם ה־CNN לא מנצח אותו בנוחות — יש באג, לא בעיית כיוונון.</p>
+      <h4>baseline_naive.py — הרצפה (נמדד 0.2230)</h4>
+      <p>שלב 4. מודל טיפש = <code class="k">nn.Linear(3·32·32, 20)</code> = רגרסיה לוגיסטית על פיקסלים מוקטנים ל-32×32. רץ בשניות, מתאמן על P0 ובודק P1. הרצפה ה<b>נמדדה</b>: <code class="k">0.2230</code> (ניחוש אקראי = 0.05). אם ה־CNN לא מנצח אותה בנוחות — יש באג (תוויות/loader), לא בעיית כיוונון. ל-reference: ResNet+SE+AdamW ב-stage 1 (128px) נותן ‎<code class="k">~0.67</code> דיוק נקי על Dev.</p>
       <h4>error_analysis.py — איפה זה נשבר</h4>
       <p>אחרי כל eval כותב <code class="k">outputs/errors_&lt;tag&gt;.csv</code> (כל misclassification: path,true,pred,conf) + <code class="k">confusion_&lt;tag&gt;.csv</code> (מטריצה 20×20). מדפיס את הזוג הכי מבולבל. <b>לעולם לא</b> על ה־Test הסופי.</p>
       <h4>robust_eval.py — מה שבאמת מנקדים</h4>
@@ -830,19 +847,20 @@ SCORE    = <span class="nu">0.5</span> * clean_acc + <span class="nu">0.5</span>
   <h3>בוצע</h3>
   <ul>
     <li><b>Stage 0 — שלד.</b> כל הקבצים רצים, ה־imports נקיים, <code class="k">check_submission.py</code> עובר ברמת dummy.</li>
-    <li><b>baseline CNN</b> כתוב ב־<code class="k">model.py</code> (כבר לא <code class="k">NotImplementedError</code>) — מתאמן ומחזיר <code class="k">[B,20]</code>.</li>
-    <li><b>צנרת מלאה:</b> split stratified, אוגמנטציה (online + תאומים אופליין), engine עם best‑weights/early‑stop, train פרוגרסיבי, וכל כלי המדידה.</li>
-    <li><b>commits אחרונים:</b> שלד התחלתי → תיקוני באגים בניתוב → עדכון התוכנית.</li>
+    <li><b>מודל מלא</b> ב־<code class="k">model.py</code>: ResNet קטן (בצורת ResNet-18) + BatchNorm + skip + <b>Squeeze-and-Excitation</b>, ‎11.28M params, מחזיר <code class="k">[B,20]</code>.</li>
+    <li><b>אימון מודרני</b> ב-<code class="k">engine.py</code>: <b>AdamW</b>+<b>CosineAnnealingLR</b> (ברירת מחדל), SGD+StepLR זמינים, label smoothing, grad-clip, best‑weights + early‑stop.</li>
+    <li><b>צנרת מלאה:</b> split stratified seeded, תאומים אופליין משוקללים (offline-only), trainer פרוגרסיבי gated, robust SCORE, error analysis.</li>
+    <li><b>רצפה נאיבית נמדדה:</b> <code class="k">0.2230</code>. stage-1 (128px) ResNet+SE נותן ‎~0.67 נקי על Dev.</li>
   </ul>
   <h3>מה הלאה — מפת הדרכים</h3>
   <table class="tbl">
     <tr><th>שלב</th><th>מה</th><th>בעלים</th><th>סטטוס</th></tr>
-    <tr><td><b>1</b></td><td>הורדת train_set · <code class="k">run.py split</code> (אוכף איזון/שפיות) · בדיקת תיקיית augmentations</td><td>D</td><td><span class="ch wip">הבא ▸</span></td></tr>
-    <tr><td><b>2</b></td><td><code class="k">run.py baseline</code> → לתעד את הרצפה</td><td>D</td><td><span class="ch wip">ממתין</span></td></tr>
-    <tr><td><b>3</b></td><td>אימון CNN נקי, לנצח את הרצפה, יעד 50%+ נקי — <code class="k">weights.joblib</code> ראשון</td><td>A+B</td><td><span class="ch wip">ממתין</span></td></tr>
-    <tr><td><b>4</b></td><td>עמידות: Person C מוסיף אוגמנטציה, D מודד נקי מול OOD, מאמנים מחדש</td><td>C+D</td><td><span class="ch wip">ממתין</span></td></tr>
-    <tr><td><b>5</b></td><td>Error analysis → מזינים בחזרה ל־A ו־C, leaderboard בוחר מנצח לכל סבב</td><td>כולם</td><td><span class="ch wip">ממתין</span></td></tr>
-    <tr><td><b>6</b></td><td>נוגעים ב־Test פעם אחת · מקפלים train.py עצמאי · README · אריזה · <code class="k">challenge2_&lt;ids&gt;</code></td><td>D</td><td><span class="ch no">לא התחיל</span></td></tr>
+    <tr><td><b>1</b></td><td>הורדת train_set · <code class="k">run.py split</code> (אוכף איזון/שפיות) · בדיקת תיקיית augmentations</td><td>D</td><td><span class="ch ok">בוצע ✓</span></td></tr>
+    <tr><td><b>2</b></td><td><code class="k">run.py baseline</code> → הרצפה תועדה (0.2230)</td><td>D</td><td><span class="ch ok">בוצע ✓</span></td></tr>
+    <tr><td><b>3</b></td><td>אימון ResNet+SE, מנצח את הרצפה (stage-1 ~0.67 נקי) — <code class="k">weights.joblib</code> ראשון</td><td>A+B</td><td><span class="ch ok">בוצע ✓</span></td></tr>
+    <tr><td><b>4</b></td><td>עמידות: תאומים משוקללים פעילים, robust SCORE מודד נקי מול OOD, מכוונים</td><td>C+D</td><td><span class="ch wip">בעבודה ▸</span></td></tr>
+    <tr><td><b>5</b></td><td>Error analysis → מזינים בחזרה ל־A ו־C; הרצה סופית full-res ב-Colab T4 (SETUP.md §5)</td><td>כולם</td><td><span class="ch wip">הבא ▸</span></td></tr>
+    <tr><td><b>6</b></td><td>נוגעים ב־Test פעם אחת · מקפלים train.py עצמאי · README ת"ז · אריזה · <code class="k">challenge2_&lt;ids&gt;</code></td><td>D</td><td><span class="ch no">לא התחיל</span></td></tr>
   </table>
 </section>
 
@@ -851,8 +869,8 @@ SCORE    = <span class="nu">0.5</span> * clean_acc + <span class="nu">0.5</span>
   <div class="sec-h"><span class="sec-n">11</span><h2>חלוקה ל־4 אנשים — כל אחד מזיז את הציון</h2></div>
   <table class="tbl">
     <tr><th>איש</th><th>תחום</th><th>קבצים</th><th>הלביר שלו</th></tr>
-    <tr><td><span class="role A">A</span></td><td>ארכיטקטורה</td><td class="m">model.py</td><td>עומק/רוחב/רגולריזציה. נשאר עצמאי, לוגיטים [B,20].</td></tr>
-    <tr><td><span class="role B">B</span></td><td>אימון/אופטימיזציה</td><td class="m">engine.py</td><td>optimizer, LR schedule, early‑stop, device, seeding, checkpoint.</td></tr>
+    <tr><td><span class="role A">A</span></td><td>ארכיטקטורה</td><td class="m">model.py</td><td>ResNet+SE, עומק/רוחב/dropout. נשאר עצמאי (torch בלבד), לוגיטים [B,20].</td></tr>
+    <tr><td><span class="role B">B</span></td><td>אימון/אופטימיזציה</td><td class="m">engine.py</td><td>AdamW/SGD, cosine/step LR, label smoothing, grad-clip, early‑stop, device, seeding, checkpoint.</td></tr>
     <tr><td><span class="role C">C</span></td><td>אוגמנטציה/עמידות</td><td class="m">augment.py · make_augmented.py</td><td>ה־differentiator — בעל חצי ה־OOD של הציון.</td></tr>
     <tr><td><span class="role D">D</span></td><td>נתונים+מתודולוגיה+הערכה</td><td class="m">split · data · baseline · robust · errors</td><td>הפיצול, ה־leaderboard שכולם סומכים עליו, אכיפת Test‑פעם‑אחת, בחירת weights סופי.</td></tr>
   </table>
@@ -886,40 +904,65 @@ SCORE    = <span class="nu">0.5</span> * clean_acc + <span class="nu">0.5</span>
 
 <!-- 13 CMDS -->
 <section id="cmds">
-  <div class="sec-h"><span class="sec-n b">13</span><h2>פקודות — דף עזר</h2></div>
+  <div class="sec-h"><span class="sec-n b">13</span><h2>פקודות והרצה — דף עזר</h2></div>
+  <h3>הסדר המומלץ ל-clone טרי</h3>
+  <p>קוד+דוקס בלבד בגיט; ה-data (2.1GB) וכל הנגזרות (splits, תאומים, validation, weights) נוצרים מקומית, seeded, זהים לכולם. ראשית: <code class="k">python3.11 -m venv .venv</code> + <code class="k">pip install -r requirements.txt</code>, ואז להוריד את <code class="k">dataset/train/&lt;class&gt;/*.jpg</code> ו-<code class="k">dataset/augmentations/{color_jitter,random_rotation}/</code> מהקורס (לא בגיט).</p>
   <div class="code">
     <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">מהשורש (איפה ש-evaluate.py יושב)</span><span class="badge">bash</span></div>
-<pre><code>python run.py split        <span class="c"># פיצול + validation (אוכף איזון/שפיות)</span>
-python run.py materialize  <span class="c"># תאומים מאוגמנטים</span>
-python run.py baseline     <span class="c"># רצפה נאיבית</span>
-python run.py train        <span class="c"># אימון -> weights.joblib</span>
-python run.py robust       <span class="c"># דוח נקי מול OOD</span>
-python run.py errors --partition P1
+<pre><code><span class="c"># הסדר: split -> materialize -> baseline -> train -> robust</span>
+python run.py split        <span class="c"># splits.json + dataset/validation/ (seeded 40/15/15/15/15)</span>
+python run.py materialize  <span class="c"># תאומים אופליין -> dataset/train_aug/  (~80s)</span>
+python run.py baseline     <span class="c"># רצפה נאיבית (0.2230)</span>
+python run.py train        <span class="c"># stage 1 (gated) -> weights.joblib</span>
+python run.py train --stage 2   <span class="c"># קידום שלב — החלטה אנושית</span>
+python run.py robust       <span class="c"># SCORE: נקי מול OOD</span>
+python run.py eval         <span class="c"># leaderboard של evaluate.py שסופק</span>
+python run.py errors --partition P1   <span class="c"># לוג טעויות -> outputs/</span>
 
 python check_submission.py [team]   <span class="c"># בדיקה מבנית</span>
-python evaluate.py                  <span class="c"># leaderboard מקומי</span>
 python labels.py                    <span class="c"># טבלת מדד<->שם</span>
 
-cd submissions/my_team &amp;&amp; python train.py   <span class="c"># אימון ישיר</span>
-python model.py            <span class="c"># smoke test: צורת [B,20]</span></code></pre>
+cd submissions/my_team &amp;&amp; python train.py   <span class="c"># אימון ישיר (stage 1)</span>
+python model.py            <span class="c"># smoke test: צורת [B,20] + ספירת params</span></code></pre>
   </div>
+  <h3>הרצה על Google Colab (T4 GPU) — לאימון הסופי</h3>
+  <p>MPS/CPU במחשבים שלנו מספיק לאיטרציה מהירה ב-128px, אבל ה<b>מודל הסופי</b> (224px מלא, יותר epochs/stages) מתאמן הרבה יותר מהר על T4 חינמי. הקוד device-agnostic — <code class="k">get_device()</code> בוחר <code class="k">cuda</code> אוטומטית, בלי שינוי קוד. (Runtime → Change runtime type → T4 GPU).</p>
+  <div class="code">
+    <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">תאי Colab</span><span class="badge">python</span></div>
+<pre><code>!git clone https://github.com/yonatan-cs/IML-HACKATHON.git
+%cd IML-HACKATHON
+!pip install -q joblib        <span class="c"># Colab כבר עם torch/torchvision CUDA — אל תתקין requirements!</span>
+
+<span class="kw">from</span> google.colab <span class="kw">import</span> drive; drive.<span class="fn2">mount</span>(<span class="st">'/content/drive'</span>)
+!cp /content/drive/MyDrive/iml_dataset.zip . &amp;&amp; unzip -q iml_dataset.zip -d dataset
+<span class="c"># צריך: dataset/train/&lt;class&gt;/*.jpg  ו-dataset/augmentations/{color_jitter,random_rotation}/</span>
+
+!python run.py split
+!python run.py materialize
+!python run.py train --stage 1 --img-size 224 --epochs 30 --workers 2
+!python run.py robust
+
+<span class="kw">from</span> google.colab <span class="kw">import</span> files; files.<span class="fn2">download</span>(<span class="st">'submissions/my_team/weights.joblib'</span>)</code></pre>
+  </div>
+  <div class="note warn"><span class="ic">▲</span><div class="bd"><b>מלכודת Colab:</b> <b>אל</b> תריצו <code class="k">pip install -r requirements.txt</code> ב-Colab — זה יתקין torch ל-CPU וישבור את ה-CUDA. רק <code class="k">pip install -q joblib</code>. <code class="k">weights.joblib</code> git-ignored — מורידים, ו-force-add רק את הקובץ הסופי הטוב ביותר.</div></div>
 </section>
 
 <!-- 14 INTERVIEW -->
 <section id="interview">
   <div class="sec-h"><span class="sec-n">14</span><h2>הראיון — מה צריך להגן עליו</h2></div>
-  <p>בסוף יש ראיון קצר. אין מצגת — בודקים הבנה ויכולת להסביר. תהיו מוכנים להסביר את הבחירות, את ההיגיון מאחוריהן, ולהוביל את המראיין דרך המימוש והתוצאות.</p>
+  <p>בסוף יש ראיון קצר. אין מצגת — בודקים הבנה ויכולת להסביר. כבר <b>לא</b> מוגבלים לשיטות מהקורס; אנחנו משתמשים ב-best-practice מודרני ו<b>מתעדים כל בחירה</b>, כך שתוכלו להוביל את המראיין דרך כל החלטה, ההיגיון מאחוריה, המימוש והתוצאות.</p>
   <ul>
-    <li><b>למה הארכיטקטורה הזו</b> — ResNet קטן: skip connections (<code class="k">y=f(x)+x</code>, He 2016, נלמד ב-Transformers) שמקלים על vanishing gradients, רוחב 64→512 ל-bias נמוך, GAP במקום FC, AdaptiveAvgPool שמקבל כל גודל.</li>
-    <li><b>🚩 BatchNorm (קצה-סילבוס)</b> — נלמד רק LayerNorm. הגנה: "שכבת נרמול כמו LayerNorm, מותאמת לערוצי conv; running stats ב-state_dict, ב-<code class="k">eval()</code> בלתי־תלוית batch". זו הסיבה שהרשת מתאמנת מאפס ומנצחת VGG, ומאפשרת LR=0.05. fallback: GroupNorm.</li>
-    <li><b>🚩 אופטימייזר (קצה-סילבוס)</b> — SGD נלמד בקורס; <code class="k">momentum=0.9</code> = הרחבת SGD (velocity = ממוצע נע של גרדיאנטים), <b>לא</b> Adam (מחוץ לסילבוס, מכוון). <code class="k">label_smoothing=0.1</code> = הרחבה של cross-entropy, <code class="k">StepLR</code> = תזמון LR נלמד בצורת מדרגה. כולם מודים שהם קצה ויודעים לאפס לברירת־מחדל "ספרית".</li>
-    <li><b>המתודולוגיה</b> — פיצול stratified seeded, מיפוי 5-החלקים ל-"Test נוגעים פעם אחת" (בלוק־בלוק), preprocessing מכויל על Train בלבד, baseline נאיבי (רגרסיה לוגיסטית) כרצפה.</li>
-    <li><b>אסטרטגיית העמידות</b> — תאומים אופליין משוקללים (rotation/color_jitter במשקל 4 — צירי OOD מאומתים), מילוי־ממוצע ולא שחור, למה אוגמנטציה רחבה ולא פילטר ספציפי, ולמה <b>אין</b> background swap (דורש סגמנטציה = מחוץ לגבולות).</li>
-    <li><b>איך מודדים חוסן</b> — <code class="k">robust_eval</code> מדפיס <b>SCORE = 0.5·נקי + 0.5·ממוצע OOD</b> שמשקף את ה-50/50 של ה-grader; עוקבים אחרי SCORE, לא אחרי דיוק נקי.</li>
+    <li><b>למה הארכיטקטורה הזו</b> — ResNet קטן (בצורת ResNet-18): skip connections (<code class="k">y=f(x)+x</code>, He 2016) שמקלים על vanishing gradients ומאפשרים עומק מאפס, רוחב 64→512 ל-bias נמוך, GAP במקום FC, AdaptiveAvgPool שמקבל כל גודל. ‎11.28M params.</li>
+    <li><b>Squeeze-and-Excitation</b> — תשומת־לב ערוצים (Hu et al. 2018): MLP זעיר קורא את הממוצע הגלובלי של כל מפת-ערוץ ומוציא gate 0..1 לכל ערוץ, <code class="k">out=x·sigmoid(W2·ReLU(W1·GAP(x)))</code>. <b>למה בחרנו:</b> הזזות רקע/צבע מעוותות תת-קבוצת ערוצים → SE מדכא אותם ומחזק ערוצי-צורה → ישירות עוזר לחצי ה-OOD. זול (~0.09M). זוכה ILSVRC-2017.</li>
+    <li><b>BatchNorm</b> — נרמול אחרי כל conv: מתנה את משטח ה-loss כך שרשת עמוקה מאפס מתאמנת נקי ומהר; running stats ב-state_dict, ב-<code class="k">eval()</code> בלתי־תלוי batch. <b>למה בחרנו:</b> הסיבה העיקרית שהרשת מתאמנת מאפס ומנצחת VGG פשוט.</li>
+    <li><b>אופטימייזר ואימון</b> — <b>AdamW</b> (lr=1e-3, wd=1e-2): צעד אדפטיבי פר-פרמטר → התכנסות מהירה וחוסן ל-LR מאפס; ה-"W" = weight-decay מנותק (רגולריזציה נכונה). <b>CosineAnnealingLR</b>: דעיכה חלקה ל-~0. <b>label_smoothing=0.1</b>: פחות ביטחון-יתר → פחות קיצורי-דרך → קצת יותר חוסן. <b>grad_clip=1.0</b>: ייצוב הצעדים הראשונים. SGD+StepLR זמינים לסבב סופי אם נרצה הכללה שטוחה יותר.</li>
+    <li><b>המתודולוגיה</b> — פיצול stratified seeded, מיפוי 5-החלקים ל-"Test נוגעים פעם אחת" (בלוק־בלוק), preprocessing מכויל על Train בלבד (mean/std קבועים של ImageNet), baseline נאיבי (רגרסיה לוגיסטית) כרצפה הנמדדת <code class="k">0.2230</code>.</li>
+    <li><b>אסטרטגיית העמידות</b> — תאומים אופליין משוקללים (rotation/color_jitter במשקל 4 — צירי OOD מאומתים), מילוי־ממוצע ולא שחור, אוגמנטציה <b>רחבה</b> (לא פילטר ספציפי, כי המבחן חבוי), ולמה <b>אין</b> background swap (דורש סגמנטציה + assets חיצוניים = מחוץ לגבולות train-from-scratch). offline-only מתועד.</li>
+    <li><b>איך מודדים חוסן</b> — <code class="k">robust_eval</code> מדפיס <b>SCORE = 0.5·נקי + 0.5·ממוצע OOD</b> שמשקף את ה-50/50 של ה-grader, plus per-axis drop + worst-axis callout; עוקבים אחרי SCORE, לא אחרי דיוק נקי.</li>
     <li><b>Error analysis</b> — איזה דפוס מצאתם בעיניים, ואיך הוא שינה את האוגמנטציה/הארכיטקטורה.</li>
     <li><b>שחזוּר</b> — למה שומרים את קובץ המשקלים ולא "מריצים שוב" (אי־דטרמיניזם של MPS/CUDA, גם אחרי seed ל-MPS).</li>
   </ul>
-  <div class="note good"><span class="ic">◆</span><div class="bd"><b>השורה התחתונה:</b> כל בחירה בקוד נבחרה כדי שתהיה <b>ניתנת להסבר</b>. אם משהו בקוד לא ברור לך — זה בדיוק מה שהראיון יחפש. עברת על המדריך הזה? אתה מוכן.</div></div>
+  <div class="note good"><span class="ic">◆</span><div class="bd"><b>השורה התחתונה:</b> כל בחירה בקוד נבחרה במכוון <b>ומתועדת</b> — כדי שתהיה ניתנת להסבר. אם משהו בקוד לא ברור לך — זה בדיוק מה שהראיון יחפש. עברת על המדריך הזה? אתה מוכן.</div></div>
 </section>
 
 </main>
