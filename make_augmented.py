@@ -79,8 +79,10 @@ def f_color_jitter(img, rng):
     return img
 
 # Geometric filters apply first, then photometric/noise — a sensible fixed order.
+# NOTE: `zoom` is intentionally excluded — its 60-90% random crop can push the labeled
+# object out of frame (label-corrupting). f_zoom is kept above but never selected.
 FILTERS = [
-    ("rotate", f_rotate), ("shift", f_shift), ("zoom", f_zoom),       # geometric
+    ("rotate", f_rotate), ("shift", f_shift),                         # geometric
     ("grayscale", f_grayscale), ("invert", f_invert),                 # color
     ("color_jitter", f_color_jitter), ("salt_pepper", f_salt_pepper), # photometric/noise
 ]

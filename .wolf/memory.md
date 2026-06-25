@@ -203,3 +203,5 @@
 | 14:59 | Identified user = Person B (engine.py owner); recorded in cerebrum | .wolf/cerebrum.md | done | ~200 |
 | 15:28 | engine.py: AdamW/cosine -> SGD(mom)/StepLR + LR 0.01 + grad_clip; updated MADRICH.html engine section | engine.py MADRICH.html | self-check OK | ~900 |
 | 15:37 | engine.py: added label_smoothing=0.1 to CrossEntropyLoss; updated MADRICH.html | engine.py MADRICH.html | self-check OK | ~400 |
+| 15:46 | Deterministic train transform + drop zoom filter | data.py, make_augmented.py | self-checks pass; needs twin regen | ~6k |
+| 15:53 | Bridged dataset/train symlink; ran split+materialize; 20k twins regen (no zoom); verified train=orig+twins deterministic | dataset/, .wolf/cerebrum.md | all checks pass | ~3k |

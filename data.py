@@ -70,16 +70,19 @@ def build_loaders(
     Build (train_loader, eval_loader). eval_loader is None if eval_partition is None.
 
     include_augmented=True (default) pulls in the offline augmented twins (dataset/train_aug/)
-    for the TRAIN set and uses a LIGHT online transform (the heavy filters are already baked
-    into the twins). If train_aug/ doesn't exist yet, no twins are added — training still
-    works on originals with the light transform. Run `python run.py materialize` first to
-    generate the twins. The eval set is ALWAYS clean originals (no twins, no leakage).
+    for the TRAIN set and feeds BOTH originals and twins through the DETERMINISTIC transform
+    (identical to eval: Resize 256 -> CenterCrop 224 -> normalize). There is NO online random
+    editing — originals are used as-is and ALL augmentation variety comes from the offline
+    twins. Run `python run.py materialize` first to generate the twins (training without them
+    means zero augmentation). The eval set is ALWAYS clean originals (no twins, no leakage).
 
     ⚠️ Windows: DataLoader workers use 'spawn', so any script that calls this MUST be
     guarded by `if __name__ == "__main__":` (run.py / train.py already are). If you hit
     worker errors on Windows, set num_workers=0.
     """
-    train_tf = build_light_train_transform(img_size) if include_augmented else build_train_transform(img_size)
+    # include_augmented (default): originals + offline twins are fed through the DETERMINISTIC
+    # transform (identical to eval) — no online editing; all variety comes from the twins.
+    train_tf = build_eval_transform(img_size) if include_augmented else build_train_transform(img_size)
     train_ds = ManifestDataset(train_partitions, train_tf, include_augmented=include_augmented)
     train_loader = DataLoader(
         train_ds, batch_size=batch_size, shuffle=True,

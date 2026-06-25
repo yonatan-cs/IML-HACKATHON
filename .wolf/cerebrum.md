@@ -20,6 +20,13 @@
   dataset locally — a different machine runs training; user's job is to make engine.py excellent
   + correct + interview-defensible.
 
+- **Dataset layout gotcha:** the downloaded raw data lives at `dataset/train_set/train/<class>/`
+  (20 classes × 1000 jpg), but the pipeline code (`split_data.py` + `make_augmented.py`) reads
+  from `dataset/train/`. Bridge with a symlink `dataset/train -> train_set/train` (local-only;
+  `dataset/` is gitignored). Without it, `python run.py split` fails with
+  `dataset/train not found — download train_set first`. Provided OOD reference sets are at
+  `dataset/augmentations/{color_jitter,random_rotation}/`.
+
 ## Do-Not-Repeat
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->
@@ -41,3 +48,13 @@
   (`error_analysis.py`). Net: methodology chain is now data partitioning → naive baseline →
   model selection → error analysis.
 - [2026-06-25] EDA decision settled: NO standalone EDA stage and NO eda.py (already deleted; run.py has no cmd_eda). Mechanical sanity (class balance, folder name == labels.py) is enforced inside split_data.build_splits. Keep only a one-time ~2-min manual glance at a few train images + the provided augmentations/ folder (Finder, no tooling) to guide augmentation choices; focused inspection continues in error_analysis. (Corrects an earlier note in this session that wrongly said eda.py still exists.)
+- [2026-06-25] Augmentation strategy = OFFLINE ONLY. Training feeds originals + offline twins
+  through the DETERMINISTIC transform (build_eval_transform: Resize256→CenterCrop224→Normalize)
+  — NO online random editing. Changed data.py:82 to use build_eval_transform when
+  include_augmented=True (was build_light_train_transform). All variety comes from make_augmented
+  twins. Rationale: team wants originals used "as is"; on-the-fly edits unwanted. build_train/
+  build_light_train kept only for the include_augmented=False fallback (twins are always
+  materialized on the single training laptop, so that path is effectively dead).
+- [2026-06-25] Dropped the `zoom` filter from make_augmented.FILTERS (its 60–90% random crop can
+  push the labeled object out of frame → label-corrupting). f_zoom function kept but never
+  selected. Twins must be regenerated (`python run.py materialize`) since prior twins included zoom.
