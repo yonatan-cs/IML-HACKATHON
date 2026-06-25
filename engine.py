@@ -113,6 +113,7 @@ def train(
     lr_step_size: int = 5,
     lr_gamma: float = 0.1,
     grad_clip: float | None = 1.0,
+    label_smoothing: float = 0.1,
     device: torch.device | None = None,
     patience: int = 5,
     log_csv: str | Path | None = None,
@@ -134,13 +135,18 @@ def train(
         Rule of thumb: step_size ≈ epochs / 3 so you get ~2 drops over the run.
       - `grad_clip` (max grad norm, default 1.0): caps update size so high-LR SGD stays stable.
         Raise toward 5.0 if it's clipping so hard that learning stalls; set None to disable.
+      - `label_smoothing` (default 0.1): softens targets to curb over-confidence. Try 0.0–0.2;
+        set 0.0 to train on hard labels.
       - early stopping `patience`, label smoothing in the loss, gradient clipping
       - (advanced) mixed precision via torch.cuda.amp on CUDA machines
     """
     device = device or get_device()
     model = model.to(device)
 
-    criterion = nn.CrossEntropyLoss()             # standard multi-class loss (wants logits)
+    # label_smoothing softens the targets (e.g. 0.9 for the true class, 0.1 spread over the
+    # rest) instead of a hard 1/0. This curbs over-confidence → better generalization and a
+    # bit more robustness (the model commits less hard to background/color shortcuts).
+    criterion = nn.CrossEntropyLoss(label_smoothing=label_smoothing)  # wants logits
     optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=momentum,
                                 weight_decay=weight_decay)
     # step decay: LR *= lr_gamma every lr_step_size epochs

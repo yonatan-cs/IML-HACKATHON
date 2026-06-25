@@ -653,7 +653,7 @@ MAX_FILTERS_PER_IMAGE = <span class="nu">3</span>
 <pre><code><span class="kw">def</span> <span class="fn2">train</span>(model, train_loader, val_loader=<span class="kw">None</span>, *, epochs=<span class="nu">15</span>,
           lr=<span class="nu">0.01</span>, momentum=<span class="nu">0.9</span>, weight_decay=<span class="nu">1e-4</span>,
           lr_step_size=<span class="nu">5</span>, lr_gamma=<span class="nu">0.1</span>, patience=<span class="nu">5</span>):
-    criterion = nn.<span class="fn2">CrossEntropyLoss</span>()                 <span class="c"># רוצה לוגיטים</span>
+    criterion = nn.<span class="fn2">CrossEntropyLoss</span>(label_smoothing=<span class="nu">0.1</span>)  <span class="c"># לוגיטים + ריכוך יעדים</span>
     optimizer = torch.optim.<span class="fn2">SGD</span>(model.<span class="fn2">parameters</span>(), lr=lr,
                                 momentum=momentum, weight_decay=weight_decay)
     scheduler = ....<span class="fn2">StepLR</span>(optimizer, step_size=lr_step_size, gamma=lr_gamma)
@@ -674,8 +674,8 @@ MAX_FILTERS_PER_IMAGE = <span class="nu">3</span>
         <li><span class="pin">evaluate</span><span class="tx">תחת <code class="k">@torch.no_grad</code>, מחזיר <code class="k">acc, preds, labels, confs</code> (confidence דרך softmax). ה־confidence משמש רק ל־error analysis, לא משפיע על acc.</span></li>
         <li><span class="pin g">best‑weights</span><span class="tx">שומר את ה־state עם ה־val הכי טוב ומשחזר בסוף — לא את ה־epoch האחרון. עמיד ל־overfit מאוחר.</span></li>
         <li><span class="pin">early stop</span><span class="tx"><code class="k">patience</code> epochs בלי שיפור → עצירה. רלוונטי רק כשיש val set.</span></li>
-        <li><span class="pin g">בוצע(B)</span><span class="tx">הוחלף ל-<code class="k">SGD(momentum=0.9)</code> + <code class="k">StepLR(step_size=5, gamma=0.1)</code> + LR=0.01. נוסף <b>gradient clipping</b> (<code class="k">grad_clip=1.0</code>, חיתוך נורמת הגרדיאנט בין backward ל-step) כדי לייצב את SGD ב-LR הגבוה. פרמטרים <code class="k">momentum/lr_step_size/lr_gamma/grad_clip</code> נחשפו לכיוונון. self-check עובר.</span></li>
-        <li><span class="pin w">TODO(B)</span><span class="tx">לכוונן: <code class="k">lr</code> ב-[0.003, 0.1], <code class="k">weight_decay</code> ל-5e-4, <code class="k">grad_clip</code> עד 5.0 אם הלמידה נתקעת; להוסיף label smoothing ו-AMP על CUDA. שקול MixUp/CutMix (משפר דיוק+חוסן).</span></li>
+        <li><span class="pin g">בוצע(B)</span><span class="tx">הוחלף ל-<code class="k">SGD(momentum=0.9)</code> + <code class="k">StepLR(step_size=5, gamma=0.1)</code> + LR=0.01. נוסף <b>gradient clipping</b> (<code class="k">grad_clip=1.0</code>) לייצוב SGD, ו-<b>label smoothing</b> (<code class="k">0.1</code>) לריכוך היעדים ומניעת ביטחון-יתר (משפר הכללה+חוסן). פרמטרים <code class="k">momentum/lr_step_size/lr_gamma/grad_clip/label_smoothing</code> נחשפו לכיוונון. self-check עובר.</span></li>
+        <li><span class="pin w">TODO(B)</span><span class="tx">לכוונן: <code class="k">lr</code> ב-[0.003, 0.1], <code class="k">weight_decay</code> ל-5e-4, <code class="k">grad_clip</code> עד 5.0 / <code class="k">label_smoothing</code> ב-[0, 0.2] אם צריך. אופציונלי: MixUp/CutMix (משפר חוסן, לתאם עם C). AMP לא רלוונטי — האימון על Mac (MPS), לא CUDA.</span></li>
       </ul>
     </div>
   </details>
