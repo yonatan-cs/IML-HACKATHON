@@ -203,3 +203,4 @@
 | 14:59 | Identified user = Person B (engine.py owner); recorded in cerebrum | .wolf/cerebrum.md | done | ~200 |
 | 15:28 | engine.py: AdamW/cosine -> SGD(mom)/StepLR + LR 0.01 + grad_clip; updated MADRICH.html engine section | engine.py MADRICH.html | self-check OK | ~900 |
 | 15:37 | engine.py: added label_smoothing=0.1 to CrossEntropyLoss; updated MADRICH.html | engine.py MADRICH.html | self-check OK | ~400 |
+| 15:52 | model.py dropout 0.3 -> 0.35 (Person A file, user request) + synced MADRICH.html | model.py MADRICH.html | smoke test OK (4,20) | ~150 |

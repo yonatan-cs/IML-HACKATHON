@@ -696,7 +696,7 @@ MAX_FILTERS_PER_IMAGE = <span class="nu">3</span>
     <span class="kw">return</span> nn.<span class="fn2">Sequential</span>(*layers)
 
 <span class="kw">class</span> <span class="fn2">ModelArchitecture</span>(nn.Module):
-    <span class="kw">def</span> <span class="fn2">__init__</span>(self, num_classes=<span class="nu">20</span>, dropout=<span class="nu">.3</span>):
+    <span class="kw">def</span> <span class="fn2">__init__</span>(self, num_classes=<span class="nu">20</span>, dropout=<span class="nu">.35</span>):
         self.features = nn.<span class="fn2">Sequential</span>(
             <span class="fn2">conv_block</span>(<span class="nu">3</span>,<span class="nu">32</span>),    <span class="c"># 224 -> 112</span>
             <span class="fn2">conv_block</span>(<span class="nu">32</span>,<span class="nu">64</span>),   <span class="c"># 112 -> 56</span>
