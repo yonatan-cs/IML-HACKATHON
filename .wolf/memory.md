@@ -101,6 +101,7 @@
 | 12:29 | Edited SETUP.md | 1→3 lines | ~65 |
 | 12:30 | Session end: 32 writes across 16 files (i-m-starting-a-new-buzzing-shannon.md, requirements.txt, .gitignore, model.py, engine.py) | 3 reads | ~18829 tok |
 | 12:30 | Session end: 32 writes across 16 files (i-m-starting-a-new-buzzing-shannon.md, requirements.txt, .gitignore, model.py, engine.py) | 3 reads | ~18829 tok |
+| 14:00 | Removed EDA: deleted eda.py, stripped eda from run.py/SETUP.md/plan.md, logged decision | eda.py run.py SETUP.md plan.md cerebrum.md | done; run imports OK, no eda subcmd | ~600 |
 
 ## Session: 2026-06-25 13:03
 

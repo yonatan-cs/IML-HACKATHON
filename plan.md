@@ -4,7 +4,7 @@ Context
 
 Everyone owns real, score-moving work (not a trivial pipeline split). Claude builds a runnable skeleton; each person fills one high-leverage lever, measured on a shared harness, in separate files (clean git merges). Compute: M3 Mac (MPS), Windows 32GB (CPU), no NVIDIA → device-agnostic code, small model.
 
-This plan follows the course "ML in Practice" methodology (data partitioning → preprocessing iron-rule → EDA → naive baseline → model selection → error analysis), not just "train a net." The interview will probe this — methodology is part of the grade.
+This plan follows the course "ML in Practice" methodology (data partitioning → naive baseline → model selection → error analysis), not just "train a net." The interview will probe this — methodology is part of the grade. (We deliberately skip dataset-specific preprocessing — fixed ImageNet mean/std constants, no fitted stats — and skip a standalone EDA pass; label/balance sanity is enforced by the split step and visual inspection happens during error analysis.)
 
 Project Vision (AI-readable — a fresh session reads this and is fully oriented)
 Product: PixelPerfect robust classifier. Input [B,3,224,224] ImageNet-normalized → output class indices [B] in 0..19.
@@ -26,8 +26,6 @@ Methodology — the iron rules (baked into every stage)
 These come from the tutorial and are non-negotiable; the harness enforces them so no one accidentally cheats the methodology:
 
 Three-way split: Train / Dev(Validation) / Test. Built once, seeded, stratified per class so each split faithfully represents the whole (no class leakage). Dev = all tuning + error analysis. Local Test = touched ONCE, at the very end, to estimate true generalization — never tuned against (every extra look overfits it and destroys it as a measure). The hidden grader test is the ultimate one-shot test.
-Preprocessing iron rule — fit on Train only. Any data-driven decision (normalization stats, class weights, augmentation strength) is decided on Train alone. Dev/Test never inform preprocessing → no contamination. (We use fixed ImageNet mean/std = constants, not fitted → already compliant; if anyone computes dataset stats, Train only.)
-EDA before modeling. Physically look at images: backgrounds, lighting, label/folder sanity, class balance. Drives which manipulations matter (Person C) and catches bad data.
 Naive baseline before the deep net. A simple model (softmax/logistic regression on downsampled pixels) sets the floor the CNN must beat. If the CNN can't beat it, something is broken.
 Error analysis on Dev, manually. Pull misclassified Dev samples, eyeball them, find recurring patterns (e.g. "sky-background ships → airliner"). Feed patterns back into augmentation/architecture. Never error-analyze on Test.
 Reproducibility caveat. Seed torch/numpy/random, but MPS/CUDA can give different results with the same seed — so we keep the actual best weights file, not "rerun and hope." Record the config that produced each weights.joblib.
@@ -35,7 +33,7 @@ Technical Decisions (plain language + cost-to-undo flags)
 Model = hand-built plain CNN (VGG-style), self-contained in model.py. conv→BN→ReLU blocks + maxpool → AdaptiveAvgPool2d(1) → Linear(…,20). Adaptive pool accepts any input (train small, eval 224). Easiest to explain, fastest to train. 🚩 Hard-to-undo: model.py must never import a local helper — grader breaks otherwise.
 Train ≈128px, evaluate 224px. ~3× faster on MPS/CPU; adaptive pool absorbs the gap. 🚩 mild train/eval gap — revisit only if clean accuracy underperforms.
 Augmentation = torchvision.transforms.v2 only. Already a dep, zero network. No albumentations (extra dep), no wandb (phones home → breaks no-network rule).
-Dev code at repo root; submission stays flat. Helpers (data.py, augment.py, engine.py, split_data.py, eda.py, baseline_naive.py, robust_eval.py, error_analysis.py, run.py) sit at root next to base_model.py. Gradeable folder keeps only self-contained model.py + thin train.py + frozen predict.py. 🚩 Assembly cost: collapse pipeline into a self-contained train.py at the end (~30 min). Grader never runs train.py, so this is for honesty/interview.
+Dev code at repo root; submission stays flat. Helpers (data.py, augment.py, engine.py, split_data.py, baseline_naive.py, robust_eval.py, error_analysis.py, run.py) sit at root next to base_model.py. Gradeable folder keeps only self-contained model.py + thin train.py + frozen predict.py. 🚩 Assembly cost: collapse pipeline into a self-contained train.py at the end (~30 min). Grader never runs train.py, so this is for honesty/interview.
 weights.joblib git-ignored during dev. Binary, changes each run → merge conflicts + bloat. Each person trains locally; the leaderboard ranks; the single best is committed once. 🚩 add submissions/**/weights.joblib to .gitignore.
 Logging = CSV per run (+ optional local TensorBoard). No external trackers (network).
 Env: Python 3.11, requirements.txt (torch torchvision pillow joblib numpy tqdm). Windows DataLoader workers guarded by if __name__ == "__main__": (spawn).
@@ -43,14 +41,13 @@ Repo / Module Layout
 repo root/
   base_model.py, labels.py, evaluate.py, check_submission.py   # provided (reuse)
   split_data.py        # NEW — 3-way stratified seeded split + OOD stress build   [Person D]
-  eda.py               # NEW — sample grids, class balance, label sanity          [Person D]
   baseline_naive.py    # NEW — softmax-regression floor (pure torch)              [Person D]
   data.py              # NEW — datasets / transforms wiring / loaders             [Person D]
   augment.py           # NEW — train aug pipeline + OOD stress transforms         [Person C]
   engine.py            # NEW — train/eval loops, device, scheduler, seed, ckpt    [Person B]
   robust_eval.py       # NEW — clean-Dev vs OOD-Dev report                        [Person D]
   error_analysis.py    # NEW — dump misclassified Dev images + confusion          [Person D]
-  run.py               # NEW — CLI glue: split|eda|baseline|train|eval|errors      [shared]
+  run.py               # NEW — CLI glue: split|baseline|train|eval|errors          [shared]
   requirements.txt     # NEW
   submissions/my_team/
     model.py           # ModelArchitecture — SELF-CONTAINED                       [Person A]
@@ -61,14 +58,14 @@ Separate files per owner ⇒ parallel work, near-zero merge conflicts.
 4-Person Ownership (each lever moves the grade)
 Person A — Architecture (model.py): own ModelArchitecture; start from the plain-CNN baseline, improve depth/width/regularization. Stays self-contained, [B,20] logits.
 Person B — Training / optimization (engine.py): loop, optimizer, LR schedule, early stop, device auto-select, seeding/reproducibility, checkpointing, metrics.
-Person C — Augmentation / robustness (augment.py): the differentiator — train-time manipulations + OOD stress transforms. Owns the 50% OOD score half. Guided by EDA + error analysis.
-Person D — Data + methodology + evaluation (split_data.py, data.py, eda.py, baseline_naive.py, robust_eval.py, error_analysis.py): the 3-way stratified split, EDA, naive baseline floor, the shared leaderboard everyone trusts, error-analysis tooling, enforces Test-used-once, and selects/commits the final weights.joblib.
+Person C — Augmentation / robustness (augment.py): the differentiator — train-time manipulations + OOD stress transforms. Owns the 50% OOD score half. Guided by error analysis.
+Person D — Data + methodology + evaluation (split_data.py, data.py, baseline_naive.py, robust_eval.py, error_analysis.py): the 3-way stratified split, naive baseline floor, the shared leaderboard everyone trusts, error-analysis tooling, enforces Test-used-once, and selects/commits the final weights.joblib.
 Shared glue (run.py, train.py) built by Claude, rarely edited → low conflict.
 
 Build Plan — small, reviewable stages
 Stage 0 — Scaffold (Claude, now, no training): create all NEW files runnable, each owner's lever marked # TODO(owner): … with full docstrings + PyTorch hints; add weights ignore. Deliverable: imports clean on Mac+Windows, check_submission.py my_team passes at dummy level. Review before training.
 
-Stage 1 — Data + split + EDA (Person D): download train_set; run.py split → seeded stratified Train/Dev/Test (+ map Dev to dataset/validation/ for evaluate.py, Test to dataset/test/). run.py eda → class balance + sample grids + label sanity. Inspect the provided augmentations/ folder, report contents. Review: splits representative? data clean?
+Stage 1 — Data + split (Person D): download train_set; run.py split → seeded stratified Train/Dev/Test (+ map Dev to dataset/validation/ for evaluate.py, Test to dataset/test/). The split step itself enforces class balance + label/folder sanity (it raises on any missing/renamed/empty class folder and prints per-partition counts). Inspect the provided augmentations/ folder, report contents. Review: splits representative? data clean?
 
 Stage 2 — Naive baseline (Person D): run.py baseline → softmax regression on downsampled pixels = the floor. Record clean-Dev accuracy. Review: floor number agreed.
 

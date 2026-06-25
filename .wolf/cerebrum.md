@@ -26,3 +26,11 @@
 ## Decision Log
 
 <!-- Significant technical decisions with rationale. Why X was chosen over Y. -->
+
+- 2026-06-25 — Dropped the preprocessing-stats step and the standalone EDA pass (deleted `eda.py`,
+  removed the `eda` subcommand from `run.py`, trimmed SETUP.md/plan.md). Rationale: normalization
+  uses fixed ImageNet mean/std constants (nothing to fit), and `eda.py`'s useful parts are already
+  covered — `split_data.build_splits` enforces class balance + label/folder sanity (raises on any
+  missing/renamed/empty class folder), and visual inspection happens during error analysis
+  (`error_analysis.py`). Net: methodology chain is now data partitioning → naive baseline →
+  model selection → error analysis.

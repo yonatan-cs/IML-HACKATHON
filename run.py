@@ -2,7 +2,6 @@
 run.py  —  SHARED CLI glue (one entry point for the whole pipeline)
 
     python run.py split        # build seeded 5-partition split + materialize dataset/validation
-    python run.py eda          # class balance, label sanity, sample grid
     python run.py materialize  # build offline augmented dataset twins (dataset/train_aug/)
     python run.py baseline     # naive logistic-regression floor (P0 -> test P1)
     python run.py train        # progressive training -> submissions/my_team/weights.joblib
@@ -10,7 +9,7 @@ run.py  —  SHARED CLI glue (one entry point for the whole pipeline)
     python run.py robust       # clean vs provided-OOD accuracy report
     python run.py errors --partition P1   # log misclassifications on one partition
 
-Recommended order for a fresh clone: split -> eda -> materialize -> baseline -> train -> robust.
+Recommended order for a fresh clone: split -> materialize -> baseline -> train -> robust.
 """
 from __future__ import annotations
 
@@ -26,11 +25,6 @@ def cmd_split(args):
     from split_data import build_splits, materialize_validation
     build_splits(seed=args.seed)
     materialize_validation(args.val_partition)   # so the provided evaluate.py has a folder
-
-
-def cmd_eda(args):
-    import eda
-    eda.main()
 
 
 def cmd_materialize(args):
@@ -84,8 +78,6 @@ def build_parser():
 
     s = sub.add_parser("split"); s.add_argument("--seed", type=int, default=42)
     s.add_argument("--val-partition", default="P1"); s.set_defaults(func=cmd_split)
-
-    sub.add_parser("eda").set_defaults(func=cmd_eda)
 
     m = sub.add_parser("materialize")
     m.add_argument("--copies", type=int, default=1, help="augmented twins per original image")

@@ -41,7 +41,6 @@ Re-run them only if the seed or split logic changes.
 ## 4. Daily pipeline
 
 ```bash
-python run.py eda          # look at the data (class balance, sample grid, label sanity)
 python run.py baseline     # naive logistic-regression floor (the CNN must beat this)
 python run.py train        # progressive training -> submissions/my_team/weights.joblib
 python run.py robust       # clean vs provided-OOD accuracy
@@ -56,7 +55,7 @@ python run.py errors --partition P1   # detailed misclassification log -> output
 | A | model architecture | `submissions/my_team/model.py` |
 | B | training / optimization | `engine.py` |
 | C | augmentation / robustness | `augment.py`, `make_augmented.py` |
-| D | data / methodology / eval | `split_data.py`, `data.py`, `eda.py`, `baseline_naive.py`, `robust_eval.py`, `error_analysis.py` |
+| D | data / methodology / eval | `split_data.py`, `data.py`, `baseline_naive.py`, `robust_eval.py`, `error_analysis.py` |
 
 `model.py` must stay self-contained (import only torch) — the grader rebuilds it from that
 file alone. `predict.py` is frozen, never edit it.
