@@ -129,3 +129,5 @@
 | 13:45 | built MADRICH.html field-guide (full spec + methodology + file-by-file code walkthrough + status) | MADRICH.html | done, opened in browser | ~18k |
 | 13:45 | Session end: 2 writes across 1 files (MADRICH.html) | 0 reads | ~19481 tok |
 | 13:45 | Session end: 2 writes across 1 files (MADRICH.html) | 0 reads | ~19481 tok |
+| 14:59 | Identified user = Person B (engine.py owner); recorded in cerebrum | .wolf/cerebrum.md | done | ~200 |
+| 15:28 | engine.py: AdamW/cosine -> SGD(mom)/StepLR + LR 0.01 + grad_clip; updated MADRICH.html engine section | engine.py MADRICH.html | self-check OK | ~900 |
