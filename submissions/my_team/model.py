@@ -51,7 +51,7 @@ class ModelArchitecture(nn.Module):
     ANY input size (we may train at 128 but the grader feeds 224 — both work).
     """
 
-    def __init__(self, num_classes: int = 20, dropout: float = 0.3):
+    def __init__(self, num_classes: int = 20, dropout: float = 0.35):
         super().__init__()
 
         # Feature extractor — channels grow as spatial size shrinks (standard CNN funnel).
