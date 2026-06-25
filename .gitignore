@@ -36,5 +36,8 @@ runs/
 # seeded split manifest — regenerate locally (deterministic)
 dataset/splits.json
 
+# ── Private (D's personal learning guide — not shared) ────────────
+LEARN.html
+
 # ── OS ────────────────────────────────────────────────────────────
 .DS_Store

@@ -309,7 +309,7 @@ details.file .body{padding:6px 22px 22px}
   <a href="#f-model">model.py</a>
   <a href="#f-train">train.py</a>
   <a href="#f-predict">predict.py</a>
-  <a href="#f-tools">eda · baseline · errors · robust</a>
+  <a href="#f-tools">baseline · errors · robust</a>
   <a href="#f-provided">קבצים שסופקו</a>
   <div class="tt">סטטוס וסיום</div>
   <a href="#status">10 · סטטוס + מפת דרכים</a>
@@ -453,8 +453,9 @@ joblib.<span class="fn2">dump</span>(model.<span class="fn2">cpu</span>().<span 
   <h3>כלל הברזל של preprocessing — מכיילים על Train בלבד</h3>
   <p>כל החלטה מבוססת־data (סטטיסטיקות נרמול, משקלי מחלקה, עוצמת אוגמנטציה) מתקבלת על Train לבד. Dev/Test אף פעם לא מזינים את ה־preprocessing → אין זיהום. (אנחנו משתמשים ב־mean/std קבועים של ImageNet = קבועים, לא מכוילים → כבר תקין.)</p>
 
-  <h3>EDA לפני מודלים</h3>
-  <p>פיזית להסתכל על התמונות: רקעים, תאורה, שפיות תוויות/תיקיות, איזון מחלקות. זה מה שמכתיב אילו מניפולציות חשובות (Person C) ותופס data מקולקל.</p>
+  <h3>EDA מינימלי — מובנה בצנרת</h3>
+  <p>אין שלב EDA נפרד, וגם אין <code class="k">eda.py</code> (נמחק). השפיות המכנית — איזון מחלקות, שמות־תיקיות == <code class="k">labels.py</code> — נאכפת אוטומטית ב<b>שלב הפיצול</b>: הוא קורס אם תיקיית מחלקה חסרה, שונתה או ריקה, ומדפיס ספירות per‑partition. אפס מאמץ ידני, אפס קוד.</p>
+  <p>נשאר רק מבט חטוף אופציונלי, פעם אחת בכל הפרויקט (~2 דקות): לפתוח כמה תמונות מ־<code class="k">dataset/train</code> ואת תיקיית <code class="k">augmentations/</code> שסופקה — ישר ב־Finder, בלי כלי. <b>לא</b> 20k תמונות; חופן, רק כדי שלPerson C תהיה אינטואיציה אילו מניפולציות שומרות־תווית לפני שבוחרים. ההסתכלות הממוקדת על טעויות אמיתיות נמשכת אחר כך ב־<b>error analysis</b>.</p>
 
   <h3>Baseline נאיבי לפני הרשת העמוקה</h3>
   <p>מודל פשוט (רגרסיה לוגיסטית על פיקסלים מוקטנים) קובע את ה<b>רצפה</b> שה־CNN חייב לנצח. אם ה־CNN לא מנצח אותו — משהו שבור (באג, תוויות, loader), לא "צריך לכוונן".</p>
@@ -480,7 +481,7 @@ joblib.<span class="fn2">dump</span>(model.<span class="fn2">cpu</span>().<span 
     <div class="arrow">▼</div>
     <div class="fstep"><div class="fi">5</div><div class="fc"><h4>train.py → weights.joblib</h4><p>אימון פרוגרסיבי על חלקים מצטברים, ואז על 100% — שומר את המשקלים בחוזה ה־joblib.</p></div></div>
     <div class="arrow">▼</div>
-    <div class="fstep"><div class="fi">6</div><div class="fc"><h4>predict.py → grader</h4><p>טוען את המשקלים, מריץ <code class="k">forward</code>, מחזיר <code class="k">argmax</code>. סביב הכל: eda / baseline / error_analysis / robust_eval מודדים.</p></div></div>
+    <div class="fstep"><div class="fi">6</div><div class="fc"><h4>predict.py → grader</h4><p>טוען את המשקלים, מריץ <code class="k">forward</code>, מחזיר <code class="k">argmax</code>. סביב הכל: baseline / error_analysis / robust_eval מודדים.</p></div></div>
   </div>
 </section>
 
@@ -507,8 +508,7 @@ joblib.<span class="fn2">dump</span>(model.<span class="fn2">cpu</span>().<span 
       <div class="code">
         <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">run.py — הפקודות</span><span class="badge">CLI</span></div>
 <pre><code><span class="c"># הסדר המומלץ ל-clone טרי:</span>
-python run.py split        <span class="c"># פיצול 5-חלקים + יצירת dataset/validation</span>
-python run.py eda          <span class="c"># איזון מחלקות, שפיות תוויות, sample grid</span>
+python run.py split        <span class="c"># פיצול 5-חלקים + validation (אוכף איזון/שפיות)</span>
 python run.py materialize  <span class="c"># בניית תאומים מאוגמנטים (dataset/train_aug/)</span>
 python run.py baseline     <span class="c"># רצפת רגרסיה לוגיסטית (P0 -> test P1)</span>
 python run.py train        <span class="c"># אימון פרוגרסיבי -> weights.joblib</span>
@@ -517,7 +517,7 @@ python run.py robust       <span class="c"># דוח דיוק נקי מול OOD</
 python run.py errors --partition P1   <span class="c"># לוג טעויות על partition</span></code></pre>
       </div>
       <ul class="ann">
-        <li><span class="pin">cmd_*</span><span class="tx">כל פקודה היא פונקציה (<code class="k">cmd_split</code>, <code class="k">cmd_train</code>...) שמייבאת מודול בעצלתיים וקוראת ל־main שלו. ייבוא עצל = הרצת <code class="k">eda</code> לא טוענת torch.</span></li>
+        <li><span class="pin">cmd_*</span><span class="tx">כל פקודה היא פונקציה (<code class="k">cmd_split</code>, <code class="k">cmd_train</code>...) שמייבאת מודול בעצלתיים וקוראת ל־main שלו. ייבוא עצל = הרצת <code class="k">split</code> לא טוענת torch.</span></li>
         <li><span class="pin">importlib</span><span class="tx"><code class="k">cmd_train</code> מייבא את <code class="k">train.py</code> של הצוות דרך <code class="k">spec_from_file_location</code> — כי הוא יושב בתיקיית הצוות, לא בשורש.</span></li>
         <li><span class="pin g">argparse</span><span class="tx">לכל פקודה דגלים משלה (<code class="k">--seed</code>, <code class="k">--img-size</code>, <code class="k">--epochs</code>...) עם defaults הגיוניים.</span></li>
       </ul>
@@ -768,10 +768,8 @@ joblib.<span class="fn2">dump</span>(model.<span class="fn2">cpu</span>().<span 
 
   <!-- ===== tools ===== -->
   <details class="file" id="f-tools">
-    <summary><span class="chev">▶</span><span class="fname">eda.py · baseline_naive.py · error_analysis.py · robust_eval.py</span><span class="role D">Person D</span><span class="own">כלי מדידה</span></summary>
+    <summary><span class="chev">▶</span><span class="fname">baseline_naive.py · error_analysis.py · robust_eval.py</span><span class="role D">Person D</span><span class="own">כלי מדידה</span></summary>
     <div class="body">
-      <h4>eda.py — להסתכל על הdata</h4>
-      <p>שלב 3 במתודולוגיה. שלוש בדיקות: (1) איזון מחלקות, (2) שמות תיקיות == <code class="k">labels.py</code>, (3) <code class="k">sample_grid</code> — montage של תמונות לדגום בעיניים. מזין את החלטות האוגמנטציה.</p>
       <h4>baseline_naive.py — הרצפה</h4>
       <p>שלב 4. מודל טיפש = <code class="k">nn.Linear(3·32·32, 20)</code> = רגרסיה לוגיסטית על פיקסלים מוקטנים. רץ בשניות, מתאמן על P0 ובודק P1. אם ה־CNN לא מנצח אותו בנוחות — יש באג, לא בעיית כיוונון.</p>
       <h4>error_analysis.py — איפה זה נשבר</h4>
@@ -812,7 +810,7 @@ joblib.<span class="fn2">dump</span>(model.<span class="fn2">cpu</span>().<span 
   <h3>מה הלאה — מפת הדרכים</h3>
   <table class="tbl">
     <tr><th>שלב</th><th>מה</th><th>בעלים</th><th>סטטוס</th></tr>
-    <tr><td><b>1</b></td><td>הורדת train_set · <code class="k">run.py split</code> · EDA · בדיקת תיקיית augmentations</td><td>D</td><td><span class="ch wip">הבא ▸</span></td></tr>
+    <tr><td><b>1</b></td><td>הורדת train_set · <code class="k">run.py split</code> (אוכף איזון/שפיות) · בדיקת תיקיית augmentations</td><td>D</td><td><span class="ch wip">הבא ▸</span></td></tr>
     <tr><td><b>2</b></td><td><code class="k">run.py baseline</code> → לתעד את הרצפה</td><td>D</td><td><span class="ch wip">ממתין</span></td></tr>
     <tr><td><b>3</b></td><td>אימון CNN נקי, לנצח את הרצפה, יעד 50%+ נקי — <code class="k">weights.joblib</code> ראשון</td><td>A+B</td><td><span class="ch wip">ממתין</span></td></tr>
     <tr><td><b>4</b></td><td>עמידות: Person C מוסיף אוגמנטציה, D מודד נקי מול OOD, מאמנים מחדש</td><td>C+D</td><td><span class="ch wip">ממתין</span></td></tr>
@@ -829,7 +827,7 @@ joblib.<span class="fn2">dump</span>(model.<span class="fn2">cpu</span>().<span 
     <tr><td><span class="role A">A</span></td><td>ארכיטקטורה</td><td class="m">model.py</td><td>עומק/רוחב/רגולריזציה. נשאר עצמאי, לוגיטים [B,20].</td></tr>
     <tr><td><span class="role B">B</span></td><td>אימון/אופטימיזציה</td><td class="m">engine.py</td><td>optimizer, LR schedule, early‑stop, device, seeding, checkpoint.</td></tr>
     <tr><td><span class="role C">C</span></td><td>אוגמנטציה/עמידות</td><td class="m">augment.py · make_augmented.py</td><td>ה־differentiator — בעל חצי ה־OOD של הציון.</td></tr>
-    <tr><td><span class="role D">D</span></td><td>נתונים+מתודולוגיה+הערכה</td><td class="m">split · data · eda · baseline · robust · errors</td><td>הפיצול, ה־leaderboard שכולם סומכים עליו, אכיפת Test‑פעם‑אחת, בחירת weights סופי.</td></tr>
+    <tr><td><span class="role D">D</span></td><td>נתונים+מתודולוגיה+הערכה</td><td class="m">split · data · baseline · robust · errors</td><td>הפיצול, ה־leaderboard שכולם סומכים עליו, אכיפת Test‑פעם‑אחת, בחירת weights סופי.</td></tr>
   </table>
   <p>הglue המשותף (<code class="k">run.py</code>, <code class="k">train.py</code>) נבנה מראש ונערך לעיתים רחוקות → conflict נמוך. קבצים נפרדים לכל בעלים = עבודה מקבילה, מיזוגי git כמעט בלי התנגשויות.</p>
 </section>
@@ -864,8 +862,7 @@ joblib.<span class="fn2">dump</span>(model.<span class="fn2">cpu</span>().<span 
   <div class="sec-h"><span class="sec-n b">13</span><h2>פקודות — דף עזר</h2></div>
   <div class="code">
     <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">מהשורש (איפה ש-evaluate.py יושב)</span><span class="badge">bash</span></div>
-<pre><code>python run.py split        <span class="c"># פיצול + validation</span>
-python run.py eda          <span class="c"># EDA</span>
+<pre><code>python run.py split        <span class="c"># פיצול + validation (אוכף איזון/שפיות)</span>
 python run.py materialize  <span class="c"># תאומים מאוגמנטים</span>
 python run.py baseline     <span class="c"># רצפה נאיבית</span>
 python run.py train        <span class="c"># אימון -> weights.joblib</span>
