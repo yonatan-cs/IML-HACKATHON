@@ -41,3 +41,7 @@ LEARN.html
 
 # ── OS ────────────────────────────────────────────────────────────
 .DS_Store
+
+# packaged submission folders (zip+upload to Moodle; weights already in submissions/my_team)
+challenge2_*/
+challenge2_*.zip
