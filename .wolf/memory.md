@@ -129,6 +129,77 @@
 | 13:45 | built MADRICH.html field-guide (full spec + methodology + file-by-file code walkthrough + status) | MADRICH.html | done, opened in browser | ~18k |
 | 13:45 | Session end: 2 writes across 1 files (MADRICH.html) | 0 reads | ~19481 tok |
 | 13:45 | Session end: 2 writes across 1 files (MADRICH.html) | 0 reads | ~19481 tok |
+| 14:46 | Edited MADRICH.html | inline fix | ~14 |
+| 14:46 | Edited MADRICH.html | inline fix | ~14 |
+| 14:46 | Edited MADRICH.html | 2→2 lines | ~94 |
+| 14:46 | Edited MADRICH.html | 2→2 lines | ~94 |
+| 14:46 | Edited MADRICH.html | inline fix | ~26 |
+| 14:46 | Edited MADRICH.html | inline fix | ~26 |
+| 14:46 | Edited MADRICH.html | 3→2 lines | ~52 |
+| 14:46 | Edited MADRICH.html | 3→2 lines | ~52 |
+| 14:46 | Edited MADRICH.html | inline fix | ~17 |
+| 14:46 | Edited MADRICH.html | inline fix | ~17 |
+| 14:46 | Edited MADRICH.html | inline fix | ~54 |
+| 14:46 | Edited MADRICH.html | inline fix | ~54 |
+| 14:46 | Edited MADRICH.html | removed 3 lines | ~11 |
+| 14:46 | Edited MADRICH.html | removed 3 lines | ~11 |
+| 14:46 | Edited MADRICH.html | inline fix | ~52 |
+| 14:46 | Edited MADRICH.html | inline fix | ~52 |
+| 14:46 | Edited MADRICH.html | inline fix | ~16 |
+| 14:46 | Edited MADRICH.html | inline fix | ~16 |
+| 14:46 | Edited MADRICH.html | 3→2 lines | ~43 |
+| 14:46 | Edited MADRICH.html | 3→2 lines | ~43 |
+| 14:46 | dropped EDA from site per updated plan (methodology/flow/CLI/status/owners) | MADRICH.html | synced | ~1k |
+| 14:47 | Session end: 10 writes across 1 files (MADRICH.html) | 2 reads | ~21616 tok |
+| 14:47 | Session end: 10 writes across 1 files (MADRICH.html) | 2 reads | ~21616 tok |
+
+## Session: 2026-06-25 14:47
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-06-25 14:47
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:56 | Edited MADRICH.html | 2→3 lines | ~192 |
+| 14:56 | Edited MADRICH.html | 2→3 lines | ~192 |
+| 14:58 | Edited MADRICH.html | 3→3 lines | ~189 |
+| 14:58 | Edited MADRICH.html | 3→3 lines | ~189 |
+| 14:58 | Edited MADRICH.html | inline fix | ~10 |
+| 14:58 | Edited MADRICH.html | inline fix | ~10 |
+| 14:58 | Edited plan.md | inline fix | ~135 |
+| 14:58 | Edited plan.md | inline fix | ~135 |
+| 14:59 | EDA reality-synced: eda.py already deleted (prior session); fixed site to drop sample_grid ref, updated plan + anatomy + cerebrum | MADRICH.html plan.md anatomy.md cerebrum.md | consistent | ~1k |
+| 14:59 | Session end: 4 writes across 2 files (MADRICH.html, plan.md) | 0 reads | ~562 tok |
+| 14:59 | Session end: 4 writes across 2 files (MADRICH.html, plan.md) | 0 reads | ~562 tok |
+| 15:00 | Session end: 4 writes across 2 files (MADRICH.html, plan.md) | 1 reads | ~3396 tok |
+| 15:00 | Session end: 4 writes across 2 files (MADRICH.html, plan.md) | 1 reads | ~3396 tok |
+
+| 15:1x | Stage1 verified: split seed42, P0=8000(400/cls)Train P1=3000(150/cls)Dev→validation P2-4=held, all BALANCED | split_data.py splits.json | OK | ~300 |
+| 15:1x | Stage2 done: naive logreg 32x32 clean-Dev floor=0.3453 (random 0.05) | baseline_naive.py | recorded | ~150 |
+| 15:1x | augmentations/ = 2 OOD families color_jitter+random_rotation (20cls x20img) → intel for C, test OOD broader/hidden | dataset/augmentations | reported | ~100 |
+| 15:07 | Session end: 4 writes across 2 files (MADRICH.html, plan.md) | 1 reads | ~3396 tok |
+| 15:07 | Session end: 4 writes across 2 files (MADRICH.html, plan.md) | 1 reads | ~3396 tok |
+| 15:09 | Session end: 4 writes across 2 files (MADRICH.html, plan.md) | 1 reads | ~3396 tok |
+| 15:09 | Session end: 4 writes across 2 files (MADRICH.html, plan.md) | 1 reads | ~3396 tok |
+
+## Session: 2026-06-25 15:11
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-06-25 15:11
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:25 | Created LEARN.html | — | ~14699 |
+| 15:25 | Created LEARN.html | — | ~14699 |
+| 15:25 | Edited .gitignore | 2→5 lines | ~43 |
+| 15:25 | Edited .gitignore | 2→5 lines | ~43 |
+| 15:25 | LEARN.html: private CNN+interview study guide for D, MADRICH-styled, gitignored | LEARN.html .gitignore | created, git-ignored OK | ~9k |
+| 15:26 | Session end: 2 writes across 2 files (LEARN.html, .gitignore) | 3 reads | ~35699 tok |
+| 15:26 | Session end: 2 writes across 2 files (LEARN.html, .gitignore) | 3 reads | ~35699 tok |
 | 14:59 | Identified user = Person B (engine.py owner); recorded in cerebrum | .wolf/cerebrum.md | done | ~200 |
 | 15:28 | engine.py: AdamW/cosine -> SGD(mom)/StepLR + LR 0.01 + grad_clip; updated MADRICH.html engine section | engine.py MADRICH.html | self-check OK | ~900 |
 | 15:37 | engine.py: added label_smoothing=0.1 to CrossEntropyLoss; updated MADRICH.html | engine.py MADRICH.html | self-check OK | ~400 |

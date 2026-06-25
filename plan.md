@@ -4,7 +4,7 @@ Context
 
 Everyone owns real, score-moving work (not a trivial pipeline split). Claude builds a runnable skeleton; each person fills one high-leverage lever, measured on a shared harness, in separate files (clean git merges). Compute: M3 Mac (MPS), Windows 32GB (CPU), no NVIDIA → device-agnostic code, small model.
 
-This plan follows the course "ML in Practice" methodology (data partitioning → naive baseline → model selection → error analysis), not just "train a net." The interview will probe this — methodology is part of the grade. (We deliberately skip dataset-specific preprocessing — fixed ImageNet mean/std constants, no fitted stats — and skip a standalone EDA pass; label/balance sanity is enforced by the split step and visual inspection happens during error analysis.)
+This plan follows the course "ML in Practice" methodology (data partitioning → naive baseline → model selection → error analysis), not just "train a net." The interview will probe this — methodology is part of the grade. (We deliberately skip dataset-specific preprocessing — fixed ImageNet mean/std constants, no fitted stats — and skip a standalone EDA pass / eda.py. Label/balance sanity is enforced by the split step itself, which raises on any missing/renamed/empty class folder and prints per-partition counts. An optional ~2-minute manual glance at a few train images + the provided augmentations/ folder (in Finder, no tooling) informs augmentation choices; focused visual inspection continues during error analysis.)
 
 Project Vision (AI-readable — a fresh session reads this and is fully oriented)
 Product: PixelPerfect robust classifier. Input [B,3,224,224] ImageNet-normalized → output class indices [B] in 0..19.

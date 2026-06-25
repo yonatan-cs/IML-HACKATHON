@@ -40,3 +40,4 @@
   missing/renamed/empty class folder), and visual inspection happens during error analysis
   (`error_analysis.py`). Net: methodology chain is now data partitioning → naive baseline →
   model selection → error analysis.
+- [2026-06-25] EDA decision settled: NO standalone EDA stage and NO eda.py (already deleted; run.py has no cmd_eda). Mechanical sanity (class balance, folder name == labels.py) is enforced inside split_data.build_splits. Keep only a one-time ~2-min manual glance at a few train images + the provided augmentations/ folder (Finder, no tooling) to guide augmentation choices; focused inspection continues in error_analysis. (Corrects an earlier note in this session that wrongly said eda.py still exists.)
