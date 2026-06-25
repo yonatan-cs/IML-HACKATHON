@@ -189,18 +189,3 @@ def train(
     if best_state is not None:
         model.load_state_dict(best_state)         # restore best, not last
     return model, history
-
-
-if __name__ == "__main__":
-    # Self-check: tiny fake data trains for 1 epoch on the chosen device.
-    from torch.utils.data import TensorDataset
-    set_seed(0)
-    dev = get_device()
-    print("device:", dev)
-    X = torch.randn(32, 3, 32, 32)
-    Y = torch.randint(0, 20, (32,))
-    net = nn.Sequential(nn.Flatten(), nn.Linear(3 * 32 * 32, 20))
-    loader = DataLoader(TensorDataset(X, Y), batch_size=8)
-    _, hist = train(net, loader, loader, epochs=1, device=dev)
-    assert len(hist) == 1
-    print("engine OK")

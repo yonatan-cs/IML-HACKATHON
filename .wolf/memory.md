@@ -206,3 +206,4 @@
 | 15:46 | Deterministic train transform + drop zoom filter | data.py, make_augmented.py | self-checks pass; needs twin regen | ~6k |
 | 15:53 | Bridged dataset/train symlink; ran split+materialize; 20k twins regen (no zoom); verified train=orig+twins deterministic | dataset/, .wolf/cerebrum.md | all checks pass | ~3k |
 | 15:52 | model.py dropout 0.3 -> 0.35 (Person A file, user request) + synced MADRICH.html | model.py MADRICH.html | smoke test OK (4,20) | ~150 |
+| 16:02 | engine.py: removed __main__ self-check block (user request, not mandatory) | engine.py | import OK | ~120 |
