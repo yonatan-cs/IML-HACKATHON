@@ -1,0 +1,4 @@
+# Stack every change on merge — union driver keeps all lines from both
+# sides, no conflict markers, nothing lost. Safe only for append-only text.
+.wolf/memory.md   merge=union
+.wolf/cerebrum.md merge=union

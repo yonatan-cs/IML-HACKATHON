@@ -1,0 +1,40 @@
+# ── OpenWolf (.wolf/) ─────────────────────────────────────────────
+# Ignore everything by default so any new machine-local state file
+# (logs, runtime JSON, regenerated anatomy/hooks) never causes push
+# conflicts. Re-include only the few files meant to be shared.
+.wolf/*
+!.wolf/OPENWOLF.md
+!.wolf/identity.md
+!.wolf/config.json
+!.wolf/reframe-frameworks.md
+# Shared + union-merged (see .gitattributes) so every change stacks, nothing lost:
+!.wolf/memory.md
+!.wolf/cerebrum.md
+# Machine-local / volatile (stay ignored): anatomy.md, buglog.json,
+# token-ledger.json, cron-state.json, cron-manifest.json, suggestions.json,
+# designqc-report.json, daemon.log, hooks/  → each dev runs `openwolf init` / `openwolf scan` locally.
+
+# ── Dataset (downloaded separately, not committed) ────────────────
+dataset/*
+!dataset/labels.json
+
+# ── Python ────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# ── Training artifacts (machine-local; binary → conflicts) ────────
+# weights.joblib changes every run; commit only the single FINAL best (force-add it).
+submissions/**/weights.joblib
+!submissions/dummy_baseline/weights.joblib
+# error logs, confusion matrices, EDA grids, learning curves
+outputs/
+# tensorboard
+runs/
+# seeded split manifest — regenerate locally (deterministic)
+dataset/splits.json
+
+# ── OS ────────────────────────────────────────────────────────────
+.DS_Store

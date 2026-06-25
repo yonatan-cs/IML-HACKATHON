@@ -1,0 +1,13 @@
+# IML Challenge 2 — dev dependencies. Install into a venv (Python 3.11 recommended):
+#   python3.11 -m venv .venv && source .venv/bin/activate   # (Windows: .venv\Scripts\activate)
+#   pip install -r requirements.txt
+#
+# NOTE: torch has no wheels for Python 3.14 yet — use 3.11/3.12/3.13.
+torch>=2.2
+torchvision>=0.17
+numpy
+pillow
+joblib
+tqdm
+# Optional, local only (no network at train/eval): uncomment if you want curves.
+# tensorboard
