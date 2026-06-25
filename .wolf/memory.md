@@ -101,3 +101,30 @@
 | 12:29 | Edited SETUP.md | 1→3 lines | ~65 |
 | 12:30 | Session end: 32 writes across 16 files (i-m-starting-a-new-buzzing-shannon.md, requirements.txt, .gitignore, model.py, engine.py) | 3 reads | ~18829 tok |
 | 12:30 | Session end: 32 writes across 16 files (i-m-starting-a-new-buzzing-shannon.md, requirements.txt, .gitignore, model.py, engine.py) | 3 reads | ~18829 tok |
+
+## Session: 2026-06-25 13:03
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-06-25 13:03
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-06-25 13:35
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-06-25 13:35
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 13:44 | Created MADRICH.html | — | ~18171 |
+| 13:44 | Created MADRICH.html | — | ~18171 |
+| 13:44 | Edited MADRICH.html | inline fix | ~11 |
+| 13:44 | Edited MADRICH.html | inline fix | ~11 |
+| 13:45 | built MADRICH.html field-guide (full spec + methodology + file-by-file code walkthrough + status) | MADRICH.html | done, opened in browser | ~18k |
+| 13:45 | Session end: 2 writes across 1 files (MADRICH.html) | 0 reads | ~19481 tok |
+| 13:45 | Session end: 2 writes across 1 files (MADRICH.html) | 0 reads | ~19481 tok |
