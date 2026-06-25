@@ -68,3 +68,5 @@ file alone. `predict.py` is frozen, never edit it.
 - Don't commit `weights.joblib` during dev (git-ignored). Near the end, the team picks the
   single best model and force-adds that one file.
 - Never commit `dataset/`, `.venv/`, or `outputs/` (all git-ignored).
+- Hit a real bug + fixed it? Log it in `.wolf/cerebrum.md` → `## Do-Not-Repeat` (shared,
+  conflict-free). `.wolf/buglog.json` is local-only auto-noise — don't rely on it.

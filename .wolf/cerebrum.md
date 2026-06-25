@@ -19,6 +19,10 @@
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->
 <!-- Format: [YYYY-MM-DD] Description of what went wrong and what to do instead. -->
 
+> TEAM CONVENTION: log REAL bug fixes here (this file is shared + union-merged → all 4 get
+> them, no conflicts). Do NOT rely on .wolf/buglog.json — it's machine-LOCAL, JSON (can't
+> union-merge), and auto-fills with edit noise. One line per fix: `[date] symptom → fix`.
+
 ## Decision Log
 
 <!-- Significant technical decisions with rationale. Why X was chosen over Y. -->
