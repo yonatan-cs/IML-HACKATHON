@@ -3,103 +3,53 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PixelPerfect — מדריך השדה · Challenge 2: סיווג תמונות עמיד</title>
+<title>PixelPerfect — מדריך השדה · Challenge 2: סיווג תמונות עמיד · SCORE 0.906</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Secular+One&family=Rubik:wght@500;600;700;800;900&family=Heebo:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0b0f1a;
-  --panel:#121829;
-  --panel-2:#161e33;
-  --panel-3:#1b2540;
-  --code-bg:#0a0e18;
-  --ink:#eaeef7;
-  --ink-soft:#c2cadb;
-  --muted:#828ca6;
-  --line:#26304a;
-  --line-soft:#1b2440;
-  --r:#ff6b81;   /* red channel  → חוקי ברזל / DQ */
-  --g:#4ade9e;   /* green channel → עמידוּת / בוצע */
-  --b:#5b9dff;   /* blue channel  → קוד / נתונים */
-  --warn:#ffc24b;/* amber         → מלכודות */
-  --r-bg:rgba(255,107,129,.10);
-  --g-bg:rgba(74,222,158,.10);
-  --b-bg:rgba(91,157,255,.10);
-  --warn-bg:rgba(255,194,75,.10);
-  --radius:14px;
-  --maxw:1240px;
-  --sans:'Heebo',system-ui,sans-serif;
-  --disp:'Rubik',system-ui,sans-serif;
-  --hero:'Secular One','Rubik',sans-serif;
-  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --bg:#0b0f1a;--panel:#121829;--panel-2:#161e33;--panel-3:#1b2540;--code-bg:#0a0e18;
+  --ink:#eaeef7;--ink-soft:#c2cadb;--muted:#828ca6;--line:#26304a;--line-soft:#1b2440;
+  --r:#ff6b81;--g:#4ade9e;--b:#5b9dff;--warn:#ffc24b;
+  --r-bg:rgba(255,107,129,.10);--g-bg:rgba(74,222,158,.10);--b-bg:rgba(91,157,255,.10);--warn-bg:rgba(255,194,75,.10);
+  --radius:14px;--maxw:1240px;
+  --sans:'Heebo',system-ui,sans-serif;--disp:'Rubik',system-ui,sans-serif;
+  --hero:'Secular One','Rubik',sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;scroll-padding-top:80px}
 body{
-  background:
-    radial-gradient(1100px 520px at 88% -8%, rgba(91,157,255,.10), transparent 60%),
-    radial-gradient(900px 480px at 5% 4%, rgba(74,222,158,.08), transparent 55%),
-    var(--bg);
-  color:var(--ink);
-  font-family:var(--sans);
-  font-weight:400;
-  line-height:1.75;
-  font-size:17px;
-  -webkit-font-smoothing:antialiased;
-  text-rendering:optimizeLegibility;
-  padding-bottom:120px;
+  background:radial-gradient(1100px 520px at 88% -8%,rgba(91,157,255,.10),transparent 60%),
+    radial-gradient(900px 480px at 5% 4%,rgba(74,222,158,.08),transparent 55%),var(--bg);
+  color:var(--ink);font-family:var(--sans);font-weight:400;line-height:1.75;font-size:17px;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;padding-bottom:120px;
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
-
-/* ---- top progress ---- */
-#prog{position:fixed;top:0;right:0;height:3px;width:0;z-index:100;
-  background:linear-gradient(90deg,var(--r),var(--warn),var(--g),var(--b));}
-
-/* ---- channel rail (signature) ---- */
-.rail{position:fixed;top:0;bottom:0;left:0;width:6px;z-index:60;
-  background:linear-gradient(180deg,var(--r) 0 33%,var(--g) 33% 66%,var(--b) 66% 100%);
-  opacity:.55;}
+#prog{position:fixed;top:0;right:0;height:3px;width:0;z-index:100;background:linear-gradient(90deg,var(--r),var(--warn),var(--g),var(--b))}
+.rail{position:fixed;top:0;bottom:0;left:0;width:6px;z-index:60;background:linear-gradient(180deg,var(--r) 0 33%,var(--g) 33% 66%,var(--b) 66% 100%);opacity:.55}
 @media(max-width:1100px){.rail{display:none}}
-
-/* ---- layout ---- */
-.wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px;}
-.shell{display:grid;grid-template-columns:255px 1fr;gap:46px;max-width:var(--maxw);margin:0 auto;padding:0 28px;}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px}
+.shell{display:grid;grid-template-columns:255px 1fr;gap:46px;max-width:var(--maxw);margin:0 auto;padding:0 28px}
 main{min-width:0;padding-top:30px}
-
-/* ---- sticky TOC ---- */
-nav.toc{position:sticky;top:24px;align-self:start;height:calc(100vh - 48px);overflow-y:auto;
-  padding:22px 18px;border:1px solid var(--line-soft);border-radius:var(--radius);
-  background:linear-gradient(180deg,var(--panel),rgba(18,24,41,.6));font-size:14px;}
-nav.toc .tt{font-family:var(--disp);font-weight:800;font-size:12px;letter-spacing:.14em;
-  text-transform:uppercase;color:var(--muted);margin:14px 6px 8px;}
+nav.toc{position:sticky;top:24px;align-self:start;height:calc(100vh - 48px);overflow-y:auto;padding:22px 18px;border:1px solid var(--line-soft);border-radius:var(--radius);background:linear-gradient(180deg,var(--panel),rgba(18,24,41,.6));font-size:14px}
+nav.toc .tt{font-family:var(--disp);font-weight:800;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:14px 6px 8px}
 nav.toc .tt:first-child{margin-top:0}
-nav.toc a{display:block;color:var(--ink-soft);text-decoration:none;padding:6px 10px;border-radius:8px;
-  border-right:2px solid transparent;transition:.15s;line-height:1.4}
+nav.toc a{display:block;color:var(--ink-soft);text-decoration:none;padding:6px 10px;border-radius:8px;border-right:2px solid transparent;transition:.15s;line-height:1.4}
 nav.toc a:hover{background:var(--panel-3);color:#fff}
 nav.toc a.on{background:var(--b-bg);color:#fff;border-right-color:var(--b);font-weight:600}
 nav.toc::-webkit-scrollbar{width:8px}
 nav.toc::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px}
 @media(max-width:1100px){.shell{grid-template-columns:1fr}nav.toc{display:none}}
-
-/* ---- hero ---- */
-.hero{padding:74px 28px 56px;max-width:var(--maxw);margin:0 auto;}
-.kick{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:12.5px;
-  letter-spacing:.05em;color:var(--g);background:var(--g-bg);border:1px solid rgba(74,222,158,.3);
-  padding:6px 13px;border-radius:100px;margin-bottom:24px}
+.hero{padding:74px 28px 50px;max-width:var(--maxw);margin:0 auto}
+.kick{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:12.5px;letter-spacing:.05em;color:var(--g);background:var(--g-bg);border:1px solid rgba(74,222,158,.3);padding:6px 13px;border-radius:100px;margin-bottom:24px}
 .kick .dot{width:7px;height:7px;border-radius:50%;background:var(--g);box-shadow:0 0 10px var(--g)}
-h1.title{font-family:var(--hero);font-weight:400;font-size:clamp(40px,6.4vw,76px);line-height:1.02;
-  letter-spacing:-.01em;margin-bottom:8px;}
-h1.title .pp{background:linear-gradient(95deg,var(--g),var(--b));-webkit-background-clip:text;
-  background-clip:text;color:transparent;}
-.lede{font-size:clamp(18px,2.1vw,23px);color:var(--ink-soft);max-width:760px;margin-top:18px;line-height:1.6}
+h1.title{font-family:var(--hero);font-weight:400;font-size:clamp(40px,6.4vw,76px);line-height:1.02;letter-spacing:-.01em;margin-bottom:8px}
+h1.title .pp{background:linear-gradient(95deg,var(--g),var(--b));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{font-size:clamp(18px,2.1vw,23px);color:var(--ink-soft);max-width:780px;margin-top:18px;line-height:1.6}
 .lede b{color:#fff;font-weight:700}
-
-/* signature specimen grid */
-.proof{margin-top:48px;border:1px solid var(--line);border-radius:18px;overflow:hidden;
-  background:linear-gradient(180deg,var(--panel),var(--bg))}
-.proof .ph{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;
-  padding:16px 22px;border-bottom:1px solid var(--line-soft)}
+.proof{margin-top:46px;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:linear-gradient(180deg,var(--panel),var(--bg))}
+.proof .ph{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding:16px 22px;border-bottom:1px solid var(--line-soft)}
 .proof .ph h3{font-family:var(--disp);font-weight:800;font-size:16px}
 .proof .ph span{font-family:var(--mono);font-size:12px;color:var(--muted)}
 .prow{display:flex;align-items:center;gap:14px;padding:18px 22px}
@@ -107,28 +57,25 @@ h1.title .pp{background:linear-gradient(95deg,var(--g),var(--b));-webkit-backgro
 .prow .rl{flex:0 0 132px;font-size:14px;color:var(--ink-soft)}
 .prow .rl b{display:block;font-family:var(--disp);font-weight:800;font-size:15px;color:#fff}
 .tiles{display:flex;gap:12px;flex-wrap:wrap}
-.tile{position:relative;width:74px;height:74px;border-radius:12px;display:grid;place-items:center;
-  font-size:34px;border:1px solid var(--line);overflow:hidden}
-.tile .tag{position:absolute;bottom:3px;inset-inline-start:4px;font-family:var(--mono);font-size:9.5px;
-  padding:1px 5px;border-radius:5px;font-weight:700}
-.tag.ok{background:var(--g);color:#06281a}
-.tag.no{background:var(--r);color:#3a0a12}
-.t-clean{background:#1d3a2b}
-.t-gray{background:#2a2f38;filter:grayscale(1)}
+.tile{position:relative;width:74px;height:74px;border-radius:12px;display:grid;place-items:center;font-size:34px;border:1px solid var(--line);overflow:hidden}
+.tile .tag{position:absolute;bottom:3px;inset-inline-start:4px;font-family:var(--mono);font-size:9.5px;padding:1px 5px;border-radius:5px;font-weight:700}
+.tag.ok{background:var(--g);color:#06281a}.tag.no{background:var(--r);color:#3a0a12}
+.t-clean{background:#1d3a2b}.t-gray{background:#2a2f38;filter:grayscale(1)}
 .t-hue{background:#3a2350;filter:hue-rotate(150deg) saturate(1.4)}
 .t-rot{background:#123048}.t-rot span{display:inline-block;transform:rotate(28deg)}
-.t-noise{background:#2c1d3a;filter:contrast(1.4) brightness(.9)}
-.t-sky{background:#2a4a78}
+.t-noise{background:#2c1d3a;filter:contrast(1.4) brightness(.9)}.t-sky{background:#2a4a78}
 .proof .foot{padding:14px 22px;border-top:1px solid var(--line-soft);font-size:14.5px;color:var(--muted)}
-.proof .foot b{color:var(--ink)}
-
-/* ---- sections ---- */
+.proof .foot b{color:var(--g)}
+.results{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:24px 0}
+.stat{border:1px solid var(--line);border-radius:var(--radius);padding:24px 20px;background:linear-gradient(180deg,var(--panel),var(--bg));text-align:center}
+.stat .n{font-family:var(--hero);font-size:clamp(36px,5.4vw,56px);line-height:1;background:linear-gradient(95deg,var(--g),var(--b));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat .l{font-size:14px;color:var(--ink-soft);margin-top:10px;font-weight:600}
+.stat .s{font-size:12.5px;color:var(--muted);margin-top:3px}
+@media(max-width:640px){.results{grid-template-columns:1fr}}
 section{scroll-margin-top:80px;padding:30px 0 14px}
 .sec-h{display:flex;align-items:center;gap:14px;margin:14px 0 22px}
-.sec-n{font-family:var(--mono);font-size:13px;font-weight:700;color:#06281a;background:var(--g);
-  width:34px;height:34px;border-radius:9px;display:grid;place-items:center;flex:0 0 auto}
-.sec-n.r{background:var(--r);color:#3a0a12}.sec-n.b{background:var(--b);color:#0a2147}
-.sec-n.w{background:var(--warn);color:#3d2b00}
+.sec-n{font-family:var(--mono);font-size:13px;font-weight:700;color:#06281a;background:var(--g);width:34px;height:34px;border-radius:9px;display:grid;place-items:center;flex:0 0 auto}
+.sec-n.r{background:var(--r);color:#3a0a12}.sec-n.b{background:var(--b);color:#0a2147}.sec-n.w{background:var(--warn);color:#3d2b00}
 h2{font-family:var(--disp);font-weight:800;font-size:clamp(25px,3.4vw,36px);line-height:1.12;letter-spacing:-.01em}
 h3{font-family:var(--disp);font-weight:700;font-size:21px;margin:28px 0 10px;color:#fff}
 h4{font-family:var(--disp);font-weight:700;font-size:16.5px;margin:18px 0 6px;color:var(--ink)}
@@ -138,108 +85,66 @@ a.inl{color:var(--b);text-decoration:none;border-bottom:1px solid rgba(91,157,25
 ul,ol{margin:0 0 16px;padding-inline-start:24px}
 li{margin:7px 0;color:var(--ink-soft)}
 hr.div{border:0;border-top:1px solid var(--line-soft);margin:40px 0}
-code.k{font-family:var(--mono);font-size:.86em;background:var(--panel-3);color:#bcd2ff;
-  padding:2px 7px;border-radius:6px;border:1px solid var(--line-soft);direction:ltr;display:inline-block}
-
-/* ---- callout cards ---- */
+code.k{font-family:var(--mono);font-size:.86em;background:var(--panel-3);color:#bcd2ff;padding:2px 7px;border-radius:6px;border:1px solid var(--line-soft);direction:ltr;display:inline-block}
 .card{border:1px solid var(--line);background:var(--panel);border-radius:var(--radius);padding:20px 22px;margin:18px 0}
 .note{border-radius:var(--radius);padding:16px 20px;margin:18px 0;border:1px solid;display:flex;gap:13px}
 .note .ic{font-size:20px;flex:0 0 auto;line-height:1.4}
 .note .bd{min-width:0}
 .note .bd b{font-family:var(--disp);font-weight:800}
-.note.rule{background:var(--r-bg);border-color:rgba(255,107,129,.34)}
-.note.rule .ic{color:var(--r)}
-.note.warn{background:var(--warn-bg);border-color:rgba(255,194,75,.32)}
-.note.warn .ic{color:var(--warn)}
-.note.good{background:var(--g-bg);border-color:rgba(74,222,158,.32)}
-.note.good .ic{color:var(--g)}
-.note.info{background:var(--b-bg);border-color:rgba(91,157,255,.32)}
-.note.info .ic{color:var(--b)}
-
-/* ---- code blocks ---- */
+.note.rule{background:var(--r-bg);border-color:rgba(255,107,129,.34)}.note.rule .ic{color:var(--r)}
+.note.warn{background:var(--warn-bg);border-color:rgba(255,194,75,.32)}.note.warn .ic{color:var(--warn)}
+.note.good{background:var(--g-bg);border-color:rgba(74,222,158,.32)}.note.good .ic{color:var(--g)}
+.note.info{background:var(--b-bg);border-color:rgba(91,157,255,.32)}.note.info .ic{color:var(--b)}
 .code{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin:16px 0;background:var(--code-bg)}
-.code .cb{display:flex;align-items:center;gap:9px;padding:9px 15px;border-bottom:1px solid var(--line-soft);
-  background:var(--panel)}
+.code .cb{display:flex;align-items:center;gap:9px;padding:9px 15px;border-bottom:1px solid var(--line-soft);background:var(--panel)}
 .code .cb .dots{display:flex;gap:6px}
 .code .cb .dots i{width:10px;height:10px;border-radius:50%;display:block}
-.code .cb .dots i:nth-child(1){background:#ff5f57}.code .cb .dots i:nth-child(2){background:#febc2e}
-.code .cb .dots i:nth-child(3){background:#28c840}
+.code .cb .dots i:nth-child(1){background:#ff5f57}.code .cb .dots i:nth-child(2){background:#febc2e}.code .cb .dots i:nth-child(3){background:#28c840}
 .code .cb .fn{font-family:var(--mono);font-size:12.5px;color:var(--ink-soft);margin-inline-start:4px}
-.code .cb .badge{margin-inline-start:auto;font-family:var(--mono);font-size:10.5px;color:var(--muted);
-  border:1px solid var(--line);padding:2px 8px;border-radius:20px}
+.code .cb .badge{margin-inline-start:auto;font-family:var(--mono);font-size:10.5px;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:20px}
 .code pre{margin:0;padding:16px 18px;overflow-x:auto;direction:ltr;text-align:left}
 .code code{font-family:var(--mono);font-size:13px;line-height:1.7;color:#d6deec;white-space:pre}
-.code .c{color:#6b7796;font-style:italic}      /* comment */
-.code .kw{color:#ff8fa3}                         /* keyword */
-.code .fn2{color:#7fd3ff}                        /* func/name */
-.code .st{color:#9be6a8}                         /* string */
-.code .nu{color:#ffc24b}                         /* number */
+.code .c{color:#6b7796;font-style:italic}.code .kw{color:#ff8fa3}.code .fn2{color:#7fd3ff}.code .st{color:#9be6a8}.code .nu{color:#ffc24b}
 .code pre::-webkit-scrollbar{height:9px}
 .code pre::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px}
-
-/* annotated line list under code */
-.ann{list-style:none;padding:0;margin:14px 0 6px;counter-reset:ln}
-.ann li{display:flex;gap:12px;align-items:flex-start;margin:9px 0;padding-bottom:9px;
-  border-bottom:1px dashed var(--line-soft)}
+.ann{list-style:none;padding:0;margin:14px 0 6px}
+.ann li{display:flex;gap:12px;align-items:flex-start;margin:9px 0;padding-bottom:9px;border-bottom:1px dashed var(--line-soft)}
 .ann li:last-child{border-bottom:0}
-.ann .pin{flex:0 0 auto;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--b);
-  background:var(--b-bg);border:1px solid rgba(91,157,255,.3);padding:2px 8px;border-radius:7px;
-  direction:ltr;white-space:nowrap;margin-top:3px}
+.ann .pin{flex:0 0 auto;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--b);background:var(--b-bg);border:1px solid rgba(91,157,255,.3);padding:2px 8px;border-radius:7px;direction:ltr;white-space:nowrap;margin-top:3px}
 .ann .pin.g{color:var(--g);background:var(--g-bg);border-color:rgba(74,222,158,.3)}
 .ann .pin.w{color:var(--warn);background:var(--warn-bg);border-color:rgba(255,194,75,.3)}
 .ann .pin.r{color:var(--r);background:var(--r-bg);border-color:rgba(255,107,129,.3)}
 .ann .tx{min-width:0;font-size:15px}
-
-/* ---- file deep dives ---- */
-details.file{border:1px solid var(--line);border-radius:var(--radius);margin:14px 0;
-  background:var(--panel);overflow:hidden}
+details.file{border:1px solid var(--line);border-radius:var(--radius);margin:14px 0;background:var(--panel);overflow:hidden}
 details.file>summary{cursor:pointer;list-style:none;padding:16px 20px;display:flex;align-items:center;gap:14px}
 details.file>summary::-webkit-details-marker{display:none}
 details.file>summary .fname{font-family:var(--mono);font-size:15px;font-weight:700;color:#fff}
-details.file>summary .own{font-size:12.5px;color:var(--muted);margin-inline-start:auto;
-  border:1px solid var(--line);padding:3px 10px;border-radius:20px;white-space:nowrap}
+details.file>summary .own{font-size:12.5px;color:var(--muted);margin-inline-start:auto;border:1px solid var(--line);padding:3px 10px;border-radius:20px;white-space:nowrap}
 details.file>summary .chev{transition:.2s;color:var(--muted);font-size:14px}
 details.file[open]>summary .chev{transform:rotate(90deg)}
 details.file[open]>summary{border-bottom:1px solid var(--line-soft)}
 details.file .body{padding:6px 22px 22px}
-.role{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:700;padding:3px 9px;
-  border-radius:7px;margin-inline-end:6px}
-.role.A{background:var(--r-bg);color:var(--r)}.role.B{background:var(--warn-bg);color:var(--warn)}
-.role.C{background:var(--g-bg);color:var(--g)}.role.D{background:var(--b-bg);color:var(--b)}
-.role.S{background:var(--panel-3);color:var(--ink-soft)}
-
-/* ---- tables ---- */
-.tbl{width:100%;border-collapse:collapse;margin:16px 0;font-size:14.5px;overflow:hidden;
-  border:1px solid var(--line);border-radius:var(--radius)}
+.tbl{width:100%;border-collapse:collapse;margin:16px 0;font-size:14.5px;overflow:hidden;border:1px solid var(--line);border-radius:var(--radius)}
 .tbl th,.tbl td{padding:11px 14px;text-align:right;border-bottom:1px solid var(--line-soft);vertical-align:top}
 .tbl th{font-family:var(--disp);font-weight:700;color:#fff;background:var(--panel-2);font-size:13.5px}
 .tbl tr:last-child td{border-bottom:0}
 .tbl td.m{font-family:var(--mono);font-size:12.5px;color:#bcd2ff;direction:ltr;text-align:left}
 .tbl .ch{font-family:var(--mono);font-weight:700}
 .ch.ok{color:var(--g)}.ch.no{color:var(--r)}.ch.wip{color:var(--warn)}
-
-/* ---- status chips ---- */
 .chips{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}
-.chip{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;padding:7px 14px;border-radius:100px;
-  border:1px solid var(--line);background:var(--panel)}
+.chip{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;padding:7px 14px;border-radius:100px;border:1px solid var(--line);background:var(--panel)}
 .chip i{width:8px;height:8px;border-radius:50%;display:block}
 .chip.done i{background:var(--g);box-shadow:0 0 8px var(--g)}
 .chip.next i{background:var(--warn);box-shadow:0 0 8px var(--warn)}
 .chip.miss i{background:var(--r);box-shadow:0 0 8px var(--r)}
-
-/* steps / flow */
-.flow{display:flex;flex-direction:column;gap:0;margin:20px 0;border:1px solid var(--line);
-  border-radius:var(--radius);overflow:hidden}
+.flow{display:flex;flex-direction:column;gap:0;margin:20px 0;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
 .fstep{display:flex;gap:16px;padding:16px 20px;background:var(--panel)}
 .fstep+.fstep{border-top:1px solid var(--line-soft)}
-.fstep .fi{flex:0 0 44px;height:44px;border-radius:11px;display:grid;place-items:center;
-  font-family:var(--mono);font-weight:700;font-size:15px;background:var(--panel-3);color:var(--b)}
+.fstep .fi{flex:0 0 44px;height:44px;border-radius:11px;display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:15px;background:var(--panel-3);color:var(--b)}
 .fstep .fc h4{margin:0 0 3px}
 .fstep .fc p{margin:0;font-size:14.5px}
 .arrow{text-align:center;color:var(--muted);font-size:18px;padding:2px}
-
-.foot-note{max-width:var(--maxw);margin:60px auto 0;padding:26px 28px;border-top:1px solid var(--line-soft);
-  color:var(--muted);font-size:14px}
+.foot-note{max-width:var(--maxw);margin:60px auto 0;padding:26px 28px;border-top:1px solid var(--line-soft);color:var(--muted);font-size:14px}
 .foot-note b{color:var(--ink-soft)}
 ::selection{background:rgba(91,157,255,.3);color:#fff}
 </style>
@@ -250,12 +155,18 @@ details.file .body{padding:6px 22px 22px}
 
 <!-- ===================== HERO ===================== -->
 <header class="hero">
-  <span class="kick"><span class="dot"></span>IML 67577 · האקתון 2026 · אתגר 2</span>
+  <span class="kick"><span class="dot"></span>הוגש ✓ · ResNet‑18 + SE · SCORE 0.906</span>
   <h1 class="title">סיווג תמונות <span class="pp">עמיד</span><br>בפני מניפולציות</h1>
-  <p class="lede">אתם צוות ה־R&amp;D של <b>PixelPerfect</b>. המשימה: לאמן רשת CNN <b>מאפס</b> שמסווגת תמונות ל־20 מחלקות — ושלא תיפול כשמשנים את הרקע, התאורה או הצבע. הרשת צריכה לזהות את <b>האובייקט</b>, לא את הרקע מאחוריו.</p>
+  <p class="lede">אימנו רשת CNN <b>מאפס</b> שמסווגת תמונות ל־20 מחלקות — ולא נשברת כשמשנים רקע, תאורה או צבע. המסמך הזה הוא מה ש<b>עשינו בפועל</b>: הארכיטקטורה, האימון, אסטרטגיית העמידות, התוצאות, והדברים שצריך לדעת להגן עליהם בראיון.</p>
+
+  <div class="results">
+    <div class="stat"><div class="n">0.847</div><div class="l">דיוק נקי (held‑out P4)</div><div class="s">in‑domain accuracy</div></div>
+    <div class="stat"><div class="n">0.906</div><div class="l">SCORE סופי</div><div class="s">0.5·clean + 0.5·OOD</div></div>
+    <div class="stat"><div class="n">~0.96</div><div class="l">דיוק OOD (משוער)</div><div class="s">גבוה מהנקי — העמידות עבדה</div></div>
+  </div>
 
   <div class="proof">
-    <div class="ph"><h3>למה בכלל "עמידות"?</h3><span>אותו אובייקט · פיקסלים שונים · התווית לא זזה</span></div>
+    <div class="ph"><h3>למה "עמידות", ולמה זה הצליח</h3><span>אותו אובייקט · פיקסלים שונים · התווית לא זזה</span></div>
     <div class="prow">
       <div class="rl"><b>בן־אדם</b>רואה צפרדע בכל מצב</div>
       <div class="tiles">
@@ -278,706 +189,335 @@ details.file .body{padding:6px 22px 22px}
         <div class="tile t-sky">🐸<span class="tag no">ship ✗</span></div>
       </div>
     </div>
-    <div class="foot">המבחן הסופי הוא בדיוק זה: <b>חצי</b> תמונות "נקיות" (כמו האימון), <b>חצי</b> מעובדות במניפולציות שאנחנו לא רואים מראש. כל המשחק — לא לתת למודל להיתפס על הרקע/הצבע.</div>
+    <div class="foot">המבחן: חצי תמונות נקיות, חצי מעוותות במניפולציות חבויות. אצלנו ה־OOD יצא <b>גבוה</b> מהנקי — המודל למד את האובייקט, לא את הרקע.</div>
   </div>
 </header>
 
-<!-- ===================== SHELL ===================== -->
 <div class="shell">
 
 <!-- TOC -->
 <nav class="toc" aria-label="תוכן עניינים">
-  <div class="tt">המשימה</div>
-  <a href="#tldr">0 · בקצרה — איפה אנחנו</a>
-  <a href="#story">1 · הסיפור והמוטיבציה</a>
-  <a href="#task">2 · מה צריך לעשות</a>
-  <a href="#eval">3 · איך מנקדים</a>
-  <a href="#rules">4 · חוקי הברזל של הgrader</a>
-  <a href="#labels">5 · מיפוי התוויות</a>
-  <a href="#data">6 · הנתונים והתיקיות</a>
-  <div class="tt">איך עובדים</div>
-  <a href="#method">7 · המתודולוגיה (נבחנת!)</a>
-  <a href="#flow">8 · זרימת הנתונים</a>
-  <div class="tt">הקוד — קובץ קובץ</div>
-  <a href="#code-intro">9 · המפה הכללית</a>
-  <a href="#f-run">run.py</a>
-  <a href="#f-split">split_data.py</a>
-  <a href="#f-data">data.py</a>
-  <a href="#f-makeaug">make_augmented.py</a>
-  <a href="#f-augment">augment.py</a>
-  <a href="#f-engine">engine.py</a>
-  <a href="#f-model">model.py</a>
-  <a href="#f-train">train.py</a>
-  <a href="#f-predict">predict.py</a>
-  <a href="#f-tools">baseline · errors · robust</a>
-  <a href="#f-provided">קבצים שסופקו</a>
-  <div class="tt">סטטוס וסיום</div>
-  <a href="#status">10 · סטטוס + מפת דרכים</a>
-  <a href="#owners">11 · חלוקה ל־4 אנשים</a>
-  <a href="#submit">12 · צ'קליסט הגשה</a>
-  <a href="#cmds">13 · פקודות + Colab</a>
-  <a href="#interview">14 · הראיון</a>
+  <div class="tt">הקשר</div>
+  <a href="#tldr">0 · בקצרה + תוצאות</a>
+  <a href="#story">1 · המשימה והניקוד</a>
+  <a href="#rules">2 · חוקי הברזל</a>
+  <div class="tt">מה עשינו</div>
+  <a href="#overview">3 · סקירה + זרימה</a>
+  <a href="#arch">4 · הארכיטקטורה (ResNet+SE)</a>
+  <a href="#train">5 · האימון</a>
+  <a href="#robust">6 · העמידות (הלב)</a>
+  <a href="#method">7 · המתודולוגיה</a>
+  <div class="tt">תוצאות וסיפור</div>
+  <a href="#results">8 · התוצאות</a>
+  <a href="#evolution">9 · איך הגענו לכאן</a>
+  <a href="#gaps">10 · לפני הראיון</a>
+  <a href="#interview">11 · הגנה על כל רכיב</a>
+  <div class="tt">עזר</div>
+  <a href="#files">12 · קבצים ופקודות</a>
 </nav>
 
 <main>
 
 <!-- 0 TLDR -->
 <section id="tldr">
-  <div class="sec-h"><span class="sec-n">0</span><h2>בקצרה — מה זה ואיפה אנחנו</h2></div>
-  <p>אם תקראו רק את החלק הזה, תדעו את השלד. השאר ממלא כל פינה.</p>
+  <div class="sec-h"><span class="sec-n">0</span><h2>בקצרה — מה בנינו ומה יצא</h2></div>
   <div class="card">
-    <p style="margin-bottom:10px"><b>המשימה בשורה אחת:</b> לאמן CNN מאפס שמסווג תמונה ל־20 מחלקות, וגם עומד במניפולציות ויזואליות (רקע, תאורה, צבע) שלא נראה מראש.</p>
-    <p style="margin-bottom:10px"><b>הקלט:</b> טנזור <code class="k">[B, 3, 224, 224]</code> מנורמל ב־ImageNet. <b>הפלט:</b> מדד מחלקה <code class="k">[B]</code> בערכים 0..19.</p>
-    <p style="margin-bottom:10px"><b>המודל:</b> ResNet קטן (בצורת ResNet-18) + תשומת־לב ערוצים <b>Squeeze-and-Excitation</b>, ‎<code class="k">~11.28M</code> פרמטרים. אופטימייזר <b>AdamW</b> + cosine schedule + label smoothing.</p>
-    <p style="margin:0"><b>הציון:</b> חצי על דיוק רגיל (in‑domain) + חצי על עמידות (out‑of‑domain). שני החצאים שווי משקל.</p>
+    <p style="margin-bottom:10px"><b>המשימה:</b> CNN מאפס שמסווג תמונה ל־20 מחלקות, ועמיד למניפולציות ויזואליות (רקע/תאורה/צבע) שלא נראה מראש. קלט <code class="k">[B,3,224,224]</code> מנורמל ImageNet, פלט מדד מחלקה <code class="k">[B]</code> ב־0..19.</p>
+    <p style="margin-bottom:10px"><b>הפתרון:</b> ResNet‑18 בצורתו + Squeeze‑Excitation (~11.28M פרמטרים), BatchNorm, אומן ב־AdamW + cosine + label smoothing. עמידות דרך אוגמנטציה כבדה ושומרת־תווית.</p>
+    <p style="margin:0"><b>התוצאה:</b> דיוק נקי 0.847, SCORE 0.906. ה־OOD יצא ~0.96 — <b>גבוה מהנקי</b>, כלומר המודל באמת אינווריאנטי ולא נשען על קיצורי דרך.</p>
   </div>
-  <div class="note good"><span class="ic">◆</span><div class="bd"><b>שינוי מסגרת (2026-06-25):</b> כבר <b>לא</b> מוגבלים לשיטות מהקורס בלבד. אנחנו משתמשים בטכניקות best-practice מודרניות — <b>AdamW</b>, <b>Squeeze-and-Excitation</b>, <b>BatchNorm</b>, cosine LR, label smoothing — <b>ומתעדים כל אחת</b> (כאן ובקוד) כדי שכולם ידעו בדיוק מה אנחנו מריצים ולמה. שום קופסה שחורה. אין יותר "קצה־סילבוס, להגן באנלוגיה".</div></div>
-  <h3>איפה הפרויקט עומד עכשיו</h3>
   <div class="chips">
-    <span class="chip done"><i></i>שלד מלא רץ end‑to‑end</span>
-    <span class="chip done"><i></i>ResNet+SE כתוב ומתאמן (11.28M)</span>
-    <span class="chip done"><i></i>אימון AdamW+cosine, best‑weights/early‑stop</span>
-    <span class="chip done"><i></i>תאומים אופליין משוקללים + split + robust SCORE</span>
-    <span class="chip done"><i></i>רצפה נאיבית נמדדה (0.2230)</span>
-    <span class="chip next"><i></i>הרצת full-res סופית (Colab T4) + error analysis</span>
-    <span class="chip miss"><i></i>weights.joblib סופי + README ת"ז + אריזה</span>
+    <span class="chip done"><i></i>הוגש</span>
+    <span class="chip done"><i></i>ResNet‑18 + SE · 11.28M</span>
+    <span class="chip done"><i></i>clean 0.847 · SCORE 0.906</span>
+    <span class="chip done"><i></i>OOD &gt; clean</span>
+    <span class="chip next"><i></i>נשאר: ראיון</span>
   </div>
-  <div class="note info"><span class="ic">◆</span><div class="bd"><b>הקיצור:</b> כל הצנרת בנויה והמודל מתאמן. stage-1 ב-128px נותן ‎<code class="k">~0.67</code> דיוק נקי על Dev; המספר הסופי ב-full-res מגיע מהרצת GPU ב-Colab (סעיף 5 ב-SETUP.md). מה שנשאר: לכוון אוגמנטציה לפי טעויות אמיתיות, להריץ סופי ולארוז. הפירוט המלא ב<a class="inl" href="#status">סעיף 10</a>.</div></div>
 </section>
 
-<!-- 1 STORY -->
+<!-- 1 STORY / TASK / EVAL -->
 <section id="story">
-  <div class="sec-h"><span class="sec-n">1</span><h2>הסיפור והמוטיבציה</h2></div>
-  <p>סיווג תמונות זו אחת המשימות הכי בסיסיות בלמידת מכונה: תמונה נכנסת, מחלקה יוצאת. מודלים מודרניים מגיעים לדיוק גבוה על סט ולידציה נקי — אבל לפעמים הם מסתמכים על <b>רמזים מטעים</b>.</p>
-  <p>הדוגמה הקלאסית (ומופיעה במסמך): צפרדע על רקע ירוק תסווג נכון כצפרדע. אותה צפרדע בדיוק, על רקע כחול־שמיים, פתאום מסווגת כ<b>ספינה</b> או <b>מטוס</b>. המודל לא באמת זיהה את הצפרדע — הוא למד "ירוק מתחת = צפרדע, כחול = משהו שעף". זה <b>קיצור דרך</b> (shortcut), והוא שביר.</p>
-  <div class="note rule"><span class="ic">▲</span><div class="bd"><b>הבעיה שאנחנו פותרים:</b> רשת שלמדה את הרקע במקום את האובייקט. הציון של האתגר נבנה בכוונה כדי להעניש בדיוק את זה.</div></div>
-  <p>במסגרת האתגר אתם צוות המחקר של חברת סטארט־אפ דמיונית, <b>PixelPerfect</b>, שכל הייעוד שלה הוא מודלים מדויקים <b>וגם</b> עמידים. אתם מאמנים מאפס (בלי משקלים מאומנים מראש), מסווגים ל־20 מחלקות, ודואגים שהמודל יעבוד טוב גם על תמונות נקיות וגם על תמונות עם שינויים שלא אמורים לשנות את התווית: רקע אחר, תאורה אחרת, עיוות צבע.</p>
-</section>
-
-<!-- 2 TASK -->
-<section id="task">
-  <div class="sec-h"><span class="sec-n">2</span><h2>מה בעצם צריך לעשות</h2></div>
-  <p>המסמך מחלק את העבודה לשני חצאים, ושניהם נספרים:</p>
-  <h3>2.1 · סיווג תמונות סטנדרטי</h3>
-  <p>קודם כל — מודל שעובד. לפצל את הdata נכון, לבחור ארכיטקטורה, לבחור פונקציית loss, ולהקים pipeline סיווג שרץ ומגיע לדיוק סביר על ולידציה נקייה. זה החצי ה"קל": ML רגיל.</p>
-  <h3>2.2 · סיווג עמיד (Robust)</h3>
-  <p>אחרי שיש baseline שעובד — להפוך אותו לעמיד. שינוי רקע <b>לא אמור</b> לשנות את התחזית כשהאובייקט נשאר אותו דבר. צריך לחשוב בצורה ביקורתית על שתי שאלות:</p>
-  <ul>
-    <li><b>איך</b> מדמים את השינויים האלה (אילו מניפולציות לייצר)?</li>
-    <li><b>איפה</b> בצנרת מכניסים אותם — באימון? בולידציה? בשניהם?</li>
-  </ul>
-  <div class="note good"><span class="ic">◆</span><div class="bd"><b>זה הלב של האתגר.</b> הדיוק הרגיל הוא החצי הקל. הקצה שמנקדים אותו הוא האינווריאנטיות — שהמודל לא יזוז כשמעוותים את התמונה בלי לשנות מה שיש בה.</div></div>
-</section>
-
-<!-- 3 EVAL -->
-<section id="eval">
-  <div class="sec-h"><span class="sec-n b">3</span><h2>איך מנקדים — וזה כל המשחק</h2></div>
-  <p>ההערכה הסופית רצה על שני סוגי תמונות, ביחס <b>קבוע ומובטח</b>:</p>
+  <div class="sec-h"><span class="sec-n">1</span><h2>המשימה והניקוד</h2></div>
+  <p>מודלים מודרניים מגיעים לדיוק גבוה על סט נקי — אבל לפעמים הם מסתמכים על <b>רמזים מטעים</b>. צפרדע על רקע ירוק תסווג נכון; אותה צפרדע על רקע כחול־שמיים פתאום מסווגת כספינה. המודל למד את הרקע, לא את האובייקט. זה <b>קיצור דרך</b>, והוא שביר. כל האתגר — להכריח את הרשת לזהות את האובייקט עצמו.</p>
+  <p>אנחנו צוות המחקר של חברת סטארט־אפ דמיונית, <b>PixelPerfect</b>: מודלים מדויקים <b>וגם</b> עמידים. מאמנים מאפס (בלי משקלים מאומנים מראש), 20 מחלקות, ועובדים טוב גם על נקי וגם על מעוות.</p>
+  <h3>איך מנקדים — וזה כל המשחק</h3>
   <table class="tbl">
-    <tr><th>חצי הסט</th><th>מה זה</th><th>מאיפה</th></tr>
-    <tr><td><b>50% In‑Domain</b></td><td>תמונות "נקיות", בהתפלגות שדומה לdata שהורדנו</td><td>כמו train_set</td></tr>
-    <tr><td><b>50% Out‑of‑Domain</b></td><td>תמונות עם אוגמנטציות <b>חבויות</b> — שלא קיבלנו</td><td>held‑out, לא בקלט</td></tr>
+    <tr><th>חצי הסט</th><th>מה זה</th></tr>
+    <tr><td><b>50% In‑Domain</b></td><td>תמונות נקיות, בהתפלגות כמו האימון</td></tr>
+    <tr><td><b>50% Out‑of‑Domain</b></td><td>אוגמנטציות <b>חבויות</b> שלא קיבלנו (held‑out)</td></tr>
   </table>
-  <p>הציון הסופי <b>משלב</b> את הביצועים על התמונות הרגילות עם העמידות על התמונות המעוותות. כלומר אי אפשר "לקנות" ציון רק עם דיוק נקי גבוה — חצי מהציון נשען על מה שלא ראיתם.</p>
-  <div class="note warn"><span class="ic">▲</span><div class="bd"><b>למה זה מכתיב את האסטרטגיה:</b> האוגמנטציות של המבחן חבויות. אם נתאמן על סוג אחד ספציפי (נגיד רק היפוך צבע), זה לא יכליל לשאר. לכן צריך אוגמנטציה <b>רחבה ושומרת־תווית</b> באימון — להכריח את הרשת להיות אינווריאנטית באופן כללי, לא לזייף עמידות לפילטר ספציפי.</div></div>
+  <p>הציון משלב את שני החצאים שווה־בשווה. אי אפשר לקנות ציון רק עם דיוק נקי — חצי נשען על מה שלא ראינו. לכן אימדדנו את עצמנו על <code class="k">SCORE = 0.5·clean + 0.5·OOD</code>, בדיוק כמו הgrader, ולא על דיוק נקי לבד.</p>
+  <div class="note warn"><span class="ic">▲</span><div class="bd"><b>למה זה הכתיב את האסטרטגיה:</b> האוגמנטציות של המבחן חבויות. אימון על פילטר ספציפי אחד לא מכליל. צריך אוגמנטציה <b>רחבה ושומרת־תווית</b> — להכריח אינווריאנטיות כללית, לא לזייף עמידות לפילטר בודד.</div></div>
 </section>
 
-<!-- 4 RULES -->
+<!-- 2 RULES -->
 <section id="rules">
-  <div class="sec-h"><span class="sec-n r">4</span><h2>חוקי הברזל של הgrader</h2></div>
-  <p>החוקים האלה נבדקים אוטומטית. הפרה של אחד מהם = פסילה או אפס. הם מעל הכל.</p>
-
-  <h3>אילוצים גלובליים</h3>
+  <div class="sec-h"><span class="sec-n r">2</span><h2>חוקי הברזל של הgrader</h2></div>
+  <p>נבדק אוטומטית. הפרה = פסילה או אפס. הכל נכתב כדי לעמוד בזה.</p>
   <ul>
-    <li><b>לאמן מאפס.</b> אסור משקלים מאומנים מראש, אסור datasets חיצוניים, אסור backbones של torchvision.</li>
-    <li><b>אין רשת.</b> שום הורדה מהאינטרנט בזמן אימון, טעינה או הערכה. אין קריאות API חיצוניות.</li>
+    <li><b>מאפס.</b> אין משקלים מאומנים מראש, אין datasets חיצוניים, אין backbones, אין רשת בזמן אימון/טעינה/הערכה.</li>
+    <li><b><code class="k">model.py</code></b> מגדיר מחלקה בשם בדיוק <code class="k">ModelArchitecture</code> (<code class="k">nn.Module</code>), <code class="k">forward</code> מחזיר <b>לוגיטים</b> <code class="k">[B,20]</code>, והקובץ <b>עצמאי</b> — מייבא רק torch/stdlib. הgrader משחזר ממנו את הרשת לבדו.</li>
+    <li><b><code class="k">train.py</code></b> שומר ל־<code class="k">weights.joblib</code> כ־CPU state dict דרך joblib: <code class="k">joblib.dump(model.cpu().state_dict(), "weights.joblib")</code>. (ה־docstring מזכיר torch.save — שגוי, joblib הוא הקובע.)</li>
+    <li><b><code class="k">predict.py</code></b> frozen — <code class="k">Model(BaseModel)</code>, מחזיר <code class="k">argmax</code> אינדקסים, לא לוגיטים.</li>
+    <li><b>תוויות:</b> <code class="k">labels.py</code> מקור האמת. מדד 0..19 = מחלקות HF ממוינות. שמות תיקיות חייבים להתאים בדיוק.</li>
+    <li><b>הגשה:</b> <code class="k">challenge2_&lt;ids&gt;/</code> = רק train.py, model.py, predict.py, weights.joblib, README. בלי dataset/venv/נתיבים מוחלטים.</li>
   </ul>
-
-  <h3><code class="k">model.py</code> — הארכיטקטורה</h3>
-  <ul>
-    <li>חייב להגדיר מחלקה בשם <b>בדיוק</b> <code class="k">ModelArchitecture</code> שיורשת מ־<code class="k">nn.Module</code>.</li>
-    <li><code class="k">forward(x)</code> מקבל <code class="k">[B,3,224,224]</code> ומחזיר <b>לוגיטים</b> בצורה <code class="k">[B,20]</code> — לא softmax, לא הסתברויות.</li>
-    <li>הקובץ חייב להיות <b>עצמאי</b>: לייבא רק <code class="k">torch</code> / stdlib. אסור <code class="k">from data import ...</code> — הgrader מעתיק רק את הקובץ הזה ומשחזר ממנו את הרשת.</li>
-  </ul>
-
-  <h3><code class="k">train.py</code> — שמירת המשקלים</h3>
-  <p>חייב לשמור ל־<b>בדיוק</b> <code class="k">weights.joblib</code>, כ־state dict על ה־CPU, דרך joblib:</p>
-  <div class="code">
-    <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">החוזה המחייב</span><span class="badge">python</span></div>
-    <pre><code><span class="kw">import</span> joblib
-joblib.<span class="fn2">dump</span>(model.<span class="fn2">cpu</span>().<span class="fn2">state_dict</span>(), <span class="st">"weights.joblib"</span>)</code></pre>
-  </div>
-  <div class="note rule"><span class="ic">▲</span><div class="bd"><b>מלכודת:</b> ה־docstring של <code class="k">base_model.py</code> מזכיר <code class="k">torch.save</code> — אבל הgrader טוען עם <code class="k">joblib.load</code>. <b>joblib הוא הקובע.</b> אל תשמרו עם torch.save.</div></div>
-
-  <h3><code class="k">predict.py</code> — אסור לגעת</h3>
-  <ul>
-    <li>מגדיר מחלקה <code class="k">Model(BaseModel)</code>. <code class="k">predict(x)</code> מחזיר טנזור Long של מדדי מחלקה <code class="k">[B]</code> בטווח 0..19 — <b>argmax של הלוגיטים</b>, אף פעם לא לוגיטים/הסתברויות.</li>
-    <li>הקלט מגיע כבר מנורמל ב־ImageNet (mean <code class="k">.485,.456,.406</code> / std <code class="k">.229,.224,.225</code>), בגודל 224×224.</li>
-  </ul>
-
-  <h3><code class="k">README</code></h3>
-  <ul>
-    <li>שורה 1: שמות חברי הצוות, מופרדים בפסיקים <b>בלי רווחים</b>.</li>
-    <li>שורה 2: ת"ז, מופרדים בפסיקים בלי רווחים.</li>
-    <li>שורה ריקה, ואז תיאור המודל + פירוט המניפולציות שניסיתם, איך הכנסתם אותן, ואיך השפיעו.</li>
-  </ul>
-</section>
-
-<!-- 5 LABELS -->
-<section id="labels">
-  <div class="sec-h"><span class="sec-n b">5</span><h2>מיפוי התוויות — לטעות פה זה אסון שקט</h2></div>
-  <p><code class="k">labels.py</code> הוא מקור האמת. המדד המקומי <code class="k">0..19</code> = מחלקות ה־ImageNet של HuggingFace, <b>ממוינות לפי אינדקס HF</b>. הקובץ <code class="k">dataset/labels.json</code> מסכים איתו.</p>
-  <p>ה־loaders (<code class="k">ImageNetSubset</code>) ממפים כל שם תיקיית־מחלקה → המדד המקומי הממוין שלה. לכן <b>שמות התיקיות חייבים להתאים בדיוק</b> ל־<code class="k">HF_INDEX_TO_NAME</code>. טעות כתיב בשם תיקייה = כל המחלקה מתויגת לא נכון, בשקט, בלי שגיאה.</p>
-  <div class="note info"><span class="ic">◆</span><div class="bd"><code class="k">python labels.py</code> מדפיס את כל הטבלה: מדד מקומי ↔ אינדקס HF ↔ שם מחלקה. הריצו אותו פעם אחת כדי לוודא שהתיקיות תקינות.</div></div>
-</section>
-
-<!-- 6 DATA -->
-<section id="data">
-  <div class="sec-h"><span class="sec-n b">6</span><h2>הנתונים והתיקיות</h2></div>
-  <ul>
-    <li><code class="k">dataset/train/&lt;class&gt;/*.jpg</code> — 20 מחלקות, <b>1000 תמונות גולמיות לכל מחלקה</b> = 20k. מורד בנפרד מ־Moodle, <b>לא מועלה ל־git</b>.</li>
-    <li><code class="k">dataset/augmentations/</code> — תיקייה שהקורס מספק עם דוגמאות OOD (למשל <code class="k">color_jitter</code>, <code class="k">random_rotation</code>). זו הצצה כנה לסוג המניפולציות שבמבחן החבוי. <b>לא מתאמנים עליה</b> — רק מודדים מולה.</li>
-    <li><code class="k">dataset/labels.json</code> — מיפוי שם↔מספר (סעיף 5).</li>
-  </ul>
-  <p>הקבצים מ־Moodle (<code class="k">base_model.py</code>, <code class="k">labels.py</code>, <code class="k">evaluate.py</code>, <code class="k">check_submission.py</code>, ה־submissions) מגיעים מוכנים. ה־<b>תמונות</b> מורדות בנפרד ולא בגיט.</p>
-  <div class="note warn"><span class="ic">▲</span><div class="bd"><b>שלב 2 בצנרת המומלצת:</b> "פצל לפני שעושים כל דבר אחר". את <code class="k">dataset/validation/</code> צריך ליצור בעצמנו מה־train הגולמי לפני ש־<code class="k">evaluate.py</code> בכלל ירוץ.</div></div>
 </section>
 
 <hr class="div">
 
-<!-- 7 METHOD -->
-<section id="method">
-  <div class="sec-h"><span class="sec-n">7</span><h2>המתודולוגיה — וזה נבחן בראיון</h2></div>
-  <p>התוכנית עוקבת אחרי המתודולוגיה של "ML in Practice" מהתרגול, לא רק "תאמן רשת". כללי הברזל האלה לא נתונים למשא ומתן, והצנרת אוכפת אותם כדי שאף אחד לא ידרוס אותם בטעות:</p>
-
-  <h3>פיצול תלת־כיווני (וכך הוא ממופה ל-5 החלקים)</h3>
-  <p>Train / Dev (ולידציה) / Test. נבנה <b>פעם אחת</b>, seeded, <b>stratified</b> לפי מחלקה — כל פיצול מייצג נאמנה את כל ההתפלגות (אין דליפת מחלקות). Dev = כל הכיוונון ו־error analysis. ה־Test המקומי נוגעים בו <b>פעם אחת בלבד</b>, כדי לאמוד הכללה אמיתית.</p>
-  <p>המימוש משתמש ב-5 חלקים מצטברים (P0..P4) ולא ב-Test בודד שמור, וזה <b>במכוון</b> ולא מחליש את הכלל: בשלב <code class="k">k</code> מאמנים על P0..P(k-1) ובודקים את Pk — הבלוק ה-15% הבא <b>שעדיין unseen</b>. כל בלוק הוא ה-Test החד־פעמי המקומי בדיוק לשלב שבו הוא עוד לא נראה, ואז מתקפל ל-Train ולעולם לא משמש שוב כ-Test נקי. Dev/כיוונון = ה-holdout של ה-early-stop על ה-Train הנוכחי + בלוקים שכבר נראו. ה-grader החבוי הוא ה-Test החד־פעמי הסופי שלא נראה לעולם → אי אפשר לעשות לו overfit. (לוגיקת הפיצול לא משתנה בשקט.)</p>
-
-  <h3>כלל הברזל של preprocessing — מכיילים על Train בלבד</h3>
-  <p>כל החלטה מבוססת־data (סטטיסטיקות נרמול, משקלי מחלקה, עוצמת אוגמנטציה) מתקבלת על Train לבד. Dev/Test אף פעם לא מזינים את ה־preprocessing → אין זיהום. (אנחנו משתמשים ב־mean/std קבועים של ImageNet = קבועים, לא מכוילים → כבר תקין.)</p>
-
-  <h3>EDA מינימלי — מובנה בצנרת</h3>
-  <p>אין שלב EDA נפרד, וגם אין <code class="k">eda.py</code> (נמחק). השפיות המכנית — איזון מחלקות, שמות־תיקיות == <code class="k">labels.py</code> — נאכפת אוטומטית ב<b>שלב הפיצול</b>: הוא קורס אם תיקיית מחלקה חסרה, שונתה או ריקה, ומדפיס ספירות per‑partition. אפס מאמץ ידני, אפס קוד.</p>
-  <p>נשאר רק מבט חטוף אופציונלי, פעם אחת בכל הפרויקט (~2 דקות): לפתוח כמה תמונות מ־<code class="k">dataset/train</code> ואת תיקיית <code class="k">augmentations/</code> שסופקה — ישר ב־Finder, בלי כלי. <b>לא</b> 20k תמונות; חופן, רק כדי שלPerson C תהיה אינטואיציה אילו מניפולציות שומרות־תווית לפני שבוחרים. ההסתכלות הממוקדת על טעויות אמיתיות נמשכת אחר כך ב־<b>error analysis</b>.</p>
-
-  <h3>Baseline נאיבי לפני הרשת העמוקה</h3>
-  <p>מודל פשוט (רגרסיה לוגיסטית על פיקסלים מוקטנים) קובע את ה<b>רצפה</b> שה־CNN חייב לנצח. אם ה־CNN לא מנצח אותו — משהו שבור (באג, תוויות, loader), לא "צריך לכוונן".</p>
-
-  <h3>Error analysis על Dev, ידני</h3>
-  <p>מושכים דוגמאות שגויות מ־Dev, מסתכלים עליהן בעיניים, מחפשים דפוסים חוזרים (למשל "ספינות על רקע שמיים → מטוס"). מזינים את הדפוס בחזרה לאוגמנטציה/ארכיטקטורה. <b>אף פעם לא</b> error analysis על Test.</p>
-
-  <h3>הסתייגות שחזוּר</h3>
-  <p>זורעים seed ל־torch/numpy/random, אבל ליבות MPS/CUDA יכולות לתת תוצאה שונה עם אותו seed. לכן <b>שומרים את קובץ המשקלים הטוב</b> בפועל, ולא "נריץ שוב ונקווה". מתעדים את הקונפיג שייצר כל <code class="k">weights.joblib</code>.</p>
-</section>
-
-<!-- 8 FLOW -->
-<section id="flow">
-  <div class="sec-h"><span class="sec-n">8</span><h2>זרימת הנתונים — מקצה לקצה</h2></div>
+<!-- 3 OVERVIEW -->
+<section id="overview">
+  <div class="sec-h"><span class="sec-n">3</span><h2>סקירה — מה הרכבנו ואיך זה זורם</h2></div>
+  <p>ארבעה דברים מזיזים את הציון, וזה הסדר שבו נבנו: ארכיטקטורה שמסוגלת ללמוד מאפס → אימון יציב → אוגמנטציה שמייצרת עמידות → מתודולוגיה שמודדת את הכל בכנות.</p>
   <div class="flow">
-    <div class="fstep"><div class="fi">1</div><div class="fc"><h4>split_data.py</h4><p>חותך את <code class="k">dataset/train</code> ל־5 חלקים stratified ושומר <code class="k">splits.json</code> — מקור האמת לכולם.</p></div></div>
+    <div class="fstep"><div class="fi">1</div><div class="fc"><h4>split + offline twins</h4><p>פיצול stratified ל־5 חלקים, ובניית <b>תאומים מאוגמנטים</b> על הדיסק (~40k תמונות, seeded, ניתנים לצפייה).</p></div></div>
     <div class="arrow">▼</div>
-    <div class="fstep"><div class="fi">2</div><div class="fc"><h4>make_augmented.py</h4><p>בונה תאומים מאוגמנטים אופליין ב־<code class="k">dataset/train_aug/</code> (פילטרי PIL, שמות זהים → יורשים partition).</p></div></div>
+    <div class="fstep"><div class="fi">2</div><div class="fc"><h4>ResNet‑18 + SE</h4><p>רשת עם residual skips, BatchNorm ו־Squeeze‑Excitation — מספיק עמוקה כדי ללמוד 20 מחלקות מאפס, ועם תשומת־לב לערוצים שעוזרת לעמידות.</p></div></div>
     <div class="arrow">▼</div>
-    <div class="fstep"><div class="fi">3</div><div class="fc"><h4>data.py + augment.py</h4><p><code class="k">ManifestDataset</code> קורא מה־manifest. ב־<code class="k">build_loaders</code> (ברירת מחדל <code class="k">include_augmented=True</code>) גם המקורות וגם התאומים עוברים את ה־transform ה<b>דטרמיניסטי</b> (זהה ל-eval) — <b>אין עריכה online</b>, כל הגיוון מגיע מהתאומים שעל הדיסק. ה-eval תמיד מקורות נקיים.</p></div></div>
+    <div class="fstep"><div class="fi">3</div><div class="fc"><h4>אימון AdamW</h4><p>AdamW + cosine + label smoothing 0.1 + grad‑clip + early‑stop, עם שמירת best‑weights. אימון פרוגרסיבי על חלקים מצטברים.</p></div></div>
     <div class="arrow">▼</div>
-    <div class="fstep"><div class="fi">4</div><div class="fc"><h4>engine.py + model.py</h4><p>לולאת האימון (<b>AdamW</b> + <b>CosineAnnealingLR</b>, label smoothing, grad‑clip, early‑stop, best‑weights) מאמנת את ה־<code class="k">ModelArchitecture</code> — ResNet קטן עם BatchNorm, skip connections, ו־<b>Squeeze-and-Excitation</b>.</p></div></div>
-    <div class="arrow">▼</div>
-    <div class="fstep"><div class="fi">5</div><div class="fc"><h4>train.py → weights.joblib</h4><p>מאמן <b>שלב אחד</b> בכל הרצה (gated), מ-init אקראי טרי, בודק את הבלוק הבא בעודו unseen, ושומר. <b>לא</b> מתקדם אוטומטית ו<b>לא</b> מתאמן על 100% — קידום שלב הוא החלטה אנושית (<code class="k">--stage N+1</code>).</p></div></div>
-    <div class="arrow">▼</div>
-    <div class="fstep"><div class="fi">6</div><div class="fc"><h4>predict.py → grader</h4><p>טוען את המשקלים, מריץ <code class="k">forward</code>, מחזיר <code class="k">argmax</code>. סביב הכל: baseline / error_analysis / robust_eval מודדים.</p></div></div>
+    <div class="fstep"><div class="fi">4</div><div class="fc"><h4>מדידה → weights.joblib</h4><p><code class="k">robust_eval</code> מודד clean מול OOD ומחשב SCORE; error analysis מצביע על המחלקות החלשות. הטוב נשמר.</p></div></div>
   </div>
 </section>
 
-<hr class="div">
+<!-- 4 ARCHITECTURE -->
+<section id="arch">
+  <div class="sec-h"><span class="sec-n">4</span><h2>הארכיטקטורה — ResNet‑18 + Squeeze‑Excitation</h2></div>
+  <p>רשת בצורת ResNet‑18 (~11.28M פרמטרים), מאומנת מ־random init. הזרימה המרחבית: <code class="k">224 → 112 → 56 → 56 → 28 → 14 → 7 → GAP → 20</code>. כל החלקים נבחרו כדי להיות מוסברים בראיון.</p>
 
-<!-- 9 CODE -->
-<section id="code-intro">
-  <div class="sec-h"><span class="sec-n b">9</span><h2>הקוד — קובץ קובץ, שורה שורה</h2></div>
-  <p>כל קובץ נושא הערת <code class="k">OWNER</code> ו־self‑check תחת <code class="k">if __name__ == "__main__"</code>. הצבעים מקודדים בעלים:</p>
-  <p style="margin-bottom:22px">
-    <span class="role A">Person A · ארכיטקטורה</span>
-    <span class="role B">Person B · אימון</span>
-    <span class="role C">Person C · אוגמנטציה</span>
-    <span class="role D">Person D · נתונים/הערכה</span>
-    <span class="role S">Shared · glue</span>
-  </p>
-  <p>לחצו על כל קובץ כדי לפתוח את הצלילה לעומק. הקוד באנגלית (LTR), ההסבר בעברית מתחתיו — שורה אחר שורה.</p>
+  <h3>המרכיבים, ולמה כל אחד</h3>
+  <table class="tbl">
+    <tr><th>מרכיב</th><th>מה הוא עושה</th><th>למה</th></tr>
+    <tr><td><b>Stem</b></td><td>Conv 7×7 stride‑2 → BN → ReLU → MaxPool 3×3 stride‑2</td><td>מקטין מהר 224→56, שדה קליטה גדול מההתחלה</td></tr>
+    <tr><td><b>Residual skips</b></td><td><code class="k">y = f(x) + x</code> (He 2016)</td><td>מסלול ישיר לגרדיאנט אחורה → אפשר לאמן עומק מאפס בלי vanishing</td></tr>
+    <tr><td><b>BatchNorm</b></td><td>נרמול כל ערוץ על הbatch אחרי כל conv</td><td>מייצב את משטח ה־loss → רשת עמוקה מתאמנת נקי ומהר</td></tr>
+    <tr><td><b>Squeeze‑Excitation</b></td><td>שער 0..1 לכל ערוץ (channel attention)</td><td>מגביר ערוצים אינפורמטיביים, מדכא מסיחים — ישיר לעמידות</td></tr>
+    <tr><td><b>Dropout 0.4 + GAP</b></td><td>head דק: Pool→Dropout→Linear(512,20)</td><td>רגולריזציה — 11M פרמטרים על ~16k תמונות = סכנת overfit</td></tr>
+  </table>
 
-  <!-- ===== run.py ===== -->
-  <details class="file" id="f-run" open>
-    <summary><span class="chev">▶</span><span class="fname">run.py</span><span class="role S">Shared</span><span class="own">נקודת כניסה · CLI</span></summary>
+  <details class="file" id="f-model" open>
+    <summary><span class="chev">▶</span><span class="fname">model.py — ResidualBlock + SE</span><span class="own">~11.28M params</span></summary>
     <div class="body">
-      <p>שער יחיד לכל הצנרת. כל פקודת־משנה מייבאת את המודול הרלוונטי וקוראת ל־<code class="k">main</code> שלו.</p>
       <div class="code">
-        <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">run.py — הפקודות</span><span class="badge">CLI</span></div>
-<pre><code><span class="c"># הסדר המומלץ ל-clone טרי:</span>
-python run.py split        <span class="c"># פיצול 5-חלקים + validation (אוכף איזון/שפיות)</span>
-python run.py materialize  <span class="c"># בניית תאומים מאוגמנטים (dataset/train_aug/)</span>
-python run.py baseline     <span class="c"># רצפת רגרסיה לוגיסטית (P0 -> test P1)</span>
-python run.py train        <span class="c"># אימון פרוגרסיבי -> weights.joblib</span>
-python run.py eval         <span class="c"># leaderboard של evaluate.py שסופק</span>
-python run.py robust       <span class="c"># דוח דיוק נקי מול OOD</span>
-python run.py errors --partition P1   <span class="c"># לוג טעויות על partition</span></code></pre>
-      </div>
-      <ul class="ann">
-        <li><span class="pin">cmd_*</span><span class="tx">כל פקודה היא פונקציה (<code class="k">cmd_split</code>, <code class="k">cmd_train</code>...) שמייבאת מודול בעצלתיים וקוראת ל־main שלו. ייבוא עצל = הרצת <code class="k">split</code> לא טוענת torch.</span></li>
-        <li><span class="pin">importlib</span><span class="tx"><code class="k">cmd_train</code> מייבא את <code class="k">train.py</code> של הצוות דרך <code class="k">spec_from_file_location</code> — כי הוא יושב בתיקיית הצוות, לא בשורש.</span></li>
-        <li><span class="pin g">argparse</span><span class="tx">לכל פקודה דגלים משלה (<code class="k">--seed</code>, <code class="k">--img-size</code>, <code class="k">--epochs</code>...) עם defaults הגיוניים.</span></li>
-      </ul>
-    </div>
-  </details>
-
-  <!-- ===== split_data.py ===== -->
-  <details class="file" id="f-split">
-    <summary><span class="chev">▶</span><span class="fname">split_data.py</span><span class="role D">Person D</span><span class="own">לב המתודולוגיה</span></summary>
-    <div class="body">
-      <p>בונה את הפיצול ה־stratified, ה־seeded, ה־5־חלקי שעליו הכל נשען.</p>
-      <div class="code">
-        <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">split_data.py</span><span class="badge">python</span></div>
-<pre><code>PARTITION_FRACS = {<span class="st">"P0"</span>:<span class="nu">.40</span>, <span class="st">"P1"</span>:<span class="nu">.15</span>, <span class="st">"P2"</span>:<span class="nu">.15</span>, <span class="st">"P3"</span>:<span class="nu">.15</span>, <span class="st">"P4"</span>:<span class="nu">.15</span>}
-
-<span class="kw">def</span> <span class="fn2">build_splits</span>(seed=<span class="nu">42</span>):
-    rng = random.<span class="fn2">Random</span>(seed)
-    <span class="kw">for</span> class_name, local_idx <span class="kw">in</span> <span class="fn2">sorted</span>(name_to_idx.<span class="fn2">items</span>()):
-        imgs = <span class="fn2">sorted</span>(...);  rng.<span class="fn2">shuffle</span>(imgs)   <span class="c"># ערבוב זרוע</span>
-        counts = [<span class="fn2">round</span>(frac*n) ...]                <span class="c"># חיתוך per-class</span>
-        counts[-<span class="nu">1</span>] = n - <span class="fn2">sum</span>(counts[:-<span class="nu">1</span>])         <span class="c"># האחרון לוקח שארית</span>
-
-<span class="kw">def</span> <span class="fn2">progressive_stages</span>():
-    <span class="kw">return</span> [([<span class="st">"P0"</span>],<span class="st">"P1"</span>), ([<span class="st">"P0"</span>,<span class="st">"P1"</span>],<span class="st">"P2"</span>),
-            ([<span class="st">"P0"</span>,<span class="st">"P1"</span>,<span class="st">"P2"</span>],<span class="st">"P3"</span>), ([<span class="st">"P0"</span>,<span class="st">"P1"</span>,<span class="st">"P2"</span>,<span class="st">"P3"</span>],<span class="st">"P4"</span>)]</code></pre>
-      </div>
-      <ul class="ann">
-        <li><span class="pin">P0=40%</span><span class="tx">חמישה חלקים: P0 גדול (40%), P1–P4 של 15% כל אחד. <b>per‑class</b> — לכל מחלקה לחוד, כך שכל partition מראה את כל ההתפלגות (stratified, אין דליפה).</span></li>
-        <li><span class="pin g">seeded</span><span class="tx"><code class="k">random.Random(seed)</code> + מיון לפני ערבוב → כל חבר צוות מקבל פיצול זהה byte‑for‑byte. הפלט: <code class="k">dataset/splits.json</code>, git‑ignored, נוצר מקומית.</span></li>
-        <li><span class="pin">progressive</span><span class="tx">4 איטרציות: אמן P0 ובדוק P1, אמן P0+P1 ובדוק P2... כל בלוק נבדק <b>פעם אחת בעודו unseen</b>, ואז מתקפל לאימון → עקומת למידה בלי דליפה.</span></li>
-        <li><span class="pin w">materialize</span><span class="tx"><code class="k">materialize_validation()</code> מעתיק partition לתוך <code class="k">dataset/validation/&lt;class&gt;/</code> כי ה־<code class="k">evaluate.py</code> שסופק קורא תיקיות, לא את ה־manifest שלנו.</span></li>
-      </ul>
-    </div>
-  </details>
-
-  <!-- ===== data.py ===== -->
-  <details class="file" id="f-data">
-    <summary><span class="chev">▶</span><span class="fname">data.py</span><span class="role D">Person D</span><span class="own">Datasets · Loaders</span></summary>
-    <div class="body">
-      <p>הופך את ה־manifest ל־PyTorch Datasets ו־DataLoaders. הרעיון: טוענים מ־manifest (רשימת <code class="k">(path,label)</code>), לא מעתיקים קבצים.</p>
-      <div class="code">
-        <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">data.py</span><span class="badge">python</span></div>
-<pre><code><span class="kw">class</span> <span class="fn2">ManifestDataset</span>(Dataset):
-    <span class="kw">def</span> <span class="fn2">__init__</span>(self, partitions, transform, include_augmented=<span class="kw">False</span>):
-        <span class="kw">for</span> p <span class="kw">in</span> partitions:
-            <span class="kw">for</span> rel, label <span class="kw">in</span> splits[<span class="st">"partitions"</span>][p]:
-                self.samples.<span class="fn2">append</span>((path, label))
-                <span class="kw">if</span> include_augmented:           <span class="c"># התאום יורש partition של המקור</span>
-                    <span class="kw">for</span> twin <span class="kw">in</span> twin_dir.<span class="fn2">glob</span>(<span class="st">f"{stem}__aug*.jpg"</span>):
-                        self.samples.<span class="fn2">append</span>((twin, label))
-
-<span class="kw">def</span> <span class="fn2">build_loaders</span>(train_parts, eval_part, *, include_augmented=<span class="kw">True</span>):
-    <span class="c"># ברירת מחדל: מקורות + תאומים → אותו transform דטרמיניסטי כמו eval. אין online.</span>
-    train_tf = <span class="fn2">build_eval_transform</span>(img_size) <span class="kw">if</span> include_augmented \
-               <span class="kw">else</span> <span class="fn2">build_train_transform</span>(img_size)
-    eval_ds  = <span class="fn2">ManifestDataset</span>([eval_part], <span class="fn2">build_eval_transform</span>())  <span class="c"># נקי בלבד</span></code></pre>
-      </div>
-      <ul class="ann">
-        <li><span class="pin">transform אחד</span><span class="tx">אותו <code class="k">ManifestDataset</code> משרת אימון או eval — ההבדל היחיד הוא ה־transform שמזריקים.</span></li>
-        <li><span class="pin g">leakage‑safe</span><span class="tx"><code class="k">include_augmented=True</code> מוסיף את התאומים מ־<code class="k">train_aug/</code> — אבל התאום יורש את ה־partition של המקור. תאום של תמונת‑P1 ישמש רק כש־P1 ב־<b>train</b>, אף פעם ב־eval. לכן מעבירים True רק ל־train.</span></li>
-        <li><span class="pin g">offline-only · אין online</span><span class="tx"><b>שינוי חשוב:</b> ב-<code class="k">include_augmented=True</code> (ברירת המחדל) גם המקורות וגם התאומים עוברים את <code class="k">build_eval_transform</code> — ה-transform ה<b>דטרמיניסטי</b>, בדיוק כמו eval. <b>אין שום עריכה אקראית online.</b> כל הגיוון מגיע מהתאומים האפויים על הדיסק (שכבר עברו פילטרים), כדי לא להכפיל עיוות. רק כש-<code class="k">include_augmented=False</code> חוזרים ל-<code class="k">build_train_transform</code> הכבד (נתיב fallback מת).</span></li>
-        <li><span class="pin r">shuffle=False</span><span class="tx">ה־eval loader <b>לא</b> מערבב — כדי ש־<code class="k">error_analysis</code> יוכל למפות כל תחזית בחזרה לקובץ דרך <code class="k">dataset.samples</code>.</span></li>
-      </ul>
-    </div>
-  </details>
-
-  <!-- ===== make_augmented.py ===== -->
-  <details class="file" id="f-makeaug">
-    <summary><span class="chev">▶</span><span class="fname">make_augmented.py</span><span class="role C">Person C</span><span class="own">תאומים אופליין</span></summary>
-    <div class="body">
-      <p>בונה כפיל מאוגמנט <b>אופליין</b> של תמונות האימון. כל תאום מקבל תת־קבוצה אקראית <b>משוקללת</b> של פילטרים: rotation · color jitter · grayscale · salt&amp;pepper · blur · inversion. <code class="k">make_augmented.main()</code> רץ עם <code class="k">copies=2</code> → ‎~40k תאומים על 20k המקורות; ‎<code class="k">run.py materialize</code> ברירת מחדל <code class="k">--copies 1</code> (~20k) — אפשר <code class="k">--copies 2</code>. הזריעה היא <b>per-file</b> (<code class="k">f"{seed}:{name}:{i}"</code>) → כל חבר צוות מקבל קבצים זהים byte-for-byte. נתיב <b>פעיל</b> (האוגמנטציה האמיתית של הפרויקט).</p>
-      <div class="code">
-        <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">make_augmented.py</span><span class="badge">python · PIL</span></div>
-<pre><code><span class="c"># (name, fn, weight) — משקל גבוה = נדגם יותר</span>
-FILTERS = [(<span class="st">"rotate"</span>,f_rotate,<span class="nu">4</span>), (<span class="st">"color_jitter"</span>,f_color_jitter,<span class="nu">4</span>),  <span class="c"># צירי OOD מאומתים</span>
-           (<span class="st">"grayscale"</span>,f_grayscale,<span class="nu">2</span>), (<span class="st">"salt_pepper"</span>,f_salt_pepper,<span class="nu">2</span>),
-           (<span class="st">"blur"</span>,f_blur,<span class="nu">2</span>), (<span class="st">"invert"</span>,f_invert,<span class="nu">1</span>)]   <span class="c"># invert נדיר — מסוכן לתווית</span>
-MAX_FILTERS_PER_IMAGE = <span class="nu">3</span>
-
-<span class="kw">def</span> <span class="fn2">apply_random_filters</span>(img, rng):       <span class="c"># דגימה משוקללת ללא החזרה</span>
-    k = rng.<span class="fn2">randint</span>(<span class="nu">1</span>, MAX_FILTERS_PER_IMAGE)
-    <span class="kw">while</span> <span class="fn2">len</span>(chosen) &lt; k <span class="kw">and</span> pool:        <span class="c"># rng.choices על pool מתכווץ</span>
-        j = rng.<span class="fn2">choices</span>(<span class="fn2">range</span>(<span class="fn2">len</span>(pool)), weights=pool_w, k=<span class="nu">1</span>)[<span class="nu">0</span>] ...
-
-<span class="kw">def</span> <span class="fn2">build_augmented</span>(copies=<span class="nu">1</span>, seed=<span class="nu">42</span>):     <span class="c"># main() קורא copies=2</span>
-    <span class="kw">for</span> img_path <span class="kw">in</span> ...:
-        rng = random.<span class="fn2">Random</span>(<span class="st">f"{seed}:{img_path.name}:{i}"</span>)  <span class="c"># זרע per-file</span>
-        aug = <span class="fn2">apply_random_filters</span>(img, rng)
-        aug.<span class="fn2">save</span>(dst / <span class="st">f"{stem}__aug{i}.jpg"</span>)</code></pre>
-      </div>
-      <ul class="ann">
-        <li><span class="pin">__aug0.jpg</span><span class="tx">הפלט משקף את עץ ה־train: <code class="k">dataset/train_aug/&lt;class&gt;/&lt;stem&gt;__aug{0,1}.jpg</code>. שם זהה למקור = <code class="k">data.py</code> מוצא את התאום לפי הנתיב של המקור → יורש partition → אין דליפה.</span></li>
-        <li><span class="pin g">משוקלל</span><span class="tx">rotation ו־color_jitter במשקל <b>4</b>, השאר 2, invert רק <b>1</b>. הדגימה ללא־החזרה מטה כל תת־קבוצה אקראית לשני הצירים ש־<code class="k">dataset/augmentations/</code> <b>מאשר</b> שהם המניפולציות האמיתיות במבחן — בלי לוותר על השאר.</span></li>
-        <li><span class="pin">PIL בלבד</span><span class="tx">פילטרים native של Pillow (לא torchvision) → אפשר לשמור JPGים רגילים שאפשר לפתוח ולראות. סיבוב 45/90/180/270, מילוי פינות = הצבע <b>הממוצע</b> של התמונה, לא שחור. color_jitter בטווח רחב 0.5–1.5 (Color/Brightness/Contrast).</span></li>
-        <li><span class="pin r">בלי background swap</span><span class="tx">החלפת רקע דורשת סגמנטציה (מודל נפרד/אסטים חיצוניים) = מחוץ לגבולות (אימון מאפס, בלי מודלים/data חיצוני) וגם לא נלמד. סיבוב מילוי־ממוצע הוא ה־proxy הקרוב ביותר ל"הסביבה השתנתה".</span></li>
-        <li><span class="pin w">מלכודת</span><span class="tx">צריך להריץ <code class="k">run.py materialize</code> <b>לפני</b> האימון. אחרת אין תאומים, ו-<code class="k">build_loaders</code> (offline-only, transform דטרמיניסטי) מתאמן רק על מקורות נקיים = <b>אפס אוגמנטציה</b>. <code class="k">--copies 2</code> = פי 2 דיסק וזמן materialize.</span></li>
-      </ul>
-    </div>
-  </details>
-
-  <!-- ===== augment.py ===== -->
-  <details class="file" id="f-augment">
-    <summary><span class="chev">▶</span><span class="fname">augment.py</span><span class="role C">Person C</span><span class="own">ה־differentiator</span></summary>
-    <div class="body">
-      <p>זה הקובץ שמכריע את חצי הציון. שלושה pipelines + שני transforms מותאמים. הכל מסתיים ב־<code class="k">ToImage→float→Normalize(ImageNet)</code> כך שהמודל מקבל בדיוק מה ש־<code class="k">predict.py</code> מצפה לו.</p>
-      <div class="code">
-        <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">augment.py — train transform (כבד)</span><span class="badge">torchvision.v2</span></div>
-<pre><code><span class="kw">def</span> <span class="fn2">build_train_transform</span>(img_size=<span class="nu">224</span>):
-  <span class="kw">return</span> v2.<span class="fn2">Compose</span>([
-    v2.<span class="fn2">RandomResizedCrop</span>(img_size, scale=(<span class="nu">.6</span>,<span class="nu">1.</span>)),   <span class="c"># zoom</span>
-    v2.<span class="fn2">RandomHorizontalFlip</span>(p=<span class="nu">.5</span>),
-    v2.<span class="fn2">RandomApply</span>([v2.<span class="fn2">RandomAffine</span>(<span class="nu">0</span>, translate=(<span class="nu">.15</span>,<span class="nu">.15</span>))], p=<span class="nu">.5</span>),  <span class="c"># shift</span>
-    v2.<span class="fn2">RandomApply</span>([<span class="fn2">MeanFillRotation</span>((<span class="nu">45</span>,<span class="nu">90</span>,<span class="nu">180</span>,<span class="nu">270</span>))], p=<span class="nu">.5</span>),  <span class="c"># ↑ ציר OOD מאומת</span>
-    v2.<span class="fn2">RandomApply</span>([v2.<span class="fn2">ColorJitter</span>(<span class="nu">.5</span>,<span class="nu">.5</span>,<span class="nu">.5</span>,<span class="nu">.1</span>)], p=<span class="nu">.8</span>),     <span class="c"># תאורה/צבע — ↑ ציר OOD מאומת</span>
-    v2.<span class="fn2">RandomGrayscale</span>(p=<span class="nu">.15</span>),
-    v2.<span class="fn2">RandomApply</span>([v2.<span class="fn2">RandomInvert</span>()], p=<span class="nu">.08</span>),           <span class="c"># 🚩 מסוכן לתווית — נדיר</span>
-    v2.<span class="fn2">RandomApply</span>([<span class="fn2">SaltPepperNoise</span>(<span class="nu">.02</span>)], p=<span class="nu">.2</span>),
-    *<span class="fn2">_normalize_tail</span>(),
-  ])</code></pre>
-      </div>
-      <ul class="ann">
-        <li><span class="pin">MeanFillRotation</span><span class="tx">סיבוב שממלא פינות ריקות בצבע <b>הממוצע</b> של התמונה — לא שחור. שחור היה רמז־רקע מזויף שהמודל יכול לרמות עליו.</span></li>
-        <li><span class="pin">SaltPepperNoise</span><span class="tx">מגריל חלק מהפיקסלים ל־0 (פלפל) או 1 (מלח) — מדמה רעש חיישן/דחיסה.</span></li>
-        <li><span class="pin g">heavy (fallback מת)</span><span class="tx"><code class="k">build_train_transform</code>: אוגמנטציה אקראית כבדה online. <b>מת בנתיב ברירת־המחדל</b> — לפי החלטת הצוות אנחנו רצים <b>offline-only</b> (כל הגיוון מהתאומים על הדיסק). הוא נשאר מתועד ועקבי עם השקלול האופליין (rotation p=.5, colorjitter p=.8 בעוצמה .5, invert p=.08) למקרה שנרצה לחזור ל-online. <code class="k">build_loaders</code> כלל לא קורא לו ב-include_augmented=True.</span></li>
-        <li><span class="pin w">light</span><span class="tx"><code class="k">build_light_train_transform</code>: רק crop+flip+normalize. לשימוש <b>עם</b> התאומים האפויים, כדי לא להכפיל עיוות. זה ה־default כשמתאמנים עם <code class="k">train_aug/</code>.</span></li>
-        <li><span class="pin r">eval — לא נגענו</span><span class="tx"><code class="k">build_eval_transform</code>: דטרמיניסטי, משקף <b>בדיוק</b> את <code class="k">evaluate.py</code> (Resize 256 → CenterCrop 224 → Normalize) כדי שהמספרים המקומיים יתאימו לgrader. הושאר ללא שינוי.</span></li>
-        <li><span class="pin">OOD_TRANSFORMS</span><span class="tx">dict של מניפולציה בודדת בכל פעם (grayscale / color_jitter / rotation / invert / salt_pepper) — למדידת אינווריאנטיות ציר אחר ציר ב־<code class="k">robust_eval</code>. זוויות הסיבוב עודכנו ל־<code class="k">(45,90,180,270)</code> כדי לשקף את מה שהתאומים באמת ראו, ועוצמות ה־probe מראות את אותו הטווח של התאומים.</span></li>
-      </ul>
-      <div class="note info"><span class="ic">◆</span><div class="bd"><b>למה זה תקין מול הgrader:</b> <code class="k">augment.py</code> מייבא torchvision — תקין לחלוטין לפיתוח, אבל <code class="k">model.py</code> המוגש חייב להיות עצמאי (torch בלבד). התאומים האפויים (PIL בלבד) הם בדיוק הדרך לעקוף: האוגמנטציה יושבת על הדיסק כקבצי JPG, לא בקוד המוגש. בזמן ההגשה לא צריך את augment.py בכלל.</div></div>
-    </div>
-  </details>
-
-  <!-- ===== engine.py ===== -->
-  <details class="file" id="f-engine">
-    <summary><span class="chev">▶</span><span class="fname">engine.py</span><span class="role B">Person B</span><span class="own">לולאות אימון</span></summary>
-    <div class="body">
-      <p>בחירת device, seeding, ולולאות train/eval. PyTorch רגיל עם הערות מפורטות. עובד כבר; התפקיד של Person B הוא לגרום לאימון <b>להתכנס טוב יותר</b>.</p>
-      <div class="note good"><span class="ic">◆</span><div class="bd"><b>בחירות Person B (מודרני, מתועד):</b> אופטימייזר ברירת מחדל <code class="k">AdamW</code> (lr=<code class="k">1e-3</code>, weight_decay=<code class="k">1e-2</code>) — Adam עם weight-decay <b>מנותק</b> (decoupled). Adam מתאים את גודל הצעד פר-פרמטר מתוך אומדנים רצים של ממוצע ושונות הגרדיאנט, ולכן מתכנס מהר וסלחני לבחירת ה-LR — ה-default החזק ביותר לאימון ה-ResNet הזה מאפס. ה-"W" אומר שה-decay מוחל ישירות על המשקלים (רגולריזציה נכונה יותר מ-Adam הקלאסי). תזמון ברירת מחדל <code class="k">CosineAnnealingLR</code> — דועך את ה-LR בעקומת קוסינוס מהערך ההתחלתי עד ~0 לאורך הריצה: למידה מהירה בהתחלה, כיוונון עדין בסוף, בלי לבחור נקודות-מדרגה ידנית. <code class="k">SGD(momentum=0.9)+StepLR</code> זמינים גם הם דרך <code class="k">optimizer="sgd"</code>/<code class="k">lr_schedule="step"</code> (SGD לפעמים מכליל קצת יותר טוב — minima שטוחים — שימושי לחצי ה-OOD, אבל דורש LR גדול יותר ועוד epochs).</div></div>
-      <div class="note info"><span class="ic">◆</span><div class="bd"><b>הגנות נגד overfit (11.28M פרמטרים על ~16k תמונות):</b> <code class="k">weight_decay</code> (L2, default מודע-אופטימייזר), <code class="k">label_smoothing=0.1</code> (יעד 0.9 לאמת + 0.1 מפוזר על 19 → פחות ביטחון-יתר, פחות היתפסות על קיצורי רקע/צבע → קצת יותר חוסן), Dropout בראש (model.py), ו-early-stopping. <code class="k">grad_clip=1.0</code> (max grad-norm) הוא רשת הביטחון לצעדים הראשונים. <code class="k">CrossEntropyLoss</code> מקבל לוגיטים גולמיים (מחיל log-softmax בפנים — <b>לא</b> לעשות softmax לפני).</div></div>
-      <div class="code">
-        <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">engine.py — לולאת האימון</span><span class="badge">python</span></div>
-<pre><code><span class="kw">def</span> <span class="fn2">train</span>(model, train_loader, val_loader=<span class="kw">None</span>, *, epochs=<span class="nu">15</span>,
-          optimizer=<span class="st">"adamw"</span>,        <span class="c"># "adamw" (default) או "sgd"</span>
-          lr=<span class="kw">None</span>, weight_decay=<span class="kw">None</span>,   <span class="c"># None ⇒ default מודע-אופטימייזר</span>
-          lr_schedule=<span class="st">"cosine"</span>,      <span class="c"># "cosine" (default) או "step"</span>
-          grad_clip=<span class="nu">1.0</span>, label_smoothing=<span class="nu">0.1</span>, patience=<span class="nu">5</span>):
-    <span class="kw">if</span> optimizer == <span class="st">"adamw"</span>:                          <span class="c"># lr=1e-3, wd=1e-2</span>
-        optimizer = torch.optim.<span class="fn2">AdamW</span>(model.<span class="fn2">parameters</span>(), lr=lr, weight_decay=weight_decay)
-    <span class="kw">elif</span> optimizer == <span class="st">"sgd"</span>:                         <span class="c"># lr=0.05, wd=5e-4, momentum=0.9</span>
-        optimizer = torch.optim.<span class="fn2">SGD</span>(model.<span class="fn2">parameters</span>(), lr=lr, momentum=<span class="nu">0.9</span>, weight_decay=weight_decay)
-    criterion = nn.<span class="fn2">CrossEntropyLoss</span>(label_smoothing=label_smoothing)  <span class="c"># לוגיטים + ריכוך</span>
-    scheduler = ....<span class="fn2">CosineAnnealingLR</span>(optimizer, T_max=epochs, eta_min=lr*<span class="nu">0.01</span>)
-
-    <span class="kw">for</span> epoch <span class="kw">in</span> <span class="fn2">range</span>(<span class="nu">1</span>, epochs+<span class="nu">1</span>):
-        tr_loss = <span class="fn2">train_one_epoch</span>(...)           <span class="c"># grad_clip אחרי backward, לפני step</span>
-        val_acc, *_ = <span class="fn2">evaluate</span>(model, val_loader, device)
-        scheduler.<span class="fn2">step</span>()
-        <span class="kw">if</span> val_acc &gt; best_acc:                       <span class="c"># שומר best, לא last</span>
-            best_state = {... clone ...};  since_improved = <span class="nu">0</span>
-        <span class="kw">else</span>:
-            since_improved += <span class="nu">1</span>
-            <span class="kw">if</span> since_improved &gt;= patience: <span class="kw">break</span>      <span class="c"># early stop</span>
-    model.<span class="fn2">load_state_dict</span>(best_state)               <span class="c"># משחזר את הטוב</span></code></pre>
-      </div>
-      <ul class="ann">
-        <li><span class="pin">get_device</span><span class="tx">בוחר את הbackend המהיר: CUDA → MPS (Apple M3) → CPU. אותו קוד רץ אצל כולם. ב-Colab זה בוחר <code class="k">cuda</code> אוטומטית, בלי שינוי קוד.</span></li>
-        <li><span class="pin">evaluate</span><span class="tx">תחת <code class="k">@torch.no_grad</code>, מחזיר <code class="k">acc, preds, labels, confs</code> (confidence דרך softmax). ה־confidence משמש רק ל־error analysis, לא משפיע על acc.</span></li>
-        <li><span class="pin g">AdamW + cosine (default)</span><span class="tx"><code class="k">AdamW</code> (lr=1e-3, wd=1e-2) + <code class="k">CosineAnnealingLR</code> (<code class="k">eta_min=lr*0.01</code>). הצעד האדפטיבי פר-פרמטר נותן התכנסות מהירה וחוסן ל-LR מאפס; ה-cosine דועך ל-~0 חלק. <b>למה זו הבחירה:</b> ה-default החזק ביותר לאימון from-scratch, פחות כיוונון ידני מ-SGD.</span></li>
-        <li><span class="pin">SGD זמין</span><span class="tx"><code class="k">optimizer="sgd"</code> → SGD+momentum 0.9 (lr=0.05, wd=5e-4) + אפשר <code class="k">lr_schedule="step"</code> (StepLR, ירידת-מדרגה כל <code class="k">epochs//3</code>). שווה לנסות בסבב הסופי כדי לראות אם סוחט עוד טיפת הכללת-OOD. BatchNorm במודל מייצב את משטח ה-loss כך ששני האופטימייזרים יציבים.</span></li>
-        <li><span class="pin g">best‑weights</span><span class="tx">שומר את ה־state עם ה־val הכי טוב ומשחזר בסוף — לא את ה־epoch האחרון. עמיד ל־overfit מאוחר.</span></li>
-        <li><span class="pin">early stop</span><span class="tx"><code class="k">patience</code> (5) epochs בלי שיפור → עצירה. רלוונטי רק כשיש val set.</span></li>
-        <li><span class="pin w">TODO(B)</span><span class="tx">לכוונן פר-שלב: adamw lr ב-[5e-4, 3e-3] / wd ב-[1e-2, 5e-2]; sgd lr ב-[0.01, 0.1] / wd ~5e-4; <code class="k">grad_clip</code> עד 5.0; <code class="k">label_smoothing</code> ב-[0, 0.2]. seed גם ל-MPS, אבל אי-דטרמיניזם MPS/CUDA → סומכים על קובץ המשקלים, לא על "נריץ שוב".</span></li>
-      </ul>
-    </div>
-  </details>
-
-  <!-- ===== model.py ===== -->
-  <details class="file" id="f-model">
-    <summary><span class="chev">▶</span><span class="fname">submissions/my_team/model.py</span><span class="role A">Person A</span><span class="own">הרשת · נשלחת</span></summary>
-    <div class="body">
-      <p>ResNet קטן (בצורת ResNet-18, סגנון He 2016) מ־random init — BatchNorm + skip connections + תשומת־לב ערוצים <b>Squeeze-and-Excitation</b>, ‎<code class="k">~11.28M</code> פרמטרים (‎<code class="k">11,275,852</code>). זה הקובץ ה<b>יחיד</b> שהgrader משחזר ממנו את הרשת — חייב להיות עצמאי (torch בלבד).</p>
-      <div class="code">
-        <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">model.py — SEBlock + ResidualBlock</span><span class="badge">nn.Module</span></div>
-<pre><code><span class="kw">class</span> <span class="fn2">SEBlock</span>(nn.Module):                <span class="c"># Squeeze-and-Excitation (Hu et al. 2018)</span>
-    <span class="kw">def</span> <span class="fn2">forward</span>(self, x):                  <span class="c"># gate פר-ערוץ מתוך הקשר גלובלי</span>
-        s = sigmoid(W2·ReLU(W1·<span class="fn2">GAP</span>(x)))   <span class="c"># [B,C,1,1] חשיבות 0..1 לכל ערוץ</span>
-        <span class="kw">return</span> x * s                       <span class="c"># מגביר ערוצים מועילים, מדכא מסיחים</span>
+        <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">model.py</span><span class="badge">nn.Module</span></div>
+<pre><code><span class="kw">class</span> <span class="fn2">SEBlock</span>(nn.Module):           <span class="c"># channel attention, reduction=16</span>
+    <span class="kw">def</span> <span class="fn2">forward</span>(self, x):
+        s = self.<span class="fn2">fc</span>(self.<span class="fn2">pool</span>(x))    <span class="c"># GAP -> 1x1(C->C/16) -> ReLU -> 1x1(->C) -> Sigmoid</span>
+        <span class="kw">return</span> x * s                  <span class="c"># שער לכל ערוץ [B,C,1,1], משדר על H,W</span>
 
 <span class="kw">class</span> <span class="fn2">ResidualBlock</span>(nn.Module):
-    <span class="c"># out = ReLU( SE(F(x)) + identity ),  F = (3x3→BN→ReLU)·2</span>
     <span class="kw">def</span> <span class="fn2">forward</span>(self, x):
         identity = x <span class="kw">if</span> self.downsample <span class="kw">is</span> <span class="kw">None</span> <span class="kw">else</span> self.<span class="fn2">downsample</span>(x)
         out = self.<span class="fn2">relu</span>(self.<span class="fn2">bn1</span>(self.<span class="fn2">conv1</span>(x)))
         out = self.<span class="fn2">bn2</span>(self.<span class="fn2">conv2</span>(out))
-        out = self.<span class="fn2">se</span>(out)                      <span class="c"># SE — מכייל ערוצים לפני החיבור</span>
-        <span class="kw">return</span> self.<span class="fn2">relu</span>(out + identity)        <span class="c"># skip — מקצר גרדיאנט</span></code></pre>
-      </div>
-      <div class="code">
-        <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">model.py — ModelArchitecture</span><span class="badge">nn.Module</span></div>
-<pre><code><span class="kw">class</span> <span class="fn2">ModelArchitecture</span>(nn.Module):
-    <span class="kw">def</span> <span class="fn2">__init__</span>(self, num_classes=<span class="nu">20</span>, base=<span class="nu">64</span>,
-                 blocks_per_stage=(<span class="nu">2</span>,<span class="nu">2</span>,<span class="nu">2</span>,<span class="nu">2</span>), dropout=<span class="nu">.4</span>):
-        self.stem   = ...   <span class="c"># 7x7 s2 conv→BN→ReLU→3x3 s2 maxpool : 224→56 [64]</span>
-        self.stage1 = ...   <span class="c"># 2 blocks, stride 1            : 56→56  [64]</span>
-        self.stage2 = ...   <span class="c"># 2 blocks, first stride 2      : 56→28  [128]</span>
-        self.stage3 = ...   <span class="c"># 2 blocks, first stride 2      : 28→14  [256]</span>
-        self.stage4 = ...   <span class="c"># 2 blocks, first stride 2      : 14→7   [512]</span>
-        self.pool = nn.<span class="fn2">AdaptiveAvgPool2d</span>(<span class="nu">1</span>)            <span class="c"># 7→1, מקבל כל גודל קלט</span>
-        self.classifier = nn.<span class="fn2">Sequential</span>(
-            nn.<span class="fn2">Flatten</span>(), nn.<span class="fn2">Dropout</span>(dropout), nn.<span class="fn2">Linear</span>(<span class="nu">512</span>,num_classes))
+        out = self.<span class="fn2">se</span>(out)               <span class="c"># SE על F(x) לפני החיבור</span>
+        out = out + identity            <span class="c"># residual add</span>
+        <span class="kw">return</span> self.<span class="fn2">relu</span>(out)
 
-    <span class="kw">def</span> <span class="fn2">forward</span>(self, x):                          <span class="c"># [B,20]</span>
-        x = self.<span class="fn2">stem</span>(x); x = self.<span class="fn2">stage1</span>(x); x = self.<span class="fn2">stage2</span>(x)
-        x = self.<span class="fn2">stage3</span>(x); x = self.<span class="fn2">stage4</span>(x)
-        <span class="kw">return</span> self.<span class="fn2">classifier</span>(self.<span class="fn2">pool</span>(x))</code></pre>
+<span class="kw">class</span> <span class="fn2">ModelArchitecture</span>(nn.Module):   <span class="c"># stem + 4 stages(2 blocks) + head</span>
+    <span class="kw">def</span> <span class="fn2">forward</span>(self, x):
+        x = self.<span class="fn2">stem</span>(x)                          <span class="c"># 224->56</span>
+        x = self.<span class="fn2">stage1</span>(x); x = self.<span class="fn2">stage2</span>(x)      <span class="c"># 64 -> 128 (s2)</span>
+        x = self.<span class="fn2">stage3</span>(x); x = self.<span class="fn2">stage4</span>(x)      <span class="c"># 256 -> 512 (s2)</span>
+        x = self.<span class="fn2">pool</span>(x)                          <span class="c"># AdaptiveAvgPool2d(1)</span>
+        <span class="kw">return</span> self.<span class="fn2">classifier</span>(x)               <span class="c"># Dropout(0.4) -> Linear(512,20) = [B,20]</span></code></pre>
       </div>
       <ul class="ann">
-        <li><span class="pin g">Squeeze-and-Excitation</span><span class="tx"><b>תשומת־לב ערוצים</b> (Hu et al. 2018), בתוך כל בלוק, אחרי שני ה-convs ולפני חיבור ה-residual. <b>squeeze</b>: global avg pool מכווץ כל מפת ערוץ למספר אחד (הקשר גלובלי). <b>excite</b>: MLP זעיר עם bottleneck (Conv1x1 reduce/16 → ReLU → Conv1x1 → Sigmoid) מוציא gate ב-0..1 לכל ערוץ. <b>recalibrate</b>: <code class="k">out = x * s</code> — מגביר ערוצים אינפורמטיביים, מדכא ערוצים-מסיחים. <b>למה בחרנו בזה:</b> הזזות רקע/צבע/תאורה מעוותות בעיקר <b>תת-קבוצה</b> של ערוצים (הרגישים-לצבע); SE מאפשר לרשת ללמוד לדכא אותם ולהישען על ערוצי צורה/מבנה — בדיוק יעד ה-OOD של האתגר. זול: ‎<code class="k">~0.09M</code> פרמטרים בלבד (reduction=16). אנלוגיה: כמו attention על טוקנים, רק שכאן משקלל <b>ערוצי</b> מפות-מאפיינים.</span></li>
-        <li><span class="pin">המשפך</span><span class="tx">ערוצים מכפילים (64→128→256→512) כשהמרחב מתכווץ (224→7). רוחב גדול = bias נמוך — הרשת הישנה (VGG ~1.2M) היתה תת־פרמטרית ל-20 מחלקות ImageNet.</span></li>
-        <li><span class="pin g">skip connections</span><span class="tx"><code class="k">y=f(x)+x</code> (He 2016) נותן לגרדיאנט מסלול ישר אחורה → מקל על vanishing gradients ומאפשר באמת לנצל את העומק. כשהבלוק משנה ערוצים/stride — ענף ה-identity מוקרן ב-1×1 conv (+BN) כדי שהצורות יתאימו לפני החיבור.</span></li>
-        <li><span class="pin g">BatchNorm</span><span class="tx">נרמול אחרי כל conv: מנרמל כל ערוץ על פני ה-batch + המיקומים המרחביים, מתנה את משטח ה-loss כך שרשת עמוקה מאפס מתאמנת נקי ומהר. <b>למה בחרנו:</b> זו הסיבה העיקרית שה-ResNet הזה מתאמן מאפס ומנצח VGG פשוט. ה-scale/shift + running mean/var רוכבים ב-state_dict כ-buffers; <code class="k">predict.py</code> קורא <code class="k">.eval()</code> → ב-inference משתמשים ב-running stats קפואים, בלתי-תלוי בגודל ה-batch.</span></li>
-        <li><span class="pin g">AdaptiveAvgPool2d(1)</span><span class="tx">Global Average Pool: מכווץ כל מפת מאפיינים ל־1×1 → אין FC params לפני ה-Linear הסופי (512→20), ומקבל <b>כל</b> גודל קלט (מאמנים ב-128 למהירות, ה-grader מזין 224 — שניהם עובדים).</span></li>
-        <li><span class="pin">Kaiming init</span><span class="tx"><code class="k">_init_weights</code>: <code class="k">kaiming_normal</code> ל-convs (fan-out, מותאם ל-ReLU — אתחול תקני וטוב), BN weight=1/bias=0, normal קטן ל-linear.</span></li>
-        <li><span class="pin r">~11.28M params · dropout=0.4</span><span class="tx">‎11,275,852 פרמטרים על ~16k תמונות = נטיית overfit. ה-dropout בראש על <b>0.4</b>, ביחד עם weight-decay (engine) + GAP + אוגמנטציה אופליין. <b>חוזה grader:</b> <code class="k">predict.py</code> בונה <code class="k">ModelArchitecture()</code> בלי args → defaults (base=64, blocks=(2,2,2,2), num_classes=20) מגדירים את הצורה שהמשקלים נטענים אליה, ו-train.py חייב להתאים. <code class="k">dropout</code> הוא הלביר היחיד שבטוח לכוונן בלי לשבור טעינת משקלים (Dropout בלי פרמטרים → אותם state_dict keys ואותן צורות).</span></li>
+        <li><span class="pin">8 בלוקים</span><span class="tx">4 stages × 2 ResidualBlocks. רוחבים 64→128→256→512, הבלוק הראשון בכל stage (2–4) עושה stride‑2 ומכפיל ערוצים; ה־identity מותאם ב־1×1 conv+BN.</span></li>
+        <li><span class="pin g">SE בכל בלוק</span><span class="tx">8 בלוקי SE (~0.09M פרמטרים בלבד). <code class="k">s = sigmoid(W2·ReLU(W1·GAP(x)))</code>, <code class="k">out = x·s</code>. שינויי רקע/צבע מפריעים בעיקר לחלק מהערוצים — SE לומד לדכא אותם.</span></li>
+        <li><span class="pin">BN אחרי כל conv</span><span class="tx">20 שכבות BN. ה־conv עם <code class="k">bias=False</code> כי ה־BN כבר נושא shift. ב־<code class="k">eval()</code> משתמש ב־running stats קפואים → תחזית בלתי־תלויה בגודל batch.</span></li>
+        <li><span class="pin w">init</span><span class="tx">Kaiming fan‑out (convs), BN weight=1/bias=0, Linear נורמלי קטן. He init מתאים ל־ReLU ומאפשר אימון מאפס.</span></li>
+        <li><span class="pin">GAP</span><span class="tx"><code class="k">AdaptiveAvgPool2d(1)</code> → הרשת מקבלת כל גודל קלט. אימנו ב־128 לזירוז, הgrader מזין 224, שניהם עובדים. אין FC גדול לפני ה־Linear → פחות פרמטרים ל־overfit.</span></li>
       </ul>
     </div>
   </details>
+</section>
 
-  <!-- ===== train.py ===== -->
-  <details class="file" id="f-train">
-    <summary><span class="chev">▶</span><span class="fname">submissions/my_team/train.py</span><span class="role S">Shared</span><span class="own">צנרת האימון</span></summary>
+<!-- 5 TRAINING -->
+<section id="train">
+  <div class="sec-h"><span class="sec-n">5</span><h2>האימון — AdamW, cosine, label smoothing</h2></div>
+  <p>המתכון שייצר את המשקלים. כל ברירת מחדל נבחרה במכוון:</p>
+  <table class="tbl">
+    <tr><th>רכיב</th><th>ערך</th><th>למה</th></tr>
+    <tr><td><b>Optimizer</b></td><td class="m">AdamW lr=1e-3, wd=1e-2</td><td>צעד אדפטיבי לכל פרמטר → התכנסות מהירה מאפס, פחות רגיש ל־LR. weight decay מנותק = רגולריזציה נקייה</td></tr>
+    <tr><td><b>LR schedule</b></td><td class="m">CosineAnnealing → ~1e-5</td><td>דעיכה חלקה ל־~0 לאורך הריצה, בלי קפיצות</td></tr>
+    <tr><td><b>Loss</b></td><td class="m">CrossEntropy + smoothing 0.1</td><td>מטרות 0.9/0.1 במקום 1/0 → מרסן ביטחון יתר, מרתיע התחייבות לקיצורי רקע/צבע</td></tr>
+    <tr><td><b>Grad clip</b></td><td class="m">max_norm=1.0</td><td>מייצב את הצעדים הראשונים</td></tr>
+    <tr><td><b>Early stop</b></td><td class="m">patience=5, best‑weights</td><td>שומר את ה־state עם ה־val הכי טוב, לא האחרון. שובר את ה־overfit</td></tr>
+    <tr><td><b>Epochs / batch</b></td><td class="m">25 @ 224px · batch 48</td><td>intermediate ב־128 (×3 מהיר), final ב־224</td></tr>
+  </table>
+  <div class="note good"><span class="ic">◆</span><div class="bd"><b>שחזוּר:</b> זרענו seed=42, אבל ליבות MPS/CUDA לא בִּיט־דטרמיניסטיות. לכן <b>שומרים את קובץ המשקלים</b> בפועל, לא "מריצים שוב ומקווים".</div></div>
+  <div class="note info"><span class="ic">◆</span><div class="bd"><b>למה AdamW ולא SGD:</b> SGD+momentum לפעמים מכליל קצת יותר טוב, אבל מאפס, עם BatchNorm, AdamW התכנס הרבה יותר מהר ויציב ב־LR גבוה. בזמן מוגבל — שווה.</div></div>
+</section>
+
+<!-- 6 ROBUST -->
+<section id="robust">
+  <div class="sec-h"><span class="sec-n g">6</span><h2>העמידות — הלב של האתגר</h2></div>
+  <p>חצי הציון הוא OOD. הכרחנו אינווריאנטיות דרך אוגמנטציה, ועשינו זאת <b>אופליין</b>: בנינו תאומים מאוגמנטים של תמונות האימון ושמרנו לדיסק.</p>
+
+  <h3>למה אופליין (תאומים על הדיסק)</h3>
+  <ul>
+    <li><b>seeded per‑file</b> → כל חברי הצוות מתאמנים על data זהה byte‑for‑byte.</li>
+    <li><b>ניתן לצפייה</b> — אפשר לפתוח את התמונה המאוגמנטת ולראות מה קרה (טוב ל־error analysis).</li>
+    <li><b>leakage‑safe</b> — שם זהה למקור → התאום יורש את ה־partition של המקור. תאום של תמונת‑test משמש רק כשהמקור ב־train.</li>
+  </ul>
+
+  <h3>הפילטרים — משוקללים לפי הצירים שאוששו</h3>
+  <table class="tbl">
+    <tr><th>פילטר</th><th>משקל</th><th>הערה</th></tr>
+    <tr><td><b>rotation</b> (45/90/180/270, mean‑fill)</td><td class="ch ok">4</td><td>ציר גאומטרי — אושש ב־<code class="k">augmentations/</code></td></tr>
+    <tr><td><b>color jitter</b> (sat/bright/contrast 0.5–1.5)</td><td class="ch ok">4</td><td>תאורה/צבע — אושש ב־<code class="k">augmentations/</code></td></tr>
+    <tr><td>grayscale</td><td class="ch wip">2</td><td>שובר הסתמכות על צבע מוחלט</td></tr>
+    <tr><td>salt‑pepper · blur</td><td class="ch wip">2</td><td>רעש חיישן / דחיסה</td></tr>
+    <tr><td>invert</td><td class="ch no">1</td><td>נדיר — מסוכן לתווית (לימון צהוב → כחול)</td></tr>
+  </table>
+  <p>כל תמונה מקבלת 1–3 פילטרים בדגימה משוקללת ללא החזרה, ב־2 עותקים (~40k תמונות). הסיבוב ממלא פינות בצבע <b>הממוצע</b> של התמונה — לא שחור, ששחור היה רמז־רקע מזויף.</p>
+
+  <div class="note rule"><span class="ic">▲</span><div class="bd"><b>למה לא החלפנו רקע:</b> החלפת רקע אמיתית דורשת סגמנטציה foreground/background + אסטים חיצוניים — מפֵר את "מאפס / בלי data חיצוני". <b>mean‑fill rotation</b> הוא ה־proxy הכי קרוב בתוך החוקים ל"הסביבה השתנתה".</div></div>
+
+  <details class="file" id="f-aug">
+    <summary><span class="chev">▶</span><span class="fname">make_augmented.py — הפילטרים</span><span class="own">PIL · offline twins</span></summary>
     <div class="body">
-      <p>מאמן <b>שלב אחד בכל הרצה</b> (gated) → מעדכן <code class="k">weights.joblib</code>. כל הרצה מתחילה מ-init אקראי <b>טרי</b> ("שוכחים מודלים קודמים"), בודקת את הבלוק ה-15% הבא בעודו unseen, מדפיסה דיוק פר-מחלקה + לוג טעויות, שומרת ו<b>עוצרת</b>. <b>לא</b> מתקדמת אוטומטית ו<b>לא</b> מתאמנת על 100% — קידום שלב הוא החלטה אנושית (<code class="k">--stage N+1</code>).</p>
       <div class="code">
-        <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">train.py</span><span class="badge">python</span></div>
-<pre><code><span class="kw">def</span> <span class="fn2">main</span>(stage=<span class="nu">1</span>, ...):
-    <span class="fn2">set_seed</span>(<span class="nu">42</span>)
-    train_parts, test_part = <span class="fn2">progressive_stages</span>()[stage-<span class="nu">1</span>]   <span class="c"># stage 1 ⇒ (['P0'],'P1')</span>
-    model = <span class="fn2">ModelArchitecture</span>()                            <span class="c"># FRESH init בכל הרצה</span>
-    train_loader, eval_loader = <span class="fn2">build_loaders</span>(train_parts, test_part, ...)
-    model, _ = <span class="fn2">train</span>(model, train_loader, eval_loader, epochs=epochs)  <span class="c"># AdamW+cosine</span>
-    acc, preds, labels, confs = <span class="fn2">evaluate</span>(model, eval_loader, device)
-    <span class="c"># דיוק פר-מחלקה (גרוע ראשון) + dump טעויות</span>
-    <span class="fn2">log_errors</span>(eval_loader.dataset.samples, ..., tag=<span class="st">f"stage{stage}_{test_part}"</span>)
-    joblib.<span class="fn2">dump</span>(model.<span class="fn2">cpu</span>().<span class="fn2">state_dict</span>(), OUTPUT)         <span class="c"># חוזה ה-grader</span>
-    <span class="c"># verdict: GOOD אם acc≥0.55 · weak אם ≥floor(0.2230) · BROKEN אם מתחת לרצפה</span></code></pre>
+        <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">make_augmented.py</span><span class="badge">python · PIL</span></div>
+<pre><code>FILTERS = [(<span class="st">"rotate"</span>, f_rotate, <span class="nu">4</span>), (<span class="st">"color_jitter"</span>, f_color_jitter, <span class="nu">4</span>),
+           (<span class="st">"grayscale"</span>, f_grayscale, <span class="nu">2</span>), (<span class="st">"salt_pepper"</span>, f_salt_pepper, <span class="nu">2</span>),
+           (<span class="st">"blur"</span>, f_blur, <span class="nu">2</span>), (<span class="st">"invert"</span>, f_invert, <span class="nu">1</span>)]
+MAX_FILTERS_PER_IMAGE = <span class="nu">3</span>
+
+<span class="kw">def</span> <span class="fn2">build_augmented</span>(copies=<span class="nu">2</span>, seed=<span class="nu">42</span>):
+    <span class="kw">for</span> img_path <span class="kw">in</span> ...:
+        rng = random.<span class="fn2">Random</span>(<span class="st">f"{seed}:{img_path.name}:{i}"</span>)   <span class="c"># זרע per-file</span>
+        aug = <span class="fn2">apply_random_filters</span>(img, rng)             <span class="c"># 1..3 משוקלל ללא החזרה</span>
+        aug.<span class="fn2">save</span>(dst / <span class="st">f"{stem}__aug{i}.jpg"</span>)         <span class="c"># יורש partition לפי שם</span></code></pre>
       </div>
       <ul class="ann">
-        <li><span class="pin">gated · fresh init</span><span class="tx">כל הרצה: init אקראי טרי, אימון שלב <b>אחד</b>, עצירה. נכון כשהארכיטקטורה משתנה בין איטרציות (אין הפתעות משקלים-ישנים). הסילבוס: stage 1 = P0(40%)→test P1, stage 2 = +P1(55%)→test P2, וכן הלאה עד stage 4. אין שלב "100% + save" אוטומטי בקוד.</span></li>
-        <li><span class="pin g">save contract</span><span class="tx"><code class="k">joblib.dump(model.cpu().state_dict(), "weights.joblib")</code> — בדיוק החוזה. CPU + joblib. כל הרצה דורסת את הקובץ.</span></li>
-        <li><span class="pin">verdict + floor</span><span class="tx">מדפיס verdict מול הרצפה הנאיבית הנמדדת <code class="k">0.2230</code>: ‎<code class="k">≥0.55</code> = GOOD (אפשר לקדם), בין הרצפה ל-0.55 = weak (לכוונן ולהריץ שוב), מתחת לרצפה = BROKEN (משהו שבור). מדפיס גם את 8 המחלקות הגרועות ביותר.</span></li>
-        <li><span class="pin w">sys.path</span><span class="tx">מכניס גם שורש‑הריפו (engine/data...) וגם תיקיית הצוות (model). לפני הגשה סופית מקפלים את ה־helpers פנימה → קובץ עצמאי (Stage 6).</span></li>
-        <li><span class="pin r">הgrader לא מריץ</span><span class="tx">את <code class="k">train.py</code> אף פעם. הוא רק טוען <code class="k">weights.joblib</code> דרך <code class="k">predict.py</code>. לכן הייבוא מהשורש תקין בפיתוח.</span></li>
+        <li><span class="pin g">mean‑fill</span><span class="tx"><code class="k">f_rotate</code> ממלא פינות ב־<code class="k">_mean_color(img)</code> — הצבע הממוצע, לא שחור. מונע למידת רקע מזויף.</span></li>
+        <li><span class="pin">משקלים</span><span class="tx">rotate ו־color_jitter שוקללו 4 כי תיקיית <code class="k">augmentations/</code> שסופקה (random_rotation, color_jitter) מאשרת שאלה צירי מבחן אמיתיים.</span></li>
+        <li><span class="pin w">SCORE</span><span class="tx"><code class="k">robust_eval.py</code> מחשב <code class="k">0.5·clean + 0.5·mean(OOD)</code> על תיקיית <code class="k">augmentations/</code>, מדפיס את הdrop לכל ציר ואת הציר הכי גרוע — כדי לכוון אליו אוגמנטציה.</span></li>
       </ul>
     </div>
   </details>
+</section>
 
-  <!-- ===== predict.py ===== -->
-  <details class="file" id="f-predict">
-    <summary><span class="chev">▶</span><span class="fname">submissions/my_team/predict.py</span><span class="role S">Frozen</span><span class="own">אסור לגעת</span></summary>
-    <div class="body">
-      <p>הממשק הקבוע של הgrader. הוא עושה: <code class="k">Model()</code> → <code class="k">load("weights.joblib")</code> → <code class="k">predict(x)</code>.</p>
-      <div class="code">
-        <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">predict.py</span><span class="badge">frozen</span></div>
-<pre><code><span class="kw">class</span> <span class="fn2">Model</span>(BaseModel):
-    <span class="kw">def</span> <span class="fn2">load</span>(self, weights_path):
-        state_dict = joblib.<span class="fn2">load</span>(weights_path)        <span class="c"># joblib, לא torch</span>
-        self.net.<span class="fn2">load_state_dict</span>(state_dict);  self.net.<span class="fn2">eval</span>()
-    <span class="kw">def</span> <span class="fn2">predict</span>(self, x):
-        <span class="kw">with</span> torch.<span class="fn2">no_grad</span>():
-            logits = self.<span class="fn2">net</span>(x)
-        <span class="kw">return</span> logits.<span class="fn2">argmax</span>(dim=<span class="nu">1</span>)               <span class="c"># Long [B] ב-0..19</span></code></pre>
-      </div>
-      <ul class="ann">
-        <li><span class="pin">load_model_architecture</span><span class="tx">טוען את <code class="k">model.py</code> דרך importlib מאותה תיקייה — לכן הרשת חייבת לחיות שם, עצמאית.</span></li>
-        <li><span class="pin g">argmax</span><span class="tx">מחזיר מדדי מחלקה, <b>לא</b> לוגיטים ולא softmax. זה מה שמודד הgrader.</span></li>
-      </ul>
-    </div>
-  </details>
-
-  <!-- ===== tools ===== -->
-  <details class="file" id="f-tools">
-    <summary><span class="chev">▶</span><span class="fname">baseline_naive.py · error_analysis.py · robust_eval.py</span><span class="role D">Person D</span><span class="own">כלי מדידה</span></summary>
-    <div class="body">
-      <h4>baseline_naive.py — הרצפה (נמדד 0.2230)</h4>
-      <p>שלב 4. מודל טיפש = <code class="k">nn.Linear(3·32·32, 20)</code> = רגרסיה לוגיסטית על פיקסלים מוקטנים ל-32×32. רץ בשניות, מתאמן על P0 ובודק P1. הרצפה ה<b>נמדדה</b>: <code class="k">0.2230</code> (ניחוש אקראי = 0.05). אם ה־CNN לא מנצח אותה בנוחות — יש באג (תוויות/loader), לא בעיית כיוונון. ל-reference: ResNet+SE+AdamW ב-stage 1 (128px) נותן ‎<code class="k">~0.67</code> דיוק נקי על Dev.</p>
-      <h4>error_analysis.py — איפה זה נשבר</h4>
-      <p>אחרי כל eval כותב <code class="k">outputs/errors_&lt;tag&gt;.csv</code> (כל misclassification: path,true,pred,conf) + <code class="k">confusion_&lt;tag&gt;.csv</code> (מטריצה 20×20). מדפיס את הזוג הכי מבולבל. <b>לעולם לא</b> על ה־Test הסופי.</p>
-      <h4>robust_eval.py — מה שבאמת מנקדים</h4>
-      <p>מודד דיוק נקי מול דיוק על ה־OOD שסופקו (<code class="k">dataset/augmentations/color_jitter</code>, <code class="k">random_rotation</code>). drop גדול = המודל נשען על קיצורי צבע/אוריינטציה. עבודת האוגמנטציה של Person C אמורה לכווץ את הפער בלי לאבד דיוק נקי.</p>
-      <p>אחרי הפירוט ציר־אחר־ציר, הכלי מדפיס <b>ציון משולב יחיד</b> שמשקף בדיוק את ה-grader:</p>
-      <div class="code">
-        <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">robust_eval.py — SCORE</span><span class="badge">python</span></div>
-<pre><code>ood_mean = <span class="fn2">sum</span>(ood_accs) / <span class="fn2">len</span>(ood_accs)
-SCORE    = <span class="nu">0.5</span> * clean_acc + <span class="nu">0.5</span> * ood_mean
-<span class="fn2">print</span>(<span class="st">f"&gt;&gt; SCORE {SCORE:.4f}  &lt;-- optimize this"</span>)</code></pre>
-      </div>
-      <p><b>למה זה קריטי:</b> הציון הוא 50% נקי + 50% OOD. בלי מספר אחד שמשקף את היעד האמיתי, קל ליפול למלכודת של אופטימיזציה לדיוק נקי בלבד. עוקבים אחרי <b>SCORE</b> שעולה, לא אחרי clean acc. הכלי מטפל גם במקרים חלקיים (רק נקי / רק OOD) ומסמן אותם כ-proxy בביטחון נמוך.</p>
-      <div class="note info"><span class="ic">◆</span><div class="bd">ארבעת הכלים האלה הם ה<b>מדידה</b> סביב הצנרת — הם לא מאמנים, הם נותנים את המספרים שכל ההחלטות נשענות עליהם.</div></div>
-    </div>
-  </details>
-
-  <!-- ===== provided ===== -->
-  <details class="file" id="f-provided">
-    <summary><span class="chev">▶</span><span class="fname">base_model.py · evaluate.py · check_submission.py · labels.py</span><span class="role S">סופקו מ-Moodle</span><span class="own">לא נכתבו על ידינו</span></summary>
-    <div class="body">
-      <ul>
-        <li><b>base_model.py</b> — מגדיר את <code class="k">BaseModel</code> ש־<code class="k">predict.py</code> יורש ממנו, וגם את <code class="k">ImageNetSubset</code> (טעינה לפי תיקיות) שמשתמשים בו בפיתוח.</li>
-        <li><b>evaluate.py</b> — ה־leaderboard המקומי. טוען כל submission, מריץ inference על <code class="k">dataset/validation</code> (Resize 256 → CenterCrop 224 → Normalize), מדרג דיוק.</li>
-        <li><b>check_submission.py</b> — בדיקה מבנית: קבצים נדרשים, שמות מחלקות, צורת/טווח <code class="k">predict()</code>. בלי שם צוות = בודק את כולם.</li>
-        <li><b>labels.py</b> — מקור האמת למיפוי התוויות (סעיף 5).</li>
-      </ul>
-      <p><code class="k">submissions/dummy_baseline/</code> הוא reference עובד: CNN עם משקלי אפס שתמיד מנבא מחלקה 0. קוראים אותו כדי לראות את הצורה המדויקת שהgrader מצפה לה.</p>
-    </div>
-  </details>
+<!-- 7 METHOD -->
+<section id="method">
+  <div class="sec-h"><span class="sec-n">7</span><h2>המתודולוגיה — נבחנת בראיון</h2></div>
+  <p>עקבנו אחרי "ML in Practice" מהתרגול, לא רק "תאמן רשת". זה חצי מהציון בראיון.</p>
+  <h3>פיצול stratified, seeded, ו־curriculum מבוקר</h3>
+  <p>5 חלקים per‑class (P0=40%, P1–P4=15%), seed=42, כל partition מייצג את כל ההתפלגות (אין דליפת מחלקות). <b>Gated curriculum:</b> שלב k מתאמן על P0..P(k-1), בודק את Pk <b>פעם אחת בעודו unseen</b>, ועוצר — המעבר לשלב הבא הוא החלטה ידנית. כל שלב מתחיל מ־<b>random init טרי</b>, לא warm‑start: בין שלבים שינינו ארכיטקטורה, ו־warm‑start בלתי אפשרי כשהרשת משתנה. הdata מצטבר, המודל מתאתחל. ה־Test המקומי נוגעים בו פעם אחת בסוף.</p>
+  <h3>Baseline נאיבי כרצפה</h3>
+  <p>רגרסיה לוגיסטית על פיקסלים מוקטנים נתנה ~<b>0.22</b> — הרצפה שה־CNN חייב לנצח. אם לא מנצח, יש באג, לא בעיית כיוונון. ResNet עבר אותה בענק.</p>
+  <h3>Error analysis ידני על Dev</h3>
+  <p>משכנו דוגמאות שגויות, הסתכלנו בעיניים, חיפשנו דפוסים. מצאנו: <b>acoustic_guitar</b> מתבלבל עם laptop/mobile_phone/french_horn — כולם אובייקטים מלבניים כהים. המחלקות החזקות: goldfish, bald_eagle (~91%). <b>אף פעם לא</b> על ה־Test.</p>
+  <div class="note info"><span class="ic">◆</span><div class="bd"><b>בלי EDA נפרד:</b> ויתרנו על שלב EDA פורמלי. שפיות מכנית (איזון מחלקות, שמות תיקיות) נאכפת אוטומטית בשלב הפיצול; ההסתכלות הויזואלית קורית ב־error analysis, על טעויות אמיתיות.</div></div>
 </section>
 
 <hr class="div">
 
-<!-- 10 STATUS -->
-<section id="status">
-  <div class="sec-h"><span class="sec-n w">10</span><h2>סטטוס — מה בנוי ומה הלאה</h2></div>
-  <h3>בוצע</h3>
-  <ul>
-    <li><b>Stage 0 — שלד.</b> כל הקבצים רצים, ה־imports נקיים, <code class="k">check_submission.py</code> עובר ברמת dummy.</li>
-    <li><b>מודל מלא</b> ב־<code class="k">model.py</code>: ResNet קטן (בצורת ResNet-18) + BatchNorm + skip + <b>Squeeze-and-Excitation</b>, ‎11.28M params, מחזיר <code class="k">[B,20]</code>.</li>
-    <li><b>אימון מודרני</b> ב-<code class="k">engine.py</code>: <b>AdamW</b>+<b>CosineAnnealingLR</b> (ברירת מחדל), SGD+StepLR זמינים, label smoothing, grad-clip, best‑weights + early‑stop.</li>
-    <li><b>צנרת מלאה:</b> split stratified seeded, תאומים אופליין משוקללים (offline-only), trainer פרוגרסיבי gated, robust SCORE, error analysis.</li>
-    <li><b>רצפה נאיבית נמדדה:</b> <code class="k">0.2230</code>. stage-1 (128px) ResNet+SE נותן ‎~0.67 נקי על Dev.</li>
-  </ul>
-  <h3>מה הלאה — מפת הדרכים</h3>
+<!-- 8 RESULTS -->
+<section id="results">
+  <div class="sec-h"><span class="sec-n">8</span><h2>התוצאות</h2></div>
   <table class="tbl">
-    <tr><th>שלב</th><th>מה</th><th>בעלים</th><th>סטטוס</th></tr>
-    <tr><td><b>1</b></td><td>הורדת train_set · <code class="k">run.py split</code> (אוכף איזון/שפיות) · בדיקת תיקיית augmentations</td><td>D</td><td><span class="ch ok">בוצע ✓</span></td></tr>
-    <tr><td><b>2</b></td><td><code class="k">run.py baseline</code> → הרצפה תועדה (0.2230)</td><td>D</td><td><span class="ch ok">בוצע ✓</span></td></tr>
-    <tr><td><b>3</b></td><td>אימון ResNet+SE, מנצח את הרצפה (stage-1 ~0.67 נקי) — <code class="k">weights.joblib</code> ראשון</td><td>A+B</td><td><span class="ch ok">בוצע ✓</span></td></tr>
-    <tr><td><b>4</b></td><td>עמידות: תאומים משוקללים פעילים, robust SCORE מודד נקי מול OOD, מכוונים</td><td>C+D</td><td><span class="ch wip">בעבודה ▸</span></td></tr>
-    <tr><td><b>5</b></td><td>Error analysis → מזינים בחזרה ל־A ו־C; הרצה סופית full-res ב-Colab T4 (SETUP.md §5)</td><td>כולם</td><td><span class="ch wip">הבא ▸</span></td></tr>
-    <tr><td><b>6</b></td><td>נוגעים ב־Test פעם אחת · מקפלים train.py עצמאי · README ת"ז · אריזה · <code class="k">challenge2_&lt;ids&gt;</code></td><td>D</td><td><span class="ch no">לא התחיל</span></td></tr>
+    <tr><th>מדד</th><th>ערך</th><th>פירוש</th></tr>
+    <tr><td>דיוק נקי (held‑out P4)</td><td class="ch ok">0.847</td><td>in‑domain</td></tr>
+    <tr><td>SCORE סופי</td><td class="ch ok">0.906</td><td>0.5·clean + 0.5·OOD</td></tr>
+    <tr><td>OOD‑mean (משוער)</td><td class="ch ok">~0.964</td><td>נפתר מ־SCORE — <b>גבוה מהנקי</b></td></tr>
+    <tr><td>רצפה נאיבית</td><td>~0.22</td><td>logistic regression</td></tr>
+    <tr><td>intermediate (128px)</td><td>0.721</td><td>לפני המעבר ל־224</td></tr>
   </table>
-</section>
-
-<!-- 11 OWNERS -->
-<section id="owners">
-  <div class="sec-h"><span class="sec-n">11</span><h2>חלוקה ל־4 אנשים — כל אחד מזיז את הציון</h2></div>
-  <table class="tbl">
-    <tr><th>איש</th><th>תחום</th><th>קבצים</th><th>הלביר שלו</th></tr>
-    <tr><td><span class="role A">A</span></td><td>ארכיטקטורה</td><td class="m">model.py</td><td>ResNet+SE, עומק/רוחב/dropout. נשאר עצמאי (torch בלבד), לוגיטים [B,20].</td></tr>
-    <tr><td><span class="role B">B</span></td><td>אימון/אופטימיזציה</td><td class="m">engine.py</td><td>AdamW/SGD, cosine/step LR, label smoothing, grad-clip, early‑stop, device, seeding, checkpoint.</td></tr>
-    <tr><td><span class="role C">C</span></td><td>אוגמנטציה/עמידות</td><td class="m">augment.py · make_augmented.py</td><td>ה־differentiator — בעל חצי ה־OOD של הציון.</td></tr>
-    <tr><td><span class="role D">D</span></td><td>נתונים+מתודולוגיה+הערכה</td><td class="m">split · data · baseline · robust · errors</td><td>הפיצול, ה־leaderboard שכולם סומכים עליו, אכיפת Test‑פעם‑אחת, בחירת weights סופי.</td></tr>
-  </table>
-  <p>הglue המשותף (<code class="k">run.py</code>, <code class="k">train.py</code>) נבנה מראש ונערך לעיתים רחוקות → conflict נמוך. קבצים נפרדים לכל בעלים = עבודה מקבילה, מיזוגי git כמעט בלי התנגשויות.</p>
-</section>
-
-<!-- 12 SUBMIT -->
-<section id="submit">
-  <div class="sec-h"><span class="sec-n r">12</span><h2>צ'קליסט הגשה</h2></div>
-  <p>תיקייה סופית <code class="k">challenge2_&lt;id&gt;_&lt;id&gt;_&lt;id&gt;/</code> מכילה <b>אך ורק</b>:</p>
+  <h3>עקומת האימון (stage4, 224px, 25 epochs)</h3>
   <div class="code">
-    <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">מבנה ההגשה</span><span class="badge">layout</span></div>
-<pre><code>challenge2_123456789_234567891_345678912/
-├─ train.py        <span class="c"># עצמאי (מקופל)</span>
-├─ model.py        <span class="c"># ModelArchitecture עצמאי</span>
-├─ predict.py      <span class="c"># frozen</span>
-├─ weights.joblib  <span class="c"># CPU state dict</span>
-└─ README          <span class="c"># שמות / ת"ז / כתיבה</span></code></pre>
+    <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">outputs/train_stage4.csv</span><span class="badge">val_acc</span></div>
+<pre><code>epoch  1   loss 2.369   val_acc 0.537
+epoch 10   loss 0.923   val_acc 0.816
+epoch 20   loss 0.622   val_acc 0.843
+epoch 25   loss 0.614   val_acc 0.847      <span class="c"># LR cosine: 1.0e-3 -> 1.4e-5</span></code></pre>
   </div>
-  <ul>
-    <li><b>אסור להגיש:</b> dataset, venvs, caches, checkpoints ביניים, או כל דבר עם נתיב מוחלט (<code class="k">C:/Users/...</code>).</li>
-    <li><code class="k">weights.joblib</code> בתוך תיקיית הצוות.</li>
-    <li><code class="k">model.py</code> עם <code class="k">ModelArchitecture</code> עצמאי.</li>
-    <li><code class="k">predict.py</code> ללא שינוי מהמקור.</li>
-    <li>README מפרט לעומק את אסטרטגיות המניפולציה.</li>
-    <li>תחזיות בצורה נכונה, ערכים 0..19.</li>
-    <li>אין נתיבים מוחלטים בשום סקריפט.</li>
-  </ul>
-  <div class="note good"><span class="ic">◆</span><div class="bd">בדיקה מקומית לפני העלאה: <code class="k">python check_submission.py</code> (מבני) ואז <code class="k">python evaluate.py</code> (הערכה מדומה).</div></div>
+  <div class="note good"><span class="ic">◆</span><div class="bd"><b>הממצא הכי חזק:</b> ה־OOD יצא <b>גבוה מהנקי</b> (~0.96 מול 0.847). זה אומר שהמודל לא רק "שורד" מניפולציות — הוא ממש למד אינווריאנטיות. בדיוק מה שהאתגר רצה. בראיון: זו ההוכחה שהאוגמנטציה עבדה ושלא נשענים על קיצורי דרך.</div></div>
 </section>
 
-<!-- 13 CMDS -->
-<section id="cmds">
-  <div class="sec-h"><span class="sec-n b">13</span><h2>פקודות והרצה — דף עזר</h2></div>
-  <h3>הסדר המומלץ ל-clone טרי</h3>
-  <p>קוד+דוקס בלבד בגיט; ה-data (2.1GB) וכל הנגזרות (splits, תאומים, validation, weights) נוצרים מקומית, seeded, זהים לכולם. ראשית: <code class="k">python3.11 -m venv .venv</code> + <code class="k">pip install -r requirements.txt</code>, ואז להוריד את <code class="k">dataset/train/&lt;class&gt;/*.jpg</code> ו-<code class="k">dataset/augmentations/{color_jitter,random_rotation}/</code> מהקורס (לא בגיט).</p>
-  <div class="code">
-    <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">מהשורש (איפה ש-evaluate.py יושב)</span><span class="badge">bash</span></div>
-<pre><code><span class="c"># הסדר: split -> materialize -> baseline -> train -> robust</span>
-python run.py split        <span class="c"># splits.json + dataset/validation/ (seeded 40/15/15/15/15)</span>
-python run.py materialize  <span class="c"># תאומים אופליין -> dataset/train_aug/  (~80s)</span>
-python run.py baseline     <span class="c"># רצפה נאיבית (0.2230)</span>
-python run.py train        <span class="c"># stage 1 (gated) -> weights.joblib</span>
-python run.py train --stage 2   <span class="c"># קידום שלב — החלטה אנושית</span>
-python run.py robust       <span class="c"># SCORE: נקי מול OOD</span>
-python run.py eval         <span class="c"># leaderboard של evaluate.py שסופק</span>
-python run.py errors --partition P1   <span class="c"># לוג טעויות -> outputs/</span>
-
-python check_submission.py [team]   <span class="c"># בדיקה מבנית</span>
-python labels.py                    <span class="c"># טבלת מדד<->שם</span>
-
-cd submissions/my_team &amp;&amp; python train.py   <span class="c"># אימון ישיר (stage 1)</span>
-python model.py            <span class="c"># smoke test: צורת [B,20] + ספירת params</span></code></pre>
+<!-- 9 EVOLUTION -->
+<section id="evolution">
+  <div class="sec-h"><span class="sec-n">9</span><h2>איך הגענו לכאן — הסיפור</h2></div>
+  <p>הנרטיב הזה שווה זהב בראיון: לא קפצנו ישר ל־ResNet, הגענו אליו כי משהו פשוט יותר נכשל.</p>
+  <div class="flow">
+    <div class="fstep"><div class="fi">①</div><div class="fc"><h4>VGG פשוט (~1.2M)</h4><p>4 בלוקי conv, בלי BatchNorm, בלי residuals. <b>underfit</b> — לא מספיק קיבולת ל־20 מחלקות ImageNet מאפס, גרדיאנטים נחנקים.</p></div></div>
+    <div class="arrow">▼</div>
+    <div class="fstep"><div class="fi">②</div><div class="fc"><h4>כיוונון optimizer</h4><p>ניסינו SGD+momentum, StepLR. ה־optimizer לבד לא פתר את מגבלת הארכיטקטורה.</p></div></div>
+    <div class="arrow">▼</div>
+    <div class="fstep"><div class="fi">③</div><div class="fc"><h4>פיבוט ל־ResNet‑18 + SE</h4><p>residual skips + BatchNorm פתחו את העומק לאימון מאפס; SE הוסיף עמידות. AdamW + cosine + label smoothing. קפיצה אמיתית.</p></div></div>
+    <div class="arrow">▼</div>
+    <div class="fstep"><div class="fi">④</div><div class="fc"><h4>אוגמנטציה משוקללת + 224px</h4><p>תאומים אופליין (rotation/color ×4), מעבר מ־128 ל־224. דיוק נקי 0.721 → 0.847, SCORE 0.906.</p></div></div>
   </div>
-  <h3>הרצה על Google Colab (T4 GPU) — לאימון הסופי</h3>
-  <p>MPS/CPU במחשבים שלנו מספיק לאיטרציה מהירה ב-128px, אבל ה<b>מודל הסופי</b> (224px מלא, יותר epochs/stages) מתאמן הרבה יותר מהר על T4 חינמי. הקוד device-agnostic — <code class="k">get_device()</code> בוחר <code class="k">cuda</code> אוטומטית, בלי שינוי קוד. (Runtime → Change runtime type → T4 GPU).</p>
-  <div class="code">
-    <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">תאי Colab</span><span class="badge">python</span></div>
-<pre><code>!git clone https://github.com/yonatan-cs/IML-HACKATHON.git
-%cd IML-HACKATHON
-!pip install -q joblib        <span class="c"># Colab כבר עם torch/torchvision CUDA — אל תתקין requirements!</span>
-
-<span class="kw">from</span> google.colab <span class="kw">import</span> drive; drive.<span class="fn2">mount</span>(<span class="st">'/content/drive'</span>)
-!cp /content/drive/MyDrive/iml_dataset.zip . &amp;&amp; unzip -q iml_dataset.zip -d dataset
-<span class="c"># צריך: dataset/train/&lt;class&gt;/*.jpg  ו-dataset/augmentations/{color_jitter,random_rotation}/</span>
-
-!python run.py split
-!python run.py materialize
-!python run.py train --stage 1 --img-size 224 --epochs 30 --workers 2
-!python run.py robust
-
-<span class="kw">from</span> google.colab <span class="kw">import</span> files; files.<span class="fn2">download</span>(<span class="st">'submissions/my_team/weights.joblib'</span>)</code></pre>
-  </div>
-  <div class="note warn"><span class="ic">▲</span><div class="bd"><b>מלכודת Colab:</b> <b>אל</b> תריצו <code class="k">pip install -r requirements.txt</code> ב-Colab — זה יתקין torch ל-CPU וישבור את ה-CUDA. רק <code class="k">pip install -q joblib</code>. <code class="k">weights.joblib</code> git-ignored — מורידים, ו-force-add רק את הקובץ הסופי הטוב ביותר.</div></div>
 </section>
 
-<!-- 14 INTERVIEW -->
+<!-- 10 GAPS -->
+<section id="gaps">
+  <div class="sec-h"><span class="sec-n w">10</span><h2>לפני הראיון — מה לדעת</h2></div>
+  <p>היה פער קטן בין קבצי ההגשה, תיקנו אותו. כך זה עומד עכשיו:</p>
+  <div class="note good"><span class="ic">◆</span><div class="bd"><b>הכל עקבי: weights ↔ README ↔ train.py.</b> אומת שה־<code class="k">weights.joblib</code> שהוגש זהה בייט‑לבייט למודל שאומן עם התאומים האופליין (אותו checksum). הגרסה הראשונה של train.py שנארזה עשתה אוגמנטציה online ולא תאמה — החלפנו אותה ב־<code class="k">train.py</code> עצמאי שבאמת בונה את התאומים המשוקללים (4/4/2/2/2/1, mean‑fill), בדיוק השיטה שייצרה את המשקלים. README נוקה גם (ירדו engine.py ו־SGD‑selectable). שלושתם מספרים אותו סיפור.</div></div>
+  <div class="note info"><span class="ic">◆</span><div class="bd"><b>rerun ≠ משקלים זהים.</b> ליבות MPS/CUDA לא בִּיט‑דטרמיניסטיות, אז הרצה חוזרת של train.py לא תשחזר byte‑identical — לכן שומרים את <code class="k">weights.joblib</code> בפועל. תשובה לגיטימית אם נשאלים "תריצו ותראו".</div></div>
+  <div class="note info"><span class="ic">◆</span><div class="bd"><b>נקודה חלשה ידועה:</b> acoustic_guitar ↔ laptop/mobile_phone (אובייקטים מלבניים כהים). אם נשאלים "מה הייתם משפרים" — אוגמנטציה ספציפית לצורה/הקשר למחלקות האלה.</div></div>
+</section>
+
+<!-- 11 INTERVIEW -->
 <section id="interview">
-  <div class="sec-h"><span class="sec-n">14</span><h2>הראיון — מה צריך להגן עליו</h2></div>
-  <p>בסוף יש ראיון קצר. אין מצגת — בודקים הבנה ויכולת להסביר. כבר <b>לא</b> מוגבלים לשיטות מהקורס; אנחנו משתמשים ב-best-practice מודרני ו<b>מתעדים כל בחירה</b>, כך שתוכלו להוביל את המראיין דרך כל החלטה, ההיגיון מאחוריה, המימוש והתוצאות.</p>
-  <ul>
-    <li><b>למה הארכיטקטורה הזו</b> — ResNet קטן (בצורת ResNet-18): skip connections (<code class="k">y=f(x)+x</code>, He 2016) שמקלים על vanishing gradients ומאפשרים עומק מאפס, רוחב 64→512 ל-bias נמוך, GAP במקום FC, AdaptiveAvgPool שמקבל כל גודל. ‎11.28M params.</li>
-    <li><b>Squeeze-and-Excitation</b> — תשומת־לב ערוצים (Hu et al. 2018): MLP זעיר קורא את הממוצע הגלובלי של כל מפת-ערוץ ומוציא gate 0..1 לכל ערוץ, <code class="k">out=x·sigmoid(W2·ReLU(W1·GAP(x)))</code>. <b>למה בחרנו:</b> הזזות רקע/צבע מעוותות תת-קבוצת ערוצים → SE מדכא אותם ומחזק ערוצי-צורה → ישירות עוזר לחצי ה-OOD. זול (~0.09M). זוכה ILSVRC-2017.</li>
-    <li><b>BatchNorm</b> — נרמול אחרי כל conv: מתנה את משטח ה-loss כך שרשת עמוקה מאפס מתאמנת נקי ומהר; running stats ב-state_dict, ב-<code class="k">eval()</code> בלתי־תלוי batch. <b>למה בחרנו:</b> הסיבה העיקרית שהרשת מתאמנת מאפס ומנצחת VGG פשוט.</li>
-    <li><b>אופטימייזר ואימון</b> — <b>AdamW</b> (lr=1e-3, wd=1e-2): צעד אדפטיבי פר-פרמטר → התכנסות מהירה וחוסן ל-LR מאפס; ה-"W" = weight-decay מנותק (רגולריזציה נכונה). <b>CosineAnnealingLR</b>: דעיכה חלקה ל-~0. <b>label_smoothing=0.1</b>: פחות ביטחון-יתר → פחות קיצורי-דרך → קצת יותר חוסן. <b>grad_clip=1.0</b>: ייצוב הצעדים הראשונים. SGD+StepLR זמינים לסבב סופי אם נרצה הכללה שטוחה יותר.</li>
-    <li><b>המתודולוגיה</b> — פיצול stratified seeded, מיפוי 5-החלקים ל-"Test נוגעים פעם אחת" (בלוק־בלוק), preprocessing מכויל על Train בלבד (mean/std קבועים של ImageNet), baseline נאיבי (רגרסיה לוגיסטית) כרצפה הנמדדת <code class="k">0.2230</code>.</li>
-    <li><b>אסטרטגיית העמידות</b> — תאומים אופליין משוקללים (rotation/color_jitter במשקל 4 — צירי OOD מאומתים), מילוי־ממוצע ולא שחור, אוגמנטציה <b>רחבה</b> (לא פילטר ספציפי, כי המבחן חבוי), ולמה <b>אין</b> background swap (דורש סגמנטציה + assets חיצוניים = מחוץ לגבולות train-from-scratch). offline-only מתועד.</li>
-    <li><b>איך מודדים חוסן</b> — <code class="k">robust_eval</code> מדפיס <b>SCORE = 0.5·נקי + 0.5·ממוצע OOD</b> שמשקף את ה-50/50 של ה-grader, plus per-axis drop + worst-axis callout; עוקבים אחרי SCORE, לא אחרי דיוק נקי.</li>
-    <li><b>Error analysis</b> — איזה דפוס מצאתם בעיניים, ואיך הוא שינה את האוגמנטציה/הארכיטקטורה.</li>
-    <li><b>שחזוּר</b> — למה שומרים את קובץ המשקלים ולא "מריצים שוב" (אי־דטרמיניזם של MPS/CUDA, גם אחרי seed ל-MPS).</li>
-  </ul>
-  <div class="note good"><span class="ic">◆</span><div class="bd"><b>השורה התחתונה:</b> כל בחירה בקוד נבחרה במכוון <b>ומתועדת</b> — כדי שתהיה ניתנת להסבר. אם משהו בקוד לא ברור לך — זה בדיוק מה שהראיון יחפש. עברת על המדריך הזה? אתה מוכן.</div></div>
+  <div class="sec-h"><span class="sec-n">11</span><h2>הגנה על כל רכיב</h2></div>
+  <p>אין מצגת — בודקים הבנה. לכל רכיב, משפט שמסביר <b>למה</b>:</p>
+  <table class="tbl">
+    <tr><th>אם ישאלו על...</th><th>התשובה</th></tr>
+    <tr><td><b>Residual skips</b></td><td><code class="k">y=f(x)+x</code> נותן לגרדיאנט מסלול ישיר אחורה → אפשר לאמן עומק מאפס בלי vanishing (He 2016).</td></tr>
+    <tr><td><b>BatchNorm</b></td><td>נרמול כל ערוץ על הbatch מייצב את משטח ה־loss; כמו LayerNorm ב־Transformers. ב־eval משתמש ב־running stats קפואים.</td></tr>
+    <tr><td><b>Squeeze‑Excitation</b></td><td>channel attention זול (~0.09M): שער 0..1 לכל ערוץ. מדכא ערוצים שמושפעים מרקע/צבע → ישיר לעמידות.</td></tr>
+    <tr><td><b>AdamW</b></td><td>צעד אדפטיבי לכל פרמטר + weight decay מנותק → התכנסות מהירה ויציבה מאפס. SGD היה אופציה למעבר אחרון.</td></tr>
+    <tr><td><b>Label smoothing</b></td><td>מטרות 0.9/0.1 מרסנות ביטחון יתר ומרתיעות התחייבות לקיצורי רקע/צבע.</td></tr>
+    <tr><td><b>למה לא background swap</b></td><td>דורש סגמנטציה + אסטים חיצוניים → מפר מאפס/בלי data חיצוני. mean‑fill rotation = proxy חוקי.</td></tr>
+    <tr><td><b>מתודולוגיה</b></td><td>split stratified seeded, פרוגרסיבי, Test נוגעים פעם אחת, baseline נאיבי 0.22 כרצפה, error analysis על Dev.</td></tr>
+    <tr><td><b>למה OOD &gt; clean</b></td><td>אימון על תאומים מאוגמנטים הכריח אינווריאנטיות; המודל למד את האובייקט, אז מניפולציות לא מזיזות אותו.</td></tr>
+  </table>
+  <div class="note good"><span class="ic">◆</span><div class="bd"><b>שורה תחתונה:</b> כל בחירה ניתנת להסבר. עברת על המסמך — אתה מכיר את הארכיטקטורה, האימון, העמידות, התוצאות, והפערים. מוכן.</div></div>
+</section>
+
+<!-- 12 FILES -->
+<section id="files">
+  <div class="sec-h"><span class="sec-n b">12</span><h2>קבצים ופקודות</h2></div>
+  <table class="tbl">
+    <tr><th>קובץ</th><th>תפקיד</th></tr>
+    <tr><td class="m">challenge2_…/model.py</td><td>ResNet‑18 + SE, עצמאי, [B,20] לוגיטים — מה שהgrader משחזר</td></tr>
+    <tr><td class="m">challenge2_…/train.py</td><td>צנרת אימון עצמאית → weights.joblib (גרסה מקופלת, ראה §10)</td></tr>
+    <tr><td class="m">challenge2_…/predict.py</td><td>frozen — argmax אינדקסים</td></tr>
+    <tr><td class="m">model.py / engine.py</td><td>גרסת הפיתוח (שורש): ארכיטקטורה + לולאת אימון מלאה</td></tr>
+    <tr><td class="m">make_augmented.py · augment.py</td><td>תאומים אופליין + pipelines + preview</td></tr>
+    <tr><td class="m">split_data.py · data.py</td><td>פיצול stratified + manifest loaders</td></tr>
+    <tr><td class="m">robust_eval.py · error_analysis.py · baseline_naive.py</td><td>SCORE, מטריצת בלבול, רצפה נאיבית</td></tr>
+  </table>
+  <div class="code">
+    <div class="cb"><span class="dots"><i></i><i></i><i></i></span><span class="fn">פקודות (מהשורש)</span><span class="badge">bash</span></div>
+<pre><code>python run.py split        <span class="c"># פיצול 5-חלקים + validation (אוכף איזון/שפיות)</span>
+python run.py materialize  <span class="c"># בניית תאומים מאוגמנטים (~40k)</span>
+python run.py baseline     <span class="c"># רצפה נאיבית ~0.22</span>
+python run.py train        <span class="c"># אימון פרוגרסיבי -> weights.joblib</span>
+python run.py robust       <span class="c"># clean מול OOD + SCORE</span>
+python run.py errors --partition P4    <span class="c"># לוג טעויות + confusion</span>
+
+python check_submission.py challenge2_…   <span class="c"># בדיקה מבנית</span>
+python evaluate.py                        <span class="c"># leaderboard מקומי</span></code></pre>
+  </div>
 </section>
 
 </main>
 </div>
 
 <div class="foot-note">
-  <b>PixelPerfect · IML 67577 · Challenge 2</b> — מדריך פנימי. נבנה מקריאת מסמך ההנחיות + התוכנית + כל קובץ בריפו. הקוד באנגלית, ההסברים בעברית, שום פינה לא נשארה פתוחה.
+  <b>PixelPerfect · IML 67577 · Challenge 2 — הוגש.</b> ResNet‑18 + Squeeze‑Excitation · 11.28M params · clean 0.847 · SCORE 0.906. המסמך מתאר את מה שעשינו בפועל. הקוד המוגש, ה־README והמשקלים עקביים זה עם זה.
 </div>
 
 <script>
-// progress bar
 const prog=document.getElementById('prog');
 const onScroll=()=>{const h=document.documentElement;const sc=h.scrollTop/(h.scrollHeight-h.clientHeight);prog.style.width=(sc*100)+'%';};
 document.addEventListener('scroll',onScroll,{passive:true});onScroll();
-// scrollspy
 const links=[...document.querySelectorAll('nav.toc a')];
 const map=new Map(links.map(a=>[a.getAttribute('href').slice(1),a]));
 const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove('on'));const a=map.get(e.target.id);if(a){a.classList.add('on');a.scrollIntoView({block:'nearest'});}}});},{rootMargin:'-15% 0px -75% 0px'});

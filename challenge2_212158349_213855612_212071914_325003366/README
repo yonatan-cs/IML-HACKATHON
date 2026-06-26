@@ -1,0 +1,69 @@
+yonatan rotem,netanel turgeman,nitzan daloomy,dana naftaly
+212158349,213855612,212071914,325003366
+
+IML 67577 — Challenge 2: Robust Image Classification (20 ImageNet-subset classes).
+Trained from random init: no pretrained weights, no external data, no network access at
+train/load/eval. We use modern best-practice techniques (AdamW, BatchNorm, Squeeze-and-
+Excitation, cosine schedule, label smoothing) and document each one below so every choice
+is understood and explainable.
+
+MODEL (model.py — class ModelArchitecture, ~11.28M params)
+A small ResNet-18-shaped CNN with Squeeze-and-Excitation channel attention. A stem
+(7x7 stride-2 conv -> BatchNorm -> ReLU -> 3x3 stride-2 maxpool, 224->56) feeds 4 residual
+stages of widths 64->128->256->512; the first block of stages 2-4 strides 2 (28->14->7) and
+doubles channels, its identity branch matched by a 1x1 conv+BN. Then AdaptiveAvgPool2d(1) ->
+Dropout(0.4) -> Linear(512,20) logits. The adaptive pool makes the net size-agnostic, so it
+accepts the grader's 224x224 input (smaller sizes also run, used for speed in development).
+Spatial path: 224 -> 112 (stem conv) -> 56 (maxpool) -> 56 -> 28 -> 14 -> 7 -> GAP -> 20.
+
+Components and why:
+- Conv + pooling, ReLU, softmax (argmax in predict.py), and Global Average Pool instead of
+  large fully-connected layers (no FC params before the final 512->20 linear -> fewer
+  parameters to overfit).
+- Residual / skip connections y = f(x)+x (He et al., 2016): the skip gives gradients a
+  direct path backward, so the added depth is actually trainable (no vanishing gradients).
+- BatchNorm after each conv: normalizes each channel across the batch + spatial positions,
+  conditioning the loss surface so a deep-from-scratch net trains cleanly and fast. Its
+  scale/shift + running mean/var ride in the state_dict
+  as buffers; predict.py calls .eval(), so inference uses frozen running stats and is
+  batch-size-independent.
+- Squeeze-and-Excitation (Hu et al., 2018) inside each residual block: a tiny bottleneck MLP
+  reads the global average of each feature map and outputs a 0..1 gate per channel
+  (out = x * sigmoid(W2.ReLU(W1.GAP(x)))). It up-weights informative channels and suppresses
+  distractor channels — directly useful for the robustness half, since background/colour
+  shifts mostly perturb a subset of channels. Cheap (~0.09M params, reduction=16).
+- Regularization (11.28M params on ~16k images is the overfitting risk): head Dropout 0.4,
+  L2/weight decay (in training), Global Average Pool, and heavy data augmentation.
+- Kaiming/He init (fan-out, ReLU) for convs; BN scale=1/shift=0; small-normal for the linear.
+
+TRAINING (train.py)
+AdamW optimizer (Adam with decoupled weight decay): per-parameter adaptive step sizes give
+fast, LR-robust convergence from scratch; defaults lr=1e-3, weight_decay=1e-2. Cosine-annealing LR
+schedule decays the rate smoothly toward ~0 over the run. Loss = cross-entropy with label
+smoothing 0.1 (targets 0.9 true / 0.1 spread), which curbs over-confidence and discourages
+hard commitment to background/colour shortcuts. grad_clip=1.0 stabilizes the first steps;
+early stopping on validation accuracy (patience) with best-weights checkpointing is the
+overfitting guard. We keep the saved weights.joblib rather than rely on rerun-determinism
+(GPU/MPS kernels are not bit-deterministic). Methodology: a stratified, seeded split; a naive
+logistic-regression floor (~0.22) the CNN must beat; manual error analysis on Dev; the local
+Test block touched once.
+
+MANIPULATIONS / ROBUSTNESS (the 50% OOD half)
+The graded test is 50% clean + 50% held-out manipulations, so we force invariance with data
+augmentation. We pre-bake OFFLINE augmented "twins" of the training images to disk (seeded
+per file -> identical, inspectable, reproducible data; twins inherit their
+original's split partition -> no leakage). Originals pass through unchanged. Filters are
+weighted so the confirmed test axes dominate:
+- Colour jitter (saturation/brightness/contrast 0.5-1.5, weight 4) — lighting + colour axis.
+- Mean-fill rotation (45/90/180/270, corners filled with the image's own mean colour; weight
+  4) — geometric axis, and our nearest proxy for "the surroundings changed".
+- Grayscale and colour inversion — break reliance on absolute colour (inversion kept rare,
+  it is label-risky: a yellow lemon becomes blue).
+- Salt-pepper noise and blur (weight 2) — sensor noise / compression artifacts.
+Rotation and colour jitter are weighted heaviest because the provided augmentations folder
+(random_rotation, color_jitter) confirms they are real test manipulations. We deliberately do
+NOT attempt background swap: it needs foreground/background segmentation plus external
+background assets, which violates the train-from-scratch / no-external-data constraint;
+mean-fill rotation is the closest in-bounds proxy. We track and optimize a single
+SCORE = 0.5*clean + 0.5*mean(OOD-set accuracy), mirroring the grader's weighting — not clean
+accuracy alone — so every augmentation trade is confirmed net-positive.
