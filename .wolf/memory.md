@@ -710,3 +710,5 @@
 | 10:16 | Session end: 10 writes across 4 files (MADRICH.html, LEARN.html, train.py, README) | 6 reads | ~101500 tok |
 | 10:19 | Session end: 10 writes across 4 files (MADRICH.html, LEARN.html, train.py, README) | 9 reads | ~106053 tok |
 | 10:19 | Session end: 10 writes across 4 files (MADRICH.html, LEARN.html, train.py, README) | 9 reads | ~106053 tok |
+| 10:24 | Edited .gitignore | folders() → zips() | ~29 |
+| 10:24 | Edited .gitignore | folders() → zips() | ~29 |
